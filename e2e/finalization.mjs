@@ -1,8 +1,9 @@
 // Finalization features: shaped experience (UW-year / large losses / risk
-// profile), client signing instruction, brokerage, MDP debit notes, and
-// treaty losses with reinstatement premium.
+// profile), client signing instruction, brokerage, the MDP account prepared
+// and independently approved in the Premium workspace (its debit notes and
+// settlement), and treaty losses with reinstatement premium.
 import assert from 'node:assert/strict';
-import { launch, login, makeStep, goHub, buildLayerToFotAuthorised } from './lib.mjs';
+import { launch, login, makeStep, goHub, buildLayerToFotAuthorised, BASE } from './lib.mjs';
 
 const PREMIUM_CSV = `UW Year,Gross Premium
 2023,1000000
@@ -31,6 +32,23 @@ async function ingest(page, placementId, type, csv) {
     });
     if (!r.ok) throw new Error(`ingest ${t} failed: ${r.status}`);
   }, [placementId, type, csv]);
+}
+
+/** Call the API as the signed-in page's user (register setup, not the test). */
+async function apiCall(page, method, path, body) {
+  return page.evaluate(async ([m, p, b]) => {
+    const r = await fetch(`/api${p}`, {
+      method: m,
+      headers: {
+        'content-type': 'application/json',
+        authorization: `Bearer ${localStorage.getItem('ub_token')}`,
+      },
+      body: b === null ? undefined : JSON.stringify(b),
+    });
+    const text = await r.text();
+    if (!r.ok) throw new Error(`${m} ${p} -> ${r.status}: ${text}`);
+    return text ? JSON.parse(text) : null;
+  }, [method, path, body ?? null]);
 }
 
 export default async function run() {
@@ -88,7 +106,7 @@ export default async function run() {
       assert.ok(summary.large_losses.some((l) => l.claim_ref === 'C-2'), 'C-2 (600k) is large');
       assert.ok(summary.risk_profile && summary.risk_profile.bands.length > 0, 'risk profile bands');
 
-      await broker.goto(`${broker.url().split('/layers')[0]}/placements/${placementId}`, { waitUntil: 'networkidle' });
+      await broker.goto(`${BASE}/placements/${placementId}`, { waitUntil: 'networkidle' });
       await broker.click('.wizard-tab:has-text("Data")');
       await broker.waitForSelector('[data-testid="placement-data"]', { timeout: 15000 });
       assert.equal(await broker.locator('text=Ingest Bordereau').count(), 0, 'the Data tab ingests nothing');
@@ -129,24 +147,109 @@ export default async function run() {
       await uw.waitForSelector('text=Bound', { timeout: 10000 });
     });
 
-    await step('issue MDP → schedule + per-market debit notes, sent → paid', async () => {
+    await step('the layer card sends MDP to the Premium workspace: no issue form on the layer page', async () => {
       await broker.goto(layerUrl, { waitUntil: 'networkidle' });
-      const mdp = broker.locator('section:has-text("minimum & deposit premium")');
-      await mdp.locator('input[type=number]').nth(0).fill('320000');
-      await mdp.locator('input[type=number]').nth(1).fill('360000');
-      await mdp.locator('button:has-text("Issue MDP")').click();
-      await broker.waitForSelector('text=Debit notes');
-      // 2 markets × 4 instalments.
-      assert.equal(await mdp.locator('tbody tr').count(), 8, '8 debit notes');
+      const mdp = broker.locator('section.card:has-text("minimum & deposit premium")');
+      await mdp.locator('a:has-text("Open Premium workspace")').waitFor({ timeout: 10000 });
+      assert.equal(await mdp.locator('input[type=number]').count(), 0, 'no issue form on the layer page');
+      assert.equal(await mdp.locator('button:has-text("Issue MDP")').count(), 0, 'no Issue MDP button');
+    });
 
-      await mdp.locator('button:has-text("Mark sent")').first().click();
-      await broker.waitForTimeout(400);
-      await mdp.locator('button:has-text("Mark paid")').first().click();
-      await broker.waitForSelector('section:has-text("minimum & deposit premium") >> text=Paid');
+    await step('prepare the MDP account in the Premium workspace → 2 markets × 4 instalments, submitted for review', async () => {
+      // Every note goes to a reinsurer's registered contact, so each market
+      // with a signed line gets one unless the register already has it (the
+      // e2e database accumulates across runs) — register setup, not the test.
+      const source = await apiCall(broker, 'GET', `/premium/contracts/${placementId}`);
+      for (const line of source.layers[0].lines) {
+        if (source.contacts.some((c) => c.market_id === line.market_id)) continue;
+        await apiCall(broker, 'POST', `/markets/${line.market_id}/contacts`, {
+          name: `${line.market_name} accounts`,
+          email: `${line.market_name.replace(/\W+/g, '.').toLowerCase()}@example.test`,
+          is_primary: true,
+        });
+      }
+
+      // The workspace opens on the question — which contract? — asked as
+      // country, then cedant, then contract.
+      await broker.goto(`${BASE}/claims-premiums/non-proportional/premium`, { waitUntil: 'networkidle' });
+      const picker = broker.locator('[data-testid="servicing-contract-picker"]');
+      await picker.waitFor({ timeout: 15000 });
+      await picker.locator('#sv-pick-country').selectOption('GB');
+      await picker.locator('#sv-pick-cedant').selectOption(`Cedant ${tag}`);
+      await picker.locator('#sv-pick-contract').selectOption(placementId);
+      await picker.locator('button:has-text("Open contract")').click();
+      await broker.waitForSelector(`.pw-treaty-heading:has-text("Cedant ${tag}")`, { timeout: 15000 });
+
+      // The signed shares behind the account: 60 / 40 as instructed, not normalised.
+      const shares = broker.locator('section.pw-panel:has-text("The shares behind the account")');
+      await shares.locator('td:has-text("60%")').first().waitFor();
+      assert.ok(await shares.locator('td:has-text("40%")').count() > 0, 'Beta signed 40%');
+
+      // Terms at 100%. The deposit is entered, never assumed from the quoted
+      // premium; brokerage, the schedule and the first due date come from the
+      // layer and the placement.
+      const term = (label) => broker.locator(`input[aria-label="Layer 1 ${label}"]`);
+      await term('Minimum premium').fill('320000');
+      await term('Deposit premium').fill('360000');
+      assert.equal(await term('Brokerage %').inputValue(), '2.5', 'brokerage read from the layer');
+      assert.equal(await term('Instalments').inputValue(), '4', 'four instalments');
+      assert.equal(await term('Every (months)').inputValue(), '3', 'quarterly');
+      assert.equal(await term('due date').inputValue(), '2026-01-01', 'first due at inception');
+      // A reinsurer with one registered contact has its recipient pre-selected;
+      // one with several is asked.
+      const recipients = broker.locator('.pw-recipient-grid select');
+      assert.equal(await recipients.count(), 2, 'a recipient per reinsurer');
+      for (let i = 0; i < 2; i += 1) {
+        const recipient = recipients.nth(i);
+        if (!(await recipient.inputValue())) await recipient.selectOption({ index: 1 });
+        assert.notEqual(await recipient.inputValue(), '', 'a recipient for every reinsurer');
+      }
+
+      await broker.click('button:has-text("Calculate accounts")');
+      await broker.waitForSelector('.pw-notice:has-text("Calculated from the signed lines")');
+      // 360k deposit: Alpha 60% → 4 × 54,000 (52,650 net of 2.5% brokerage),
+      // Beta 40% → 4 × 36,000 (35,100 net); 351,000 due in all.
+      const review = broker.locator('section.pw-panel:has-text("Review every amount")');
+      assert.equal(await review.locator('tbody tr').count(), 8, '8 debit notes: 2 markets × 4 instalments');
+      assert.equal(await review.locator('td:has-text("54,000")').count(), 4, 'Alpha instalments');
+      assert.equal(await review.locator('td:has-text("36,000")').count(), 4, 'Beta instalments');
+      assert.equal(await review.locator('td:has-text("52,650")').count(), 4, 'Alpha net of brokerage');
+      assert.equal(await review.locator('td:has-text("35,100")').count(), 4, 'Beta net of brokerage');
+      await review.locator('.pw-total-pills b:has-text("351,000")').waitFor();
+
+      await broker.click('button:has-text("Save draft")');
+      await broker.waitForSelector('.pw-notice:has-text("Draft saved")');
+      // Four eyes: the preparer names a different approver and submits a locked account.
+      await broker.selectOption('select[aria-label="Independent approver"]', { label: 'Demo Underwriter · underwriter' });
+      await broker.click('button:has-text("Approve & submit")');
+      await broker.waitForSelector('.pw-notice:has-text("Submitted to the selected approver")');
+      await broker.waitForSelector('text=Awaiting the second pair of eyes', { timeout: 10000 });
+      assert.equal(await broker.locator('button:has-text("Approve, issue & email")').count(), 0, 'the preparer cannot approve their own account');
+    });
+
+    await step('independent approval issues the 8 numbered notes; the preparer records a settlement', async () => {
+      await uw.goto(`${BASE}/claims-premiums/non-proportional/premium?contract=${placementId}`, { waitUntil: 'networkidle' });
+      await uw.click('button:has-text("Approve, issue & email")');
+      await uw.waitForSelector('.pw-notice:has-text("Approved. Notes were issued")', { timeout: 30000 });
+      const issued = uw.locator('section.pw-panel:has-text("Issued accounts")');
+      await issued.waitFor({ timeout: 15000 });
+      assert.equal(await issued.locator('tbody tr').count(), 8, '8 issued notes');
+      assert.equal(await issued.locator('td:has-text("PIQ-")').count(), 8, 'every note is numbered');
+      await issued.locator('button:has-text("Download PDF")').first().waitFor();
+
+      // Settlement is recorded by the preparer or the approver; here the preparer.
+      await broker.goto(`${BASE}/claims-premiums/non-proportional/premium?contract=${placementId}`, { waitUntil: 'networkidle' });
+      const mine = broker.locator('section.pw-panel:has-text("Issued accounts")');
+      await mine.waitFor({ timeout: 15000 });
+      assert.equal(await mine.locator('button:has-text("Record as settled")').count(), 8, 'all 8 outstanding');
+      await mine.locator('button:has-text("Record as settled")').first().click();
+      await broker.waitForSelector('.pw-notice:has-text("Settlement recorded")');
+      await mine.locator('.pw-delivery.sent:has-text("Settled")').first().waitFor();
+      assert.equal(await mine.locator('button:has-text("Record as settled")').count(), 7, 'one settled, seven outstanding');
     });
 
     await step('advise + calculate loss → shares and reinstatement premium', async () => {
-      await broker.goto(`${broker.url().split('/layers')[0]}/placements/${placementId}`, { waitUntil: 'networkidle' });
+      await broker.goto(`${BASE}/placements/${placementId}`, { waitUntil: 'networkidle' });
       await broker.click('.wizard-tab:has-text("Data")');
       await broker.waitForSelector('text=Treaty losses');
       const losses = broker.locator('section:has-text("Treaty losses")');
