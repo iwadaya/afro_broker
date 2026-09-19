@@ -6,7 +6,7 @@ import { llmProviders } from '../../lib/llm.js';
 import { readBook, moneyBag } from '../dashboards/portfolioBook.js';
 import { loadCountries, countryOfDomicile, regionsOf, resolveScope } from './geography.js';
 import { attributeAccounts, readRoi, aggregateRoi, isoDay, ATTRIBUTION_MONTHS } from './roi.js';
-import { gatherBrief, isConfigured } from '../../integrations/marketBrief.js';
+import { gatherBrief, isConfigured, SECTION_KEYS } from '../../integrations/marketBrief.js';
 
 /**
  * Market intelligence — behind the "Market intelligence" button on Portfolio
@@ -16,10 +16,12 @@ import { gatherBrief, isConfigured } from '../../integrations/marketBrief.js';
  *  - the book      the accounts whose cedant is domiciled in the scope, as
  *                  Portfolio intelligence reads them (portfolioBook.js), so
  *                  the two screens can never disagree about an account;
- *  - the brief     what the AI gathered from the internet for the scope —
- *                  market dynamics, the cedants, regulatory change, dated
- *                  developments — with the desk's own material folded in,
- *                  unverified until a person signs it off;
+ *  - the brief     what the AI gathered from the internet for the scope, in
+ *                  six sections (marketBrief.js): the insurance and
+ *                  reinsurance sector, the economy and its major projects,
+ *                  regulation, market statistics, events in the market and
+ *                  the market players — with the desk's own material folded
+ *                  into each, unverified until a person signs it off;
  *  - the desk      the brokers' market visits, each with what it cost and
  *                  the return the book shows for it (roi.js), and the notes
  *                  kept on a cedant, a country or a region. A cedant note
@@ -439,35 +441,36 @@ async function briefContext(scope, geo) {
 }
 
 /**
- * Gather the brief for a scope from the internet, folding in the desk's own
- * material, and store it as the scope's current brief — unverified, replacing
- * the last gather. Throws `LlmUnavailableError` (503) with nothing written
- * when the research cannot run. `clients` is the test injection point.
+ * Gather the brief for a scope from the internet — its six sections, each
+ * researched on its own with the desk's material folded in — and store it as
+ * the scope's current brief: unverified, replacing the last gather whole.
+ * Throws `LlmUnavailableError` (503) with nothing written when any section
+ * cannot run. `clients` is the test injection point.
  */
 export async function gather({ type, key }, user, clients) {
   const geo = await geography();
   const scope = await requireScope(type, key, geo);
   const context = await briefContext(scope, geo);
   const brief = await gatherBrief(context, clients);
-  const json = (v) => JSON.stringify(v || []);
+  // One JSONB column per section, named as marketBrief.js names them.
+  const sections = SECTION_KEYS.map((k) => JSON.stringify(brief.sections[k] || {}));
+  const sectionCols = SECTION_KEYS.join(', ');
+  const sectionParams = SECTION_KEYS.map((_, i) => `$${i + 4}`).join(', ');
+  const sectionSets = SECTION_KEYS.map((k) => `${k} = EXCLUDED.${k}`).join(', ');
+  const n = 3 + SECTION_KEYS.length;
   const { rows } = await query(
-    `INSERT INTO market_intel_brief (scope_type, scope_key, scope_label, headline, market_dynamics, cedants, regulatory,
-                                     developments, opportunities, from_the_desk, citations, notes_used, visits_used,
+    `INSERT INTO market_intel_brief (scope_type, scope_key, scope_label, ${sectionCols}, citations, notes_used, visits_used,
                                      provider, model, gathered_at, gathered_by, verified, verified_by, verified_at, updated_at)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,now(),$16,FALSE,NULL,NULL,now())
+     VALUES ($1,$2,$3,${sectionParams},$${n + 1},$${n + 2},$${n + 3},$${n + 4},$${n + 5},now(),$${n + 6},FALSE,NULL,NULL,now())
      ON CONFLICT (scope_type, scope_key) DO UPDATE SET
-       scope_label = EXCLUDED.scope_label, headline = EXCLUDED.headline,
-       market_dynamics = EXCLUDED.market_dynamics, cedants = EXCLUDED.cedants, regulatory = EXCLUDED.regulatory,
-       developments = EXCLUDED.developments, opportunities = EXCLUDED.opportunities,
-       from_the_desk = EXCLUDED.from_the_desk, citations = EXCLUDED.citations,
+       scope_label = EXCLUDED.scope_label, ${sectionSets}, citations = EXCLUDED.citations,
        notes_used = EXCLUDED.notes_used, visits_used = EXCLUDED.visits_used,
        provider = EXCLUDED.provider, model = EXCLUDED.model,
        gathered_at = now(), gathered_by = EXCLUDED.gathered_by,
        verified = FALSE, verified_by = NULL, verified_at = NULL, updated_at = now()
      RETURNING id`,
-    [scope.type, scope.key, scope.label, brief.headline || null, json(brief.market_dynamics), json(brief.cedants),
-      json(brief.regulatory), json(brief.developments), json(brief.opportunities), brief.from_the_desk,
-      json(brief.citations), context.notes.length, context.visits.length, brief.provider, brief.model, user.id],
+    [scope.type, scope.key, scope.label, ...sections, JSON.stringify(brief.citations || []),
+      context.notes.length, context.visits.length, brief.provider, brief.model, user.id],
   );
   await audit({
     entityType: 'market_intel_brief', entityId: rows[0].id, action: 'gather', userId: user.id,

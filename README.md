@@ -228,15 +228,42 @@ market chosen shows the map — every region and country with what the desk
 holds on it — and the trips log; picking a region or a country (held in the
 URL, `?region=Europe&country=GB`) opens the market. Its **brief** is what
 the AI gathers from the internet on demand (**Gather from internet**,
-`POST /api/market-intelligence/brief/gather`): the market in a paragraph, its
-dynamics by topic, the cedants buying reinsurance there and what is known of
-each programme, regulatory changes recent and pending, dated developments
-and what to do next, with its sources. It goes through the same `lib/llm.js`
-module as the counterparty profile, with ChatGPT's server-side web search,
-so it needs `OPENAI_API_KEY` and nothing else; with no key the gather fails
-with `llm_unavailable` (503) and writes nothing, and the rest of the screen
-works without it. A brief lands unverified and says so until a broker,
-underwriter or admin marks it verified; a fresh gather is unverified again.
+`POST /api/market-intelligence/brief/gather`), in six sections, each
+researched as its own request and shown as its own tab (the tab is in the
+URL too, `&section=statistics`):
+
+- **Insurance and reinsurance sector** — the sector in a paragraph, gross
+  written premium by segment and year, the top insurance companies by
+  premium, the local brokers, and mergers and acquisitions in the insurance
+  and reinsurance industry.
+- **Economic indicators and major projects** — the headline indicators,
+  latest available, and the government and private-sector projects above
+  USD 50m, approved and in the pipeline, each with its sponsor and status.
+- **Regulation** — who regulates, updates to the regulatory environment
+  recent and pending, the capital regime, fines and findings on industry
+  players, and other relevant news.
+- **Market statistics** — gross written premium by class of business and in
+  aggregate, loss ratios by class for the market and split by insurer or
+  reinsurer where published, the 50 biggest insured risks and projects, and
+  the largest reported losses with their insured and uninsured parts.
+- **Events in the market** — catastrophes (flooding, hail, wildfire,
+  earthquake, windstorm) and big individual fires, a factory burning down
+  and the like, each with what it cost.
+- **Market players** — competition among the brokers, the insurers and the
+  reinsurers, new products, and government insurance pools.
+
+Every section carries its own summary, a **From the desk** paragraph (what
+the brokers' notes and trips added to or contradicted in it) and its
+sources; the brief's `citations` are the sections' sources as one list. The
+shape of each section is in `backend/src/integrations/marketBrief.js`, which
+is also what fills it: every figure is nullable and the model is told to
+leave a field empty rather than estimate. The gather goes through the same
+`lib/llm.js` module as the counterparty profile, with ChatGPT's server-side
+web search, so it needs `OPENAI_API_KEY` and nothing else; with no key — or
+with any one section failing — it fails with `llm_unavailable` (503) and
+writes nothing, and the rest of the screen works without it. A brief lands
+unverified and says so until a broker, underwriter or admin marks it
+verified; a fresh gather is unverified again.
 **Our book in the market** is the accounts whose cedant is domiciled there,
 as Portfolio intelligence reads them; the treaty year in the top bar narrows
 this table alone. **Market visits** are every broker's trips — country,
@@ -1501,7 +1528,7 @@ the market.
 | Draft wordings | `GET/POST /api/wordings/drafts`, `GET/PATCH/DELETE /api/wordings/drafts/:id`, `POST /api/wordings/drafts/:id/clauses`, `.../clauses/:rowId/revert`, `.../reorder` |
 | Compare | `GET /api/wordings/compare?left_type=…&right_type=…` |
 | Dashboards | `GET /api/dashboards/metrics`, `/outstanding`, `/renewal-calendar`, `/portfolio` (`?year=YYYY` — who leads, who places, who writes the book), `/brokerage`, `/placements/:id/progress` |
-| Market intelligence | `GET /api/market-intelligence` (the map: every region and country with the accounts, cedants, trips, notes and brief on it), `GET /api/market-intelligence/scope?scope_type=country|region&scope_key=…` (one market: the brief, our book there, the trips with their return, the notes), `POST /api/market-intelligence/brief/gather` (research the market from the internet, folding in the desk's notes and trips — `OPENAI_API_KEY`), `POST /api/market-intelligence/brief/:id/verify`, `GET/POST /api/market-intelligence/visits`, `PATCH/DELETE /api/market-intelligence/visits/:id` (a broker's trips, with cost, cedants met and the return the book shows), `GET/POST /api/market-intelligence/notes`, `PATCH/DELETE /api/market-intelligence/notes/:id` (notes by cedant, country or region, typed or uploaded) |
+| Market intelligence | `GET /api/market-intelligence` (the map: every region and country with the accounts, cedants, trips, notes and brief on it), `GET /api/market-intelligence/scope?scope_type=country|region&scope_key=…` (one market: the brief in its six sections — `sector`, `economy`, `regulation`, `statistics`, `events`, `players` — our book there, the trips with their return, the notes), `POST /api/market-intelligence/brief/gather` (research the market from the internet, one request per section, folding in the desk's notes and trips — `OPENAI_API_KEY`), `POST /api/market-intelligence/brief/:id/verify`, `GET/POST /api/market-intelligence/visits`, `PATCH/DELETE /api/market-intelligence/visits/:id` (a broker's trips, with cost, cedants met and the return the book shows), `GET/POST /api/market-intelligence/notes`, `PATCH/DELETE /api/market-intelligence/notes/:id` (notes by cedant, country or region, typed or uploaded) |
 | Dynamic financial analysis | `GET /api/dfa/portfolio` (the analysable book: calibration from bordereau experience including the outstanding reserves and the modelling pack's risk profile, the current structure from the layers, the signed panel and its rating-based default probability, the cedants' domicile, the standard scenarios, the appetite and the structuring grid's defaults), `POST /api/dfa/run` (simulate up to 4 named structures — quota share, surplus, excess of loss, stop loss — and 12 frontier variants over identical gross trials: capital, ruin and EPD against available capital, reinsurance economics, cover-by-cover attribution, reinsurer returns, the combined ratio, net income and year-end solvency as distributions, multi-year surplus; with `assumptions.domicile` the capital read against that country's regime, and up to 12 `scenarios` re-run on the same seed with the inputs moved), `POST /api/dfa/structuring` (the treaty-structuring sweep: the families named in `grid` built across a range of retentions — up to 40 candidates — run on the same trials as the current programme and under up to 6 `stresses`, then read against the `appetite`: every candidate's tests, its place on the frontier and its standing under each stress, the defensible range family by family, and the pick), `GET /api/dfa/regimes` (the capital regimes by country — Solvency II, risk-based capital, solvency margin, minimum capital), `GET /api/dfa/regimes/:code` (one regime in full: regulator, requirement, calibration, the ladder of action levels) |
 | Quoting stage | `GET /api/placements/:id/negotiation` (the board, plus `by_underwriter`, `combined` and `rol_comparison`), `POST /api/placements/:id/negotiation/send`, `GET/PUT /api/negotiations/:id/sheet`, `PUT /api/negotiations/:id/quotes`, `PATCH/DELETE /api/negotiations/:id`, `DELETE /api/negotiations/:id/structures/:structureId` |
 | Submissions | `GET /api/placements/:id/negotiation/submission-context`, `GET/POST /api/placements/:id/negotiation/submissions`, `GET/PATCH /api/negotiation-submissions/:id`, `POST /api/negotiation-submissions/:id/{redraft,request-approval,approve,reject,cancel}` |
