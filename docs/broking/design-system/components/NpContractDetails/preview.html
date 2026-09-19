@@ -1,0 +1,43 @@
+<!-- @dsCard group="Screens" height=720 width=1200 page subtitle="NP step 2 — left pane only" -->
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>NpContractDetails</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap">
+<style>html,body{margin:0;background:var(--bg0);} .pad{padding:18px;} </style>
+</head>
+<body class="ab">
+<div class="ab-shell"><nav class="ab-side"><div class="ab-side-group">Setup</div>
+<div class="ab-tab is-done"><span class="ab-dot"></span>Identify</div><div class="ab-tab is-active"><span class="ab-dot"></span>Contract Details</div>
+<div class="ab-side-group">Structure</div><div class="ab-tab"><span class="ab-dot"></span>Layers</div></nav>
+<main class="ab-main"><span class="ab-pill">Non-proportional treaty: contract details</span>
+<div class="ab-summary"><b>Kenya Re</b><span class="ab-sep">·</span><b>Kenya</b><span class="ab-sep">·</span><b>USD</b><span class="ab-sep">·</span><b>CAT XL</b><span class="ab-right"><span class="ab-id"><span class="ab-id-k">UMR</span><span class="ab-id-v">B0621DAR26CX002</span></span><span class="ab-badge">Draft</span></span></div>
+<div class="ab-grid-2"><div class="ab-pane"><div class="ab-pane-head"><span class="ab-pane-title">Contract details</span><span class="ab-tag">Input</span></div><div class="ab-pane-body">
+<div class="ab-fr"><label>Country<span class="ab-req">*</span></label><select class="ab-sel" id="cty"><option>Kenya</option><option>South Africa</option><option>Nigeria</option></select></div>
+<div class="ab-fr"><label>Cedant Name<span class="ab-req">*</span></label><select class="ab-sel" id="ced"><option>Kenya Re</option><option>Sanlam Re</option></select></div>
+<div class="ab-fr"><label>Treaty Type<span class="ab-req">*</span></label><select class="ab-sel" id="tt"><option>Risk XL</option><option selected>CAT XL</option><option>Risk &amp; CAT XL</option><option>Stop Loss</option><option>Aggregate XL</option></select></div>
+<div class="ab-fr"><label>Classes of Business<span class="ab-req">*</span></label><button class="ab-btn-field" id="cob">Fire, Engineering <span class="ab-help" style="margin:0">+1 more</span></button></div>
+<div class="ab-fr"><label>Broker<span class="ab-req">*</span></label><select class="ab-sel"><option>Afro-Asian Re Brokers</option></select></div>
+<div class="ab-fr"><label>Contract ID</label><input class="ab-in is-derived ab-uuid" readonly tabindex="-1" value="3f2b9c1e-7a44-4c0e-9d1a-5b8e2f6c0a17"></div>
+
+<div class="ab-fr"><label>Currency<span class="ab-req">*</span></label><select class="ab-sel" id="cur"><option>USD</option><option>KES</option><option>ZAR</option></select></div>
+<div class="ab-fr"><label>Treaty Inception Date<span class="ab-req">*</span></label><input type="date" class="ab-in" id="inc" value="2026-01-01"></div>
+<div class="ab-fr"><label>Treaty Renewal Date</label><input type="date" class="ab-in" id="ren" value="2027-01-01"></div>
+<div class="ab-fr"><label>UW Year</label><input class="ab-in is-derived" readonly tabindex="-1" id="uwy" value="2026"></div>
+<div class="ab-fr"><label>Experience Start Year<span class="ab-req">*</span></label><select class="ab-sel" id="esy"></select></div>
+<div class="ab-fr"><label>Contract Description</label><div class="ab-help" id="desc" style="margin:0"></div></div></div></div>
+<div></div></div>
+<div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px"><span class="ab-help" style="align-self:center;margin:0">Draft saved 14:02</span><button class="ab-btn ghost">Back</button><button class="ab-btn primary">Save &amp; next: Structure</button></div>
+</main></div>
+<script>
+
+(function(){var s=document.getElementById('esy'),y=new Date().getFullYear();for(var i=y;i>=y-40;i--){var o=document.createElement('option');o.textContent=i;if(i===y-10)o.selected=true;s.appendChild(o)}
+var codes={'Kenya':'KE','South Africa':'ZA','Nigeria':'NG'};
+function upd(){var inc=document.getElementById('inc').value;var yr=inc?inc.slice(0,4):'';document.getElementById('uwy').value=yr;
+ var ren=document.getElementById('ren');if(inc&&!ren.dataset.manual){var d=new Date(inc);d.setFullYear(d.getFullYear()+1);ren.value=d.toISOString().slice(0,10)}
+ var c=document.getElementById('cty').value;document.getElementById('desc').textContent=[yr,document.getElementById('ced').value,document.getElementById('tt').value,'(Fire, Engineering, Marine)',codes[c]].filter(Boolean).join(' ');
+ if(window.onTypeChange)window.onTypeChange(document.getElementById('tt').value);}
+['inc','cty','ced','tt'].forEach(function(id){document.getElementById(id).addEventListener('change',upd)});
+document.getElementById('ren').addEventListener('change',function(e){e.target.dataset.manual=1});upd();})();
+
+</script>
+</body>
+</html>

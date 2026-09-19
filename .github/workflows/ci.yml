@@ -1,0 +1,53 @@
+name: ci
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  lint-unit-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version-file: .nvmrc }
+      - run: npm ci && npm ci --prefix server && npm ci --prefix client
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test --prefix server
+      - run: npm run build --prefix client
+      - run: npm test --prefix client
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    needs: lint-unit-build
+    services:
+      postgres:
+        image: postgres:16
+        env: { POSTGRES_USER: postgres, POSTGRES_PASSWORD: postgres, POSTGRES_DB: afro_broker_test }
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 10s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/afro_broker_test
+      NODE_ENV: test
+      TEST_WITH_DB: '1'
+      ALLOW_DEMO_AUTH: 'true'
+      BROKING_ENABLED: 'true'
+      BROKING_LLOYDS_BROKER_NO: '0621'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version-file: .nvmrc }
+      - run: npm ci && npm ci --prefix server && npm ci --prefix client
+      - run: npm run migrate --prefix server
+      - run: npm run seed --prefix server
+      - run: npm test --prefix server
+      - run: npm run build --prefix client
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with: { name: playwright-report, path: playwright-report/ }

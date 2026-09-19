@@ -1,0 +1,81 @@
+<!-- @dsCard group="Screens" height=640 width=1400 page subtitle="NP step 3 — layers" -->
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>NpStructure</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap">
+<style>html,body{margin:0;background:var(--bg0);} .pad{padding:18px;} </style>
+</head>
+<body class="ab">
+<div class="ab-shell"><nav class="ab-side"><div class="ab-side-group">Setup</div>
+<div class="ab-tab is-done"><span class="ab-dot"></span>Identify</div><div class="ab-tab is-done"><span class="ab-dot"></span>Contract Details</div>
+<div class="ab-side-group">Structure</div><div class="ab-tab is-active"><span class="ab-dot"></span>Layers</div></nav>
+<main class="ab-main"><span class="ab-pill">Non-proportional treaty: structure</span>
+<div class="ab-summary"><b>Kenya Re</b><span class="ab-sep">·</span><b>Kenya</b><span class="ab-sep">·</span><b>USD</b><span class="ab-sep">·</span><b>CAT XL</b><span class="ab-right"><span class="ab-id"><span class="ab-id-k">UMR</span><span class="ab-id-v">B0621DAR26CX002</span></span><span class="ab-badge">Draft</span></span></div>
+<div class="ab-pane" style="margin-bottom:18px"><div class="ab-pane-head"><span class="ab-pane-title">Programme</span><span class="ab-tag">Terms</span></div>
+<div class="ab-pane-body" style="grid-template-columns:repeat(3,minmax(0,1fr));column-gap:24px">
+<div class="ab-fr"><label>Deductible</label><div class="ab-affix"><input id="ded" class="ab-in ab-num" value="2,500,000"><span>USD</span></div></div>
+<div class="ab-fr"><label>Type of XL</label><select class="ab-sel"><option>Gross XL</option><option>Net XL</option></select></div>
+<div class="ab-fr"><label>Accounting Method</label><select class="ab-sel"><option>Losses Occurring</option><option>Risks Attaching</option></select></div>
+<div class="ab-fr"><label>Accounts</label><select class="ab-sel"><option>Half yearly</option><option>Quarterly</option><option>Annual</option></select></div>
+<div class="ab-fr"><label>Est. GNPI</label><div class="ab-affix"><input class="ab-in ab-num" value="80,000,000"><span>USD</span></div></div>
+<div class="ab-fr"><label>Brokerage %</label><div class="ab-affix"><input class="ab-in ab-num" value="10"><span>%</span></div></div>
+<div class="ab-fr"><label>Taxes %</label><div class="ab-affix"><input class="ab-in ab-num" value="0"><span>%</span></div></div>
+<div class="ab-fr"><label>No Claims Bonus %</label><div class="ab-affix"><input class="ab-in ab-num"><span>%</span></div></div>
+<div class="ab-fr"><label>Profit Commission %</label><div class="ab-affix"><input class="ab-in ab-num"><span>%</span></div></div>
+</div></div><div class="ab-pane"><div class="ab-pane-head"><span class="ab-pane-title">Treaty structure – layers</span>
+<span class="ab-table-bar"><span class="ab-tag" id="mr">Risk XL</span><span class="ab-badge success" id="mc">CAT XL</span>
+<button class="ab-btn ghost sm" id="add">+ Add Layer</button><button class="ab-btn ghost sm" id="del">Delete Layer</button></span></div>
+<div style="padding:14px 18px 18px"><div class="ab-table-wrap"><table class="ab-table">
+<thead><tr><th class="ab-sticky">Layer</th><th>Limit</th><th>Deductible / attachment</th><th>Aggregate limit</th><th>EGNPI</th><th>Rate %</th><th>Earned premium</th><th>MDP</th><th>MDP%</th><th>No. reinst.</th><th>% reinst.</th><th>AAD</th><th>AAD amount</th><th>Risk</th><th>Cat</th><th>ROL</th></tr></thead>
+<tbody id="lb"></tbody><tfoot><tr id="lt"></tr></tfoot></table></div></div></div>
+<div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px"><button class="ab-btn ghost">Back</button><button class="ab-btn primary">Save structure</button></div>
+</main></div>
+<script>
+window.__mode='CAT';
+var MODE=window.__mode||'CAT', CUR='USD';
+var layers=[{limit:5000000,agg:10000000,egnpi:80000000,rate:1.8,mdp:1200000,ri:'1',rip:100,aad:false,aada:''},
+{limit:10000000,agg:20000000,egnpi:80000000,rate:1.35,mdp:900000,ri:'1',rip:100,aad:false,aada:''},
+{limit:15000000,agg:30000000,egnpi:80000000,rate:0.9,mdp:600000,ri:'2',rip:100,aad:true,aada:2000000}];
+function n(v){return Number(String(v).replace(/[^0-9.\-]/g,''))||0}
+function f(v){return v?Math.round(v).toLocaleString('en-US'):''}
+function p(v){return v?(v*100).toFixed(2)+'%':''}
+function ded0(){var e=document.getElementById('ded');return e?n(e.value):2500000}
+function render(){
+ var tb=document.getElementById('lb'),d=ded0(),T={lim:0,agg:0,ep:0,mdp:0,eg:0,rn:0,ri:0,unl:false};tb.innerHTML='';
+ layers.forEach(function(l,i){
+  var ep=l.egnpi&&l.rate?Math.round(l.egnpi*l.rate/100):0, att=d; d+=n(l.limit);
+  T.lim+=n(l.limit);T.agg+=n(l.agg);T.ep+=ep;T.mdp+=n(l.mdp);T.eg=Math.max(T.eg,n(l.egnpi));T.rn+=l.rate/100*n(l.egnpi);
+  if(l.ri==='UNLIMITED')T.unl=true;else T.ri=Math.max(T.ri,n(l.ri));
+  var rk=MODE==='CAT'?false:true, ct=MODE==='RISK'?false:true, dis=MODE==='BOTH'?'':' disabled';
+  var opts=['','1','2','3','4','5','6','7','8','9','10','UNLIMITED'].map(function(o){return '<option value="'+o+'"'+(o===l.ri?' selected':'')+'>'+(o===''?'—':o==='UNLIMITED'?'Unlimited':o)+'</option>'}).join('');
+  var tr=document.createElement('tr');
+  tr.innerHTML='<td class="ab-sticky">'+(i+1)+'</td>'+
+  '<td><input class="ab-cell" data-k="limit" value="'+f(l.limit)+'"></td>'+
+  '<td><input class="ab-cell is-derived" tabindex="-1" readonly value="'+f(att)+'"></td>'+
+  '<td><input class="ab-cell" data-k="agg" value="'+f(l.agg)+'"></td>'+
+  '<td><input class="ab-cell" data-k="egnpi" value="'+f(l.egnpi)+'"></td>'+
+  '<td><input class="ab-cell w-s" data-k="rate" value="'+(l.rate||'')+'"></td>'+
+  '<td><input class="ab-cell is-derived" tabindex="-1" readonly value="'+f(ep)+'"></td>'+
+  '<td><input class="ab-cell" data-k="mdp" value="'+f(l.mdp)+'"></td>'+
+  '<td><input class="ab-cell is-derived w-s" tabindex="-1" readonly value="'+(ep&&l.mdp?p(n(l.mdp)/ep):'')+'"></td>'+
+  '<td><select class="ab-cell w-s" data-k="ri">'+opts+'</select></td>'+
+  '<td><input class="ab-cell w-s" data-k="rip" value="'+(l.rip||'')+'"></td>'+
+  '<td class="ab-center"><input type="checkbox" class="ab-check" data-k="aad"'+(l.aad?' checked':'')+'></td>'+
+  '<td><input class="ab-cell" data-k="aada" value="'+f(l.aada)+'"'+(l.aad?'':' disabled')+'></td>'+
+  '<td class="ab-center"><input type="checkbox" class="ab-check"'+(rk?' checked':'')+dis+'></td>'+
+  '<td class="ab-center"><input type="checkbox" class="ab-check"'+(ct?' checked':'')+dis+'></td>'+
+  '<td><input class="ab-cell is-derived w-s" tabindex="-1" readonly value="'+(ep&&l.limit?p(ep/n(l.limit)):'')+'"></td>';
+  tr.querySelectorAll('[data-k]').forEach(function(el){el.addEventListener('change',function(){var k=el.dataset.k;
+   l[k]=el.type==='checkbox'?el.checked:(k==='ri'?el.value:n(el.value));render();});});
+  tb.appendChild(tr);});
+ var t=document.getElementById('lt');
+ t.innerHTML='<td class="ab-sticky">Σ</td><td>'+f(T.lim)+'</td><td>'+f(ded0())+'</td><td>'+f(T.agg)+'</td><td>'+f(T.eg)+'</td><td></td><td>'+f(T.ep)+'</td><td>'+f(T.mdp)+'</td><td>'+(T.ep?p(T.mdp/T.ep):'')+'</td><td>'+(T.unl?'Unlimited':T.ri||'')+'</td><td></td><td></td><td></td><td></td><td></td><td>'+(T.lim?p(T.rn/T.lim):'')+'</td>';
+ document.getElementById('del').disabled=layers.length<=1;
+}
+document.getElementById('add').onclick=function(){if(layers.length<20){layers.push({limit:0,agg:0,egnpi:layers[0]?layers[0].egnpi:0,rate:0,mdp:0,ri:'',rip:0,aad:false,aada:''});render();}};
+document.getElementById('del').onclick=function(){if(layers.length>1){layers.pop();render();}};
+var dd=document.getElementById('ded'); if(dd) dd.addEventListener('change',function(){dd.value=f(n(dd.value));render();});
+render();
+
+</script>
+</body>
+</html>

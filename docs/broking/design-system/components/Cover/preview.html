@@ -1,0 +1,61 @@
+<!-- @dsCard height=288 -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Afro_Asian_Business_Intelligence</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap">
+<style>
+  html, body { margin:0; height:100%; }
+  body { background:var(--bg0); color:var(--text-strong); font-family:var(--font-sans); overflow:hidden; }
+  .cover { position:relative; width:960px; height:288px; overflow:hidden; }
+  .band { position:absolute; top:0; left:0; width:960px; height:120px; }
+  .band svg { display:block; }
+  .accent { fill:var(--accent); }
+  .deep { fill:var(--text-strong); }
+  .info { fill:var(--info); }
+  .tint { fill:var(--table-head-bg); }
+  .amber { fill:var(--warn); }
+  .slate { fill:var(--muted); }
+  .ground { fill:var(--bg0); }
+  .blk { rx:var(--radius-lg); }
+  .lay { rx:var(--radius-sm); }
+  .words { position:absolute; left:var(--space-6); right:var(--space-6); bottom:var(--space-6); }
+  .name { margin:0; font-size:44px; line-height:.95; font-weight:800; letter-spacing:-.01em; color:var(--text-strong); }
+  .tag { margin:var(--space-2) 0 0 2px; font-size:14px; line-height:20px; color:var(--muted); max-width:440px; }
+</style>
+</head>
+<body>
+<div class="cover">
+<div class="band" aria-hidden="true">
+<svg viewBox="0 0 960 120" width="960" height="120">
+<!--
+  blocks      accent 300×148 bled off the top (the brand green, largest) · text-strong 250 wide deep slab · info 170 wide · muted slate 154 wide (table-head-bg tint only for the echo layers) · warn 56×28 once (it only means "enter manually")
+  arrangement a strip of unequal bands across the top, bleeding off the top edge, gutters space-3
+  pattern     an XoL layer tower — the product's own subject: layers stacked on an attachment, each wider than the last, cut into the deep slab in ground colour and into the accent block in tint; from "capture treaty layers"
+  scales      gutters space-3 (10); layer height space-3, layer pitch space-4 (14); block corners radius-lg; layer corners radius-sm
+-->
+<rect class="accent blk" x="28" y="-28" width="300" height="136" rx="16"/>
+<rect class="deep blk" x="338" y="-28" width="250" height="136" rx="16"/>
+<rect class="info blk" x="598" y="-28" width="170" height="96" rx="16"/>
+<rect class="slate blk" x="778" y="-28" width="154" height="136" rx="16"/>
+<rect class="amber lay" x="598" y="80" width="56" height="28" rx="6"/>
+<!-- tower in the deep slab: 5 layers, widening upward -->
+<rect class="ground lay" x="403" y="88" width="120" height="10" rx="6"/>
+<rect class="ground lay" x="393" y="74" width="140" height="10" rx="6"/>
+<rect class="ground lay" x="378" y="60" width="170" height="10" rx="6"/>
+<rect class="ground lay" x="363" y="46" width="200" height="10" rx="6"/>
+<rect class="ground lay" x="353" y="32" width="220" height="10" rx="6"/>
+<!-- tower echo in the accent block -->
+<rect class="tint lay" x="208" y="88" width="100" height="10" rx="6"/>
+<rect class="tint lay" x="188" y="74" width="120" height="10" rx="6"/>
+<rect class="tint lay" x="158" y="60" width="150" height="10" rx="6"/>
+</svg>
+</div>
+<div class="words">
+<h1 class="name">Afro_Asian_Business_Intelligence</h1>
+<p class="tag">Treaty capture for reinsurance broking — every contract keyed by UUID and UMR.</p>
+</div>
+</div>
+</body>
+</html>

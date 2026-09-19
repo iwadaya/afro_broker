@@ -1,0 +1,24 @@
+<!-- @dsCard group="Tables" height=330 -->
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>SlideTable</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap">
+<style>html,body{margin:0;background:var(--bg0);} .pad{padding:18px;} </style>
+</head>
+<body class="ab">
+<div class="pad" style="max-width:460px"><div class="ab-pane">
+<div class="ab-pane-head"><span class="ab-pane-title">Sliding scale</span><span class="ab-tag">Manual</span></div>
+<div class="ab-pane-body">
+<div class="ab-fr"><label>Provisional Commission %<span class="ab-req">*</span></label><div class="ab-affix"><input class="ab-in ab-num" value="30"><span>%</span></div></div>
+<div class="ab-table-wrap"><table class="ab-table" style="width:100%"><thead><tr><th>Loss ratio %</th><th>Commission %</th><th></th></tr></thead>
+<tbody id="sb"></tbody></table></div>
+<div style="display:flex;justify-content:space-between;margin-top:6px"><button class="ab-btn ghost sm" id="ar">+ Add Row</button><button class="ab-btn primary sm">Save</button></div>
+</div></div></div>
+<script>
+var rows=[[50,35],[55,33],[60,31],[65,29],[70,27]];
+function r(){var b=document.getElementById('sb');b.innerHTML='';rows.forEach(function(x,i){var t=document.createElement('tr');
+t.innerHTML='<td><input class="ab-cell" value="'+x[0]+'"></td><td><input class="ab-cell" value="'+x[1]+'"></td><td class="ab-center"><button class="ab-btn ghost sm" aria-label="Remove row">✕</button></td>';
+t.querySelector('button').onclick=function(){rows.splice(i,1);r()};b.appendChild(t)})}
+document.getElementById('ar').onclick=function(){rows.push(['','']);r()};r();
+</script>
+</body>
+</html>

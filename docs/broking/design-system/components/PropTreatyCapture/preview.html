@@ -1,0 +1,73 @@
+<!-- @dsCard group="Screens" height=1180 width=1400 page subtitle="Proportional — Universe Treaty Detail" -->
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>PropTreatyCapture</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap">
+<style>html,body{margin:0;background:var(--bg0);} .pad{padding:18px;} </style>
+</head>
+<body class="ab">
+<div class="ab-shell"><nav class="ab-side"><div class="ab-side-group">Setup</div>
+<div class="ab-tab is-done"><span class="ab-dot"></span>Identify</div><div class="ab-tab is-active"><span class="ab-dot"></span>Treaty Detail</div>
+<div class="ab-side-group">Placement</div><div class="ab-tab"><span class="ab-dot"></span>Documents</div></nav>
+<main class="ab-main"><span class="ab-pill">Proportional treaty: treaty detail</span>
+<div class="ab-summary"><b>Kenya Re</b><span class="ab-sep">·</span><b>Kenya</b><span class="ab-sep">·</span><b>Afro-Asian Re Brokers</b><span class="ab-sep">·</span><b>USD</b><span class="ab-sep">·</span><b>Quota Share &amp; Surplus</b><span class="ab-sep">·</span><b>Fire, Engineering</b>
+<span class="ab-right"><span class="ab-id"><span class="ab-id-k">UMR</span><span class="ab-id-v">B0621DAR26TR001</span></span><span class="ab-badge">Draft</span><span class="ab-help" style="margin:0">Triangulations</span><span class="ab-toggle"><button class="is-on">Yes</button><button>No</button></span></span></div>
+<div class="ab-grid-2">
+<div class="ab-pane"><div class="ab-pane-head"><span class="ab-pane-title">Contract details</span><span class="ab-tag">Input</span></div><div class="ab-pane-body">
+<div class="ab-fr"><label>Country<span class="ab-req">*</span></label><select class="ab-sel" id="cty"><option>Kenya</option><option>South Africa</option><option>Nigeria</option></select></div>
+<div class="ab-fr"><label>Cedant Name<span class="ab-req">*</span></label><select class="ab-sel" id="ced"><option>Kenya Re</option><option>Sanlam Re</option></select></div>
+<div class="ab-fr"><label>Treaty Type<span class="ab-req">*</span></label><select class="ab-sel" id="tt"><option>Quota Share</option><option selected>Quota Share &amp; Surplus</option><option>First Surplus</option><option>Second Surplus</option><option>Third Surplus</option><option>Fac Oblig</option></select></div>
+<div class="ab-fr"><label>Line of Business<span class="ab-req">*</span></label><button class="ab-btn-field" id="cob">Fire, Engineering <span class="ab-help" style="margin:0">+1 more</span></button></div>
+<div class="ab-fr"><label>Broker<span class="ab-req">*</span></label><select class="ab-sel"><option>Afro-Asian Re Brokers</option></select></div>
+<div class="ab-fr"><label>Contract ID</label><input class="ab-in is-derived ab-uuid" readonly tabindex="-1" value="3f2b9c1e-7a44-4c0e-9d1a-5b8e2f6c0a17"></div>
+<div class="ab-fr"><label>Alt. Contract ID</label><input class="ab-in" placeholder="External system reference…"></div>
+<div class="ab-fr"><label>Currency<span class="ab-req">*</span></label><select class="ab-sel" id="cur"><option>USD</option><option>KES</option><option>ZAR</option></select></div>
+<div class="ab-fr"><label>Treaty Inception Date<span class="ab-req">*</span></label><input type="date" class="ab-in" id="inc" value="2026-01-01"></div>
+<div class="ab-fr"><label>Treaty Renewal Date</label><input type="date" class="ab-in" id="ren" value="2027-01-01"></div>
+<div class="ab-fr"><label>UW Year</label><input class="ab-in is-derived" readonly tabindex="-1" id="uwy" value="2026"></div>
+<div class="ab-fr"><label>Experience Start Year<span class="ab-req">*</span></label><select class="ab-sel" id="esy"></select></div>
+<div class="ab-fr"><label>Contract Description</label><div class="ab-help" id="desc" style="margin:0"></div></div></div></div>
+<div class="ab-pane"><div class="ab-pane-head"><span class="ab-pane-title">Limit details</span><span class="ab-tag">Capacity</span></div><div class="ab-pane-body"><div class="ab-fr"><label>QS 100% Limit<span class="ab-req">*</span></label><div class="ab-affix"><input class="ab-in ab-num" id="qs" value="10,000,000"><span>USD</span></div></div><div class="ab-fr"><label>Retention %<span class="ab-req">*</span></label><div class="ab-affix"><input class="ab-in ab-num" id="rp" value="30"><span>%</span></div></div><div class="ab-fr"><label>Retention Amount</label><div class="ab-affix"><input class="ab-in ab-num is-derived" id="ra" value="" readonly tabindex="-1"><span>USD</span></div></div><div class="ab-fr"><label>Cession %</label><div class="ab-affix"><input class="ab-in ab-num" id="cp" value="70"><span>%</span></div></div><div class="ab-fr"><label>Cession Amount</label><div class="ab-affix"><input class="ab-in ab-num is-derived" id="ca" value="" readonly tabindex="-1"><span>USD</span></div></div><div class="ab-fr"><label>Surplus Max Retention<span class="ab-req">*</span></label><div class="ab-affix"><input class="ab-in ab-num" id="smr" value="3,000,000"><span>USD</span></div></div><div class="ab-fr"><label>Number of Lines<span class="ab-req">*</span></label><input class="ab-in ab-num" id="nl" type="number" min="0" value="5"></div><div class="ab-fr"><label>Total Treaty Capacity</label><div class="ab-affix"><input class="ab-in ab-num is-derived" id="cap" value="" readonly tabindex="-1"><span>USD</span></div></div><div class="ab-fr"><label>Event Limit</label><div class="ab-affix"><input class="ab-in ab-num" id="el" value="25,000,000"><span>USD</span></div></div><div class="ab-fr"><label>AAL</label><div class="ab-affix"><input class="ab-in ab-num" id="aal" value=""><span>USD</span></div></div></div></div>
+<div class="ab-pane"><div class="ab-pane-head"><span class="ab-pane-title">Commissions</span><span class="ab-toggle" id="cm"><button class="is-on">Fixed commission</button><button>Sliding scale</button></span></div><div class="ab-pane-body"><p class="ab-help">Choose between a single fixed commission or a sliding scale commission structure.</p>
+<div id="fx"><div class="ab-mini">Fixed commission</div><div class="ab-fr"><label>QS Commission %<span class="ab-req">*</span></label><div class="ab-affix"><input class="ab-in ab-num" id="fq" value="32.5"><span>%</span></div></div><div class="ab-fr"><label>Surplus Commission %<span class="ab-req">*</span></label><div class="ab-affix"><input class="ab-in ab-num" id="fs" value="30"><span>%</span></div></div></div>
+<div id="sl" class="ab-dim"><div class="ab-mini">Sliding scale</div><div class="ab-fr"><label>Min Loss Ratio %</label><div class="ab-affix"><input class="ab-in ab-num" id="s1" value=""><span>%</span></div></div><div class="ab-fr"><label>Max Loss Ratio %</label><div class="ab-affix"><input class="ab-in ab-num" id="s2" value=""><span>%</span></div></div><div class="ab-fr"><label>Min Commission %</label><div class="ab-affix"><input class="ab-in ab-num" id="s3" value=""><span>%</span></div></div><div class="ab-fr"><label>Max Commission %</label><div class="ab-affix"><input class="ab-in ab-num" id="s4" value=""><span>%</span></div></div><div class="ab-fr"><span></span><span><button class="ab-btn warn">Enter slide manually</button> <span class="ab-help">0 row(s)</span></span></div></div>
+<div class="ab-mini">Additional</div><div class="ab-fr"><label>Management Expenses %</label><div class="ab-affix"><input class="ab-in ab-num" id="me" value=""><span>%</span></div></div><div class="ab-fr"><label>Profit Commission %</label><div class="ab-affix"><input class="ab-in ab-num" id="pc" value="15"><span>%</span></div></div><div class="ab-fr"><label>Loss Carry Forward (LCF)</label><select class="ab-sel"><option>None</option><option>1 year</option><option>2 years</option><option selected>3 years</option><option>4 years</option><option>5 years</option><option>6 years</option><option>7 years</option><option>8 years</option><option>9 years</option><option>Extinction</option></select></div></div></div>
+<div class="ab-pane"><div class="ab-pane-head"><span class="ab-pane-title">Loss participation</span><span class="ab-toggle" id="lp"><button>Yes</button><button class="is-on">No</button></span></div><div class="ab-pane-body"><p class="ab-help">Capture loss participation corridors where the reinsurer share changes above a given loss ratio.</p>
+<div id="lpb" class="ab-dim"><div class="ab-fr"><label>Min Loss Ratio %<span class="ab-req">*</span></label><div class="ab-affix"><input class="ab-in ab-num" id="l1" value=""><span>%</span></div></div><div class="ab-fr"><label>Max Loss Ratio %<span class="ab-req">*</span></label><div class="ab-affix"><input class="ab-in ab-num" id="l2" value=""><span>%</span></div></div><div class="ab-fr"><label>Reinsurer Share %<span class="ab-req">*</span></label><div class="ab-affix"><input class="ab-in ab-num" id="l3" value=""><span>%</span></div></div><div class="ab-fr"><span></span><span><button class="ab-btn warn">Enter slides manually</button></span></div></div>
+<div class="ab-mini">EPI</div><div class="ab-fr"><label>Quota Share EPI<span class="ab-req">*</span></label><div class="ab-affix"><input class="ab-in ab-num" id="qepi" value="18,000,000"><span>USD</span></div></div><div class="ab-fr"><label>Surplus EPI<span class="ab-req">*</span></label><div class="ab-affix"><input class="ab-in ab-num" id="sepi" value="6,500,000"><span>USD</span></div></div><div class="ab-fr"><span></span><span><button class="ab-btn warn">EPI split</button></span></div>
+<div class="ab-mini">Brokerage &amp; taxes</div><div class="ab-fr"><label>Brokerage %</label><div class="ab-affix"><input class="ab-in ab-num" id="bk" value="10"><span>%</span></div></div><div class="ab-fr"><label>Taxes %</label><div class="ab-affix"><input class="ab-in ab-num" id="tx" value="2"><span>%</span></div></div><div class="ab-fr"><label>Loss Cap %</label><div class="ab-affix"><input class="ab-in ab-num" id="lc" value=""><span>%</span></div></div></div></div>
+</div>
+<div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px"><span class="ab-help" style="align-self:center;margin:0">Draft saved 14:02</span><button class="ab-btn ghost">Back</button><button class="ab-btn primary">Save treaty detail</button></div>
+</main></div>
+<script>
+
+(function(){var s=document.getElementById('esy'),y=new Date().getFullYear();for(var i=y;i>=y-40;i--){var o=document.createElement('option');o.textContent=i;if(i===y-10)o.selected=true;s.appendChild(o)}
+var codes={'Kenya':'KE','South Africa':'ZA','Nigeria':'NG'};
+function upd(){var inc=document.getElementById('inc').value;var yr=inc?inc.slice(0,4):'';document.getElementById('uwy').value=yr;
+ var ren=document.getElementById('ren');if(inc&&!ren.dataset.manual){var d=new Date(inc);d.setFullYear(d.getFullYear()+1);ren.value=d.toISOString().slice(0,10)}
+ var c=document.getElementById('cty').value;document.getElementById('desc').textContent=[yr,document.getElementById('ced').value,document.getElementById('tt').value,'(Fire, Engineering, Marine)',codes[c]].filter(Boolean).join(' ');
+ if(window.onTypeChange)window.onTypeChange(document.getElementById('tt').value);}
+['inc','cty','ced','tt'].forEach(function(id){document.getElementById(id).addEventListener('change',upd)});
+document.getElementById('ren').addEventListener('change',function(e){e.target.dataset.manual=1});upd();})();
+
+function n(v){return Number(String(v).replace(/[^0-9.\-]/g,''))||0}
+function f(v){return v?Math.round(v).toLocaleString('en-US'):''}
+function mode(t){t=t.toLowerCase();if(t.indexOf('quota')>-1&&t.indexOf('surplus')>-1)return'both';if(t.indexOf('quota')>-1)return'quota';if(t.indexOf('surplus')>-1||t.indexOf('fac oblig')>-1)return'surplus';return'quota'}
+var M='both';
+function en(ids,on){ids.forEach(function(id){var e=document.getElementById(id);e.disabled=!on;e.title=on?'':'Not applicable for this treaty type'})}
+function calc(){var q=n(qs.value),r=n(rp.value),c=n(cp.value),mr=n(smr.value),nl=n(nlines.value);
+ ra.value=M==='surplus'?'':f(q*r/100);ca.value=M==='surplus'?'':f(q*c/100);
+ cap.value=f(M==='quota'?q:M==='both'?q+mr*nl:mr+mr*nl);}
+var qs=document.getElementById('qs'),rp=document.getElementById('rp'),cp=document.getElementById('cp'),ra=document.getElementById('ra'),ca=document.getElementById('ca'),smr=document.getElementById('smr'),nlines=document.getElementById('nl'),cap=document.getElementById('cap');
+window.onTypeChange=function(t){M=mode(t);var isQS=M!=='surplus',isS=M!=='quota';en(['qs','rp','cp','fq','qepi'],isQS);en(['smr','nl','fs','sepi'],isS);if(qs)calc();};
+function cl(v){return Math.max(0,Math.min(100,n(v)))}
+rp.addEventListener('input',function(){cp.value=rp.value===''?'':+(100-cl(rp.value)).toFixed(2);calc()});
+cp.addEventListener('input',function(){rp.value=cp.value===''?'':+(100-cl(cp.value)).toFixed(2);calc()});
+[qs,smr,nlines].forEach(function(e){e.addEventListener('input',function(){if(e!==nlines){var v=n(e.value);e.value=v?f(Math.trunc(v)):''}calc()})});
+function tg(id,cb){var g=document.getElementById(id);g.querySelectorAll('button').forEach(function(b,i){b.onclick=function(){g.querySelectorAll('button').forEach(function(x){x.classList.toggle('is-on',x===b)});cb(i)}})}
+tg('cm',function(i){document.getElementById('fx').classList.toggle('ab-dim',i===1);document.getElementById('sl').classList.toggle('ab-dim',i===0)});
+tg('lp',function(i){document.getElementById('lpb').classList.toggle('ab-dim',i===1)});
+window.onTypeChange(document.getElementById('tt').value);calc();
+
+</script>
+</body>
+</html>
