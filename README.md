@@ -155,17 +155,21 @@ market intelligence read.
   `PATCH` and `DELETE /api/contract-documents/:id`; everyone signed in
   reads, a broker or admin writes.
 - **Shares** (`/contracts/<basis>/:id/shares`) is the third step: who takes
-  what of the programme, every row with a **Written share** column (the
-  line put down) and a **Signed share** column (what it was signed down
-  to), in percent of the programme. **BROKER SHARE** is this desk —
+  what of the programme, in percent of it. **BROKER SHARE** is this desk —
   Universe Broking, the lead broker by default — and any co-broker the
-  order is split with; **REINSURER SHARES** is the panel, each reinsurer
+  order is split with: each broker's **Order** (100% unless split), its
+  **Placed order** — the reinsurers' signed total, pro rata to the order —
+  and a **placement bar** showing how far the order is placed (fully
+  placed, short, or over). **REINSURER SHARES** is the panel, each reinsurer
   off the market register (its domicile and rating show through) or typed,
-  with a Lead mark, a market reference and a note. Totals foot both tables
-  and the reinsurers' signed total says whether the programme is fully
-  placed, short or over. The table is held on `contract_share` and saved
-  whole — `GET/PUT /api/placements/:id/shares` (everyone signed in reads, a
-  broker or admin writes).
+  with a Lead mark, a **Written share** column (the line put down), a
+  **Signed share** column (what it was signed down to), a market reference
+  and a note. Totals foot both tables and the reinsurers' signed total says
+  whether the programme is fully placed, short or over. The table is held
+  on `contract_share` (a broker row's written share is its order; its
+  signed share is unused, the placed order being derived) and saved whole —
+  `GET/PUT /api/placements/:id/shares` (everyone signed in reads, a broker
+  or admin writes).
 
 All three steps carry the tool's **floating dock** at the foot of the window
 — Back, Save and *Save & next: Documents* on the detail page; Back to the

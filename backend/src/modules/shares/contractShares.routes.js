@@ -11,8 +11,11 @@ import { audit } from '../../lib/audit.js';
  * Documents on both workflows: the broker share (this desk, and a co-broker
  * where the order is split) and the reinsurer shares, each with a written
  * share (the line put down) and a signed share (what it was signed down
- * to), in percent of the programme. The page saves the whole table at once,
- * so a PUT replaces it. Everyone signed in reads; a broker or admin writes.
+ * to), in percent of the programme. On a broker row the written share is
+ * its order (100% unless split) and the signed share goes unused: the
+ * placed order is the reinsurers' signed total, which the page derives.
+ * The page saves the whole table at once, so a PUT replaces it. Everyone
+ * signed in reads; a broker or admin writes.
  */
 const router = Router();
 router.use(authenticate);
