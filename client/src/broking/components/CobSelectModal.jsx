@@ -7,8 +7,8 @@ import Button from './Button';
 export default function CobSelectModal({ open, selected = [], classList = [], title = 'Select Lines of Business', onSave, onClose }) {
   const [sel, setSel] = useState(() => new Set(selected));
   const toggle = (id) => setSel((cur) => { const n = new Set(cur); if (n.has(id)) n.delete(id); else n.add(id); return n; });
-  // Keep the caller's order for classes already selected, append new ones in list order.
-  const ordered = [...selected.filter((id) => sel.has(id)), ...classList.map((c) => c.id).filter((id) => sel.has(id) && !selected.includes(id))];
+  // Universe: the Set's insertion order — classes in the order they were ticked, the first is the primary.
+  const ordered = [...sel];
   return (
     <Modal open={open} onClose={onClose} title={title} tag={`${sel.size} selected`}
       footer={<><span className="ab-help">First selected class is the primary class.</span><span className="ab-right"><Button onClick={onClose}>Cancel</Button><Button variant="primary" onClick={() => onSave(ordered)}>Apply</Button></span></>}>

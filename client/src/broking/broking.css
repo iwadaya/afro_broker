@@ -223,3 +223,4 @@ select.ab-cell { padding: 0 4px; text-align: left; }
 
 /* ---------- Gallery ---------- */
 .ab .ab-gallery-pane .ab-pane-head { display: none; }
+.ab .ab-right-cell { text-align: right; }
