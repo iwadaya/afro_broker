@@ -20,6 +20,12 @@ prompts in `aabi-prompts/` (01 plan → 09 verify) on top of the Universe
 - **Tests**: server 105 (unit + integration incl. constraints and seed-derived checks), client 95 (calcs cross-checks, components, screens, reducer), Playwright e2e for Identify, Treaty Detail and NP capture; a screenshot harness that renders every design-system `preview.html` next to the app's component in both themes, and 1440 / 1280 walkthroughs (`docs/broking/screenshots`).
 - **Deployment**: `deploy/provision-db.sh`, `deploy/deploy.sh --ref <ref>` (fetch → install → build → migrate → restart), `DEPLOYMENT.md`, Dockerfile + compose, CI workflow.
 
+### Found by deploying and testing locally (`deploy/deploy.sh` + the suites against the running instance)
+
+- The client kept its signed-in session only as a stored copy and never asked the server whether it was still valid: an expired or revoked cookie session left the shell on screen with every call failing. The request layer now signs out on any 401 outside sign-in (`SESSION_EXPIRED_EVENT`), the app re-validates a stored session against `/api/auth/me` on boot, and the sign-in screen says why the user is back ("Your session has expired…") before returning them to the page they were on.
+- The e2e helper signs in once per user and reuses the session (cookies and web storage), so `E2E_BASE_URL=http://localhost:4000 npm run test:e2e` runs against a deployed server within its 10 sign-ins per 15 minutes.
+- `DEPLOYMENT.md` gained the local recipe (`RESTART_CMD` instead of systemd, `--seed-demo`, pointing the suites at a deployment).
+
 ### Deviations from `data-model.md` (documented, deliberate)
 
 - `bk_contract.org_id` — contracts belong to the signed-in user's organisation; every query is org-scoped (IDOR protection). Another organisation's UMR is reported as "taken" without leaking the contract.

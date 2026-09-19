@@ -2,10 +2,23 @@
 // Every method returns parsed JSON or throws an HttpError carrying the server
 // body ({ error, code, ... }) so screens can branch on `code` (STALE_WRITE,
 // UMR_TAKEN, VALIDATION_FAILED, …).
-import { getCsrfToken } from './utils/auth';
+import { getCsrfToken, clearSession } from './utils/auth';
 import { httpFetch, HttpError } from './utils/httpClient.js';
 
 export { HttpError };
+
+/**
+ * A 401 outside sign-in means the cookie session is gone (expired, revoked, server
+ * restarted) while the client still holds its stored copy. request() clears the
+ * copy, records the expiry and fires this event on window; AppContext signs the
+ * user out and shows why. AuthBootstrap's boot check runs BEFORE the provider
+ * mounts, so the record (peekSessionExpiry) is what carries the notice across.
+ */
+export const SESSION_EXPIRED_EVENT = 'aabi:session-expired';
+const AUTH_PATHS = new Set(['/api/auth/login', '/api/auth/logout']);
+let sessionExpiry = null;
+export function peekSessionExpiry() { return sessionExpiry; }
+export function clearSessionExpiry() { sessionExpiry = null; }
 const enc = encodeURIComponent;
 
 const _cache = new Map();
@@ -34,7 +47,17 @@ export async function request(path, { method = 'GET', body, headers = {}, signal
     try { return JSON.parse(text); } catch { return text; }
   });
   if (cacheable) _cache.set(path, { promise: run, expiresAt: Date.now() + CACHE_TTL });
-  try { return await run; } catch (e) { if (cacheable) _cache.delete(path); throw e; }
+  try { return await run; } catch (e) {
+    if (cacheable) _cache.delete(path);
+    // The cookie session is gone (expired, revoked, server restarted) while the
+    // client still holds its stored copy: drop it and let the app return to sign-in.
+    if (e?.status === 401 && !AUTH_PATHS.has(path.split('?')[0])) {
+      clearSession();
+      sessionExpiry = { path, at: Date.now() };
+      try { window.dispatchEvent(new CustomEvent(SESSION_EXPIRED_EVENT, { detail: { path } })); } catch { /* non-browser */ }
+    }
+    throw e;
+  }
 }
 
 /** Parse the JSON body an HttpError carries ({ error, code, … }) or null. */

@@ -7,7 +7,7 @@ import ThemeSwitcher from '../../components/ThemeSwitcher';
 export default function LoginScreen() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { signIn } = useAppState();
+  const { signIn, authNotice } = useAppState();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -31,6 +31,7 @@ export default function LoginScreen() {
         <div className="ab-pane-head"><span className="ab-pane-title">Sign in</span><span className="ab-tag">AABI</span></div>
         <div className="ab-pane-body">
           <p className="ab-help">Afro_Asian_Business_Intelligence — treaty capture for reinsurance broking.</p>
+          {authNotice && <div className="ab-notice warn" role="status" data-testid="auth-notice">{authNotice}</div>}
           <div className="ab-fr"><label htmlFor="login-user">Username</label><input id="login-user" className="ab-in" autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} required /></div>
           <div className="ab-fr"><label htmlFor="login-pass">Password</label><input id="login-pass" className="ab-in" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required /></div>
           {error && <div className="ab-umr-status is-bad" role="alert">{error}</div>}

@@ -74,6 +74,29 @@ npm run user:create --prefix server -- --username jane.broker --email jane@examp
 
 With the flag off the routes return 404 and the navigation entry is hidden; the tables and data stay in place.
 
+## 4b. Local deployment (a laptop, or a box without systemd)
+
+```bash
+deploy/provision-db.sh                                   # or: createdb afro_broker
+cp .env.example .env                                     # DATABASE_URL, BROKING_ENABLED=true, BROKING_LLOYDS_BROKER_NO=0621
+# leave ALLOW_DEMO_AUTH unset to keep CSRF and rate limits on; NODE_ENV=development keeps cookies usable over http
+RESTART_CMD='(setsid nohup node server/src/index.js > server.log 2>&1 &)' \
+  deploy/deploy.sh --skip-git --seed-demo                # migrate, seed reference + demo data, build, start, health-check
+open http://localhost:4000                               # sign in: aabi.broker / aabi-broker-2026
+```
+
+`RESTART_CMD` replaces the systemd restart; the script still waits for `/api/health`. Re-run the same
+command after pulling changes — migrations and seeds are idempotent. To test a deployment with the
+browser suites, point them at it instead of the built-in test server:
+
+```bash
+E2E_BASE_URL=http://localhost:4000 npm run test:e2e
+E2E_BASE_URL=http://localhost:4000 npm run screenshots
+```
+
+The suites sign in once per user and reuse the session, so they stay inside the 10 sign-ins per
+15 minutes that a deployed server allows per IP.
+
 ## 5. Docker
 
 ```bash
