@@ -126,7 +126,9 @@ export default async function run() {
       await broker.waitForSelector('[data-testid="dfa-domicile"]');
       // The cedant's domicile seeds the picker; the United States is NAIC RBC.
       await broker.selectOption('[data-testid="dfa-domicile"]', 'US');
-      await broker.waitForSelector('[data-testid="dfa-regime-card"]');
+      // The card keeps the seeded domicile's regime on screen while the US one
+      // loads, so wait for the RBC family badge rather than for the card alone.
+      await broker.waitForSelector('[data-testid="dfa-regime-card"] .dfa-badge.fam-rbc');
       const card = await broker.locator('[data-testid="dfa-regime-card"]').innerText();
       assert.ok(/Risk-based capital/i.test(card), 'the regime family is on the card');
       assert.ok(/Company Action Level/.test(card), 'the ladder is on the card');
