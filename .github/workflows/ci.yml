@@ -247,3 +247,27 @@ jobs:
         with:
           name: production-logs
           path: production.log
+
+  # Deploy to Render once main is green. Opt-in: the job only fires when the
+  # repository secret RENDER_DEPLOY_HOOK_URL is set (Render → the service →
+  # Settings → Deploy Hook). With it set, switch the service's Auto-Deploy off
+  # so a merge is deployed exactly once — here, after every check above has
+  # passed — rather than twice. Without it the job does nothing, and Render's
+  # own auto-deploy (`autoDeploy: true` in render.yaml) deploys the push
+  # itself. See docs/DEPLOY.md → Auto-deploy on merge.
+  deploy:
+    name: Deploy to Render (after green checks on main)
+    needs: [backend, e2e, production]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    env:
+      RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+    steps:
+      - name: Trigger the Render deploy hook
+        run: |
+          if [ -z "$RENDER_DEPLOY_HOOK_URL" ]; then
+            echo "RENDER_DEPLOY_HOOK_URL is not set — relying on Render's own auto-deploy of this push."
+            exit 0
+          fi
+          body=$(curl --fail --silent --show-error --retry 3 --retry-delay 5 -X POST "$RENDER_DEPLOY_HOOK_URL")
+          echo "Render acknowledged the deploy: $body"
