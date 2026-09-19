@@ -185,6 +185,48 @@ The Basic tier takes daily backups with 7-day retention. Point-in-time recovery
 requires a Pro instance. If this starts holding placement records you cannot
 lose, that upgrade is the one worth making first.
 
+## Auto-deploy on merge
+
+Render deploys the service itself whenever `main` moves — a merged pull
+request included. Two things make that happen, and both are worth checking
+once in the Render dashboard, because for a service that already exists the
+dashboard's settings are what count:
+
+1. **The repository is linked.** Open the service → **Settings → Build &
+   Deploy**: *Repository* should read `iwadaya/afro_broker` and *Branch*
+   `main` (the `branch: main` the blueprint sets). If the repository is
+   missing, Render's GitHub App has lost access to it — reconnect under
+   **Account Settings → Git Providers**.
+2. **Auto-Deploy is on.** In the same tab, *Auto-Deploy* should read
+   **Yes** (or *On Commit*). `autoDeploy: true` in `render.yaml` is what the
+   blueprint sets; if it was switched off in the dashboard at some point,
+   switch it back on there.
+
+The proof is the service's **Events** tab: every merge shows a *Deploy
+started* event within a minute or two, naming the commit, then the
+pre-deploy hook (migrations, seed) and *Deploy live*. A merge that shows
+nothing there means one of the two above is off.
+
+### Deploying only after CI is green (optional)
+
+Render's auto-deploy fires on the push itself, before the GitHub Actions
+checks have run. To deploy only once every check on `main` has passed, use
+the **deploy** job at the end of `.github/workflows/ci.yml` instead:
+
+1. In Render, open the service → **Settings → Deploy Hook** and copy the URL
+   (it carries a key — treat it as a secret).
+2. In GitHub, add it as the repository secret `RENDER_DEPLOY_HOOK_URL`
+   (**Settings → Secrets and variables → Actions**).
+3. Switch the service's *Auto-Deploy* to **No**, and set `autoDeploy: false`
+   in `render.yaml` so a blueprint sync keeps it that way.
+
+From then on every merge to `main` runs the tests, the browser suite and the
+production rehearsal, and the **deploy** job calls the hook once they are
+all green — its log shows Render's acknowledgement, and the deploy appears
+in the Events tab as *Deploy hook*. Without the secret the job does nothing
+and Render's own auto-deploy carries on as before, so adding the secret is
+the only switch.
+
 ## Verifying a deploy
 
 ```bash

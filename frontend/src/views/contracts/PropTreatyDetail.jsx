@@ -44,7 +44,7 @@ export default function PropTreatyDetail() {
   const canEdit = useHasRole('broker', 'admin');
   const placement = useFetch('GET', id ? `/placements/${id}` : null, [id]);
   const pd = isNew ? NEW_CONTRACT : placement.data;
-  useScreenHead('Contracts · Proportional · 1 of 2', 'Treaty Detail', pd?.reference || 'NEW');
+  useScreenHead('Contracts · Proportional · 1 of 3', 'Treaty Detail', pd?.reference || 'NEW');
 
   const h = useContractHeader({ pd, isNew, basis: 'PROP' });
   const [terms, setTerms] = useState(emptyPropTerms);

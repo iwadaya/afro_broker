@@ -41,6 +41,9 @@ services:
     # `&& npm run seed` (and DEMO_PASSWORD) for anything beyond a demonstration.
     preDeployCommand: npm run migrate && npm run seed
     healthCheckPath: /health
+    # Every push to `branch` — a merged pull request included — deploys. To
+    # deploy only once the GitHub Actions checks are green instead, see
+    # docs/DEPLOY.md → Auto-deploy on merge (a deploy hook, and this false).
     autoDeploy: true
     envVars:
       - key: NODE_VERSION
