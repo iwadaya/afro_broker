@@ -471,6 +471,20 @@ html[data-theme="maksure"] {
 /* Artwork drawn for a dark ground (THEMES[].logoOnDark) sits on a nav chip. */
 .brand-lockup-logo--chip { background: var(--nav); border-radius: 6px; padding: 4px 8px; }
 .brand-lockup-divider { flex: none; width: 1px; align-self: stretch; background: var(--hairline-strong); }
+/* The house logo (Afro-Asian Insurance Services, 764 × 260, its name set
+   small) needs more height than a client mark to read: 50px in the top bar,
+   and on the login card it sits above the wordmark at 84px. Drawn for a
+   light ground, it takes a white plate on the dark themes. */
+.brand-lockup--topbar .brand-lockup-logo--house img { height: 50px; max-width: 220px; }
+.brand-lockup--login  .brand-lockup-logo--house img { height: 84px; max-width: 320px; }
+.brand-lockup--login.brand-lockup--house { flex-direction: column; align-items: flex-start; gap: 12px; }
+.brand-lockup--login.brand-lockup--house .brand-lockup-divider { display: none; }
+html[data-theme="midnight"] .brand-lockup-logo--house,
+html[data-theme="ocean"]    .brand-lockup-logo--house,
+html[data-theme="graphite"] .brand-lockup-logo--house,
+html[data-theme="sunset"]   .brand-lockup-logo--house {
+  background: #fff; border-radius: 8px; padding: 3px 8px;
+}
 
 /* ── Theme switcher (in the top bar's account menu, on the theme's control tokens) ── */
 .theme-switcher {

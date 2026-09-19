@@ -2682,7 +2682,11 @@ td.r, td.num { font-variant-numeric: tabular-nums; }
 }
 @media (max-width: 900px) {
   .topbar { padding: 0 20px; gap: 10px; }
-  .topbar-brand { display: none; }
+  /* The house logo stays on a narrow window; the wordmark beside it goes. */
+  .topbar-brand:not(.brand-lockup--house) { display: none; }
+  .topbar-brand.brand-lockup--house .brand-lockup-text,
+  .topbar-brand.brand-lockup--house .brand-lockup-divider { display: none; }
+  .topbar-brand.brand-lockup--house .brand-lockup-logo--house img { height: 36px; }
   .topbar-tools .iconbtn, .topbar-tools .popover-host { display: none; }
   /* The account menu survives too — sign-out must — as its avatar alone. */
   .topbar-tools .topbar-account-host { display: inline-flex; }

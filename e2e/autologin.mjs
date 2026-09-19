@@ -40,6 +40,10 @@ export default async function run() {
       await page.waitForSelector('.account-menu');
       await page.click('.account-menu >> text=Sign out');
       await page.waitForSelector('.login', { timeout: 10000 });
+      // The login card carries the house logo too.
+      const logo = page.locator('.login [data-testid=brand-logo]');
+      await logo.waitFor({ timeout: 10000 });
+      assert.ok(await logo.evaluate((img) => img.complete && img.naturalWidth > 0), 'the logo loaded on the login screen');
       // Signed out on purpose: a reload stays on the login screen.
       await page.reload({ waitUntil: 'networkidle' });
       await page.waitForSelector('.login', { timeout: 10000 });

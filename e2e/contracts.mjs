@@ -51,6 +51,16 @@ export default async function run() {
     // is deterministic.
     await apiAs(broker, 'POST', '/cedants', { name: cedantName, domicile: 'GB' });
 
+    await step('the house logo heads every screen: the top bar carries Afro-Asian Insurance Services with the wordmark', async () => {
+      const logo = broker.locator('.topbar [data-testid=brand-logo]');
+      await logo.waitFor({ timeout: 10000 });
+      assert.match(await logo.getAttribute('alt'), /^Afro-Asian Insurance Services/);
+      assert.equal(await logo.getAttribute('src'), '/brand/afro-asian/logo.png');
+      assert.ok(await logo.evaluate((img) => img.complete && img.naturalWidth > 0), 'the image loaded');
+      assert.ok((await logo.boundingBox()).height >= 40, 'large enough to read');
+      assert.ok(await broker.locator('.topbar .brand-lockup-text:has-text("BROKER")').count() > 0, 'the wordmark follows it');
+    });
+
     await step('the launcher\'s Contracts pill lands on the two options and the register', async () => {
       await goHub(broker, 'Contracts');
       await broker.waitForURL(/\/contracts$/, { timeout: 10000 });
