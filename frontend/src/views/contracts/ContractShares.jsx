@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../../api.js';
-import { useFetch, ErrorBanner } from '../../components.jsx';
+import { useFetch, ErrorBanner, ProgressBar } from '../../components.jsx';
 import { useScreenHead } from '../../shell.jsx';
 import { useHasRole } from '../../auth.jsx';
 import { useToast } from '../../toast.jsx';
@@ -13,20 +13,25 @@ import { toNumber } from './calcs.js';
 
 /**
  * Contracts → Shares: the third step of both workflows, after Documents —
- * who takes what of the programme. Two tables, each with a Written share
- * column (the line put down) and a Signed share column (what it was signed
- * down to), in percent of the programme:
+ * who takes what of the programme, in percent of it:
  *
  *   BROKER SHARE — this desk (Universe Broking, the lead broker by
- *   default) and any co-broker the order is split with;
+ *   default) and any co-broker the order is split with. Each broker has
+ *   its Order (100% unless split), its Placed order — the reinsurers'
+ *   signed total, pro rata to the order — and a placement bar showing how
+ *   far the order is placed.
  *   REINSURER SHARES — the panel, each reinsurer picked off the market
  *   register (its rating shows through) or typed, with a Lead mark, a
- *   market reference and a note.
+ *   Written share (the line put down), a Signed share (what it was signed
+ *   down to), a market reference and a note.
  *
  * Totals foot each table, and the reinsurers' signed total says whether
  * the programme is fully placed, short, or over. The page saves the whole
  * table at once; the floating dock takes it Back to the documents (saving
  * first) and Save & done to the register. Ctrl+S saves.
+ *
+ * On a broker row the stored written share is its order; its stored
+ * signed share is not used — the placed order is derived.
  */
 export const HOUSE = 'Universe Broking';
 
@@ -42,11 +47,14 @@ const fromApi = (r) => newRow(r.party, {
 const hasContent = (r) => r.name.trim() || r.written_pct !== '' || r.signed_pct !== '';
 const toApi = (r) => ({
   market_id: r.market_id || null, name: r.name.trim(), role: r.role,
-  written_pct: toNumber(r.written_pct), signed_pct: toNumber(r.signed_pct),
+  written_pct: toNumber(r.written_pct), signed_pct: r.party === 'broker' ? null : toNumber(r.signed_pct),
   reference: r.reference.trim() || null, note: r.note.trim() || null,
 });
-const sum = (rows, key) => Math.round(rows.reduce((t, r) => t + (toNumber(r[key]) || 0), 0) * 10000) / 10000;
+const round4 = (n) => Math.round(n * 10000) / 10000;
+const sum = (rows, key) => round4(rows.reduce((t, r) => t + (toNumber(r[key]) || 0), 0));
 const fmtPct = (n) => `${Number(n).toLocaleString('en-US', { maximumFractionDigits: 4 })}%`;
+/** The placement bar's colour for a status — with the words beside it, never on its own. */
+const BAR_TONE = { ok: 'emerald', short: 'gold', over: 'red' };
 
 /** Fully placed, short, or over: the reinsurers' signed total against 100%. */
 function placedStatus(signed) {
@@ -80,7 +88,7 @@ export default function ContractShares({ basis }) {
   // The stored table; a contract without a broker share yet starts with this desk as the lead broker.
   const hydrate = (data) => {
     const b = (data?.broker || []).map(fromApi);
-    setBrokerRows(b.length || !canEdit ? b : [newRow('broker', { name: HOUSE, role: 'lead' })]);
+    setBrokerRows(b.length || !canEdit ? b : [newRow('broker', { name: HOUSE, role: 'lead', written_pct: '100' })]);
     setReRows((data?.reinsurers || []).map(fromApi));
     setDirty(false);
   };
@@ -167,9 +175,12 @@ export default function ContractShares({ basis }) {
   if (placement.error) return <ErrorBanner error={placement.error} />;
   if (!pd || !h.ed) return null;
 
+  // The placed order is the reinsurers' signed total; each broker's share of it follows its order.
+  const placedPct = reRows ? sum(reRows, 'signed_pct') : 0;
+  const placedOf = (r) => round4(placedPct * (toNumber(r.written_pct) || 0) / 100);
   const totals = brokerRows && reRows ? {
-    broker: { written: sum(brokerRows, 'written_pct'), signed: sum(brokerRows, 'signed_pct') },
-    re: { written: sum(reRows, 'written_pct'), signed: sum(reRows, 'signed_pct') },
+    broker: { order: sum(brokerRows, 'written_pct'), placed: round4(brokerRows.reduce((t, r) => t + placedOf(r), 0)) },
+    re: { written: sum(reRows, 'written_pct'), signed: placedPct },
   } : null;
   const status = totals ? placedStatus(totals.re.signed) : null;
 
@@ -200,14 +211,25 @@ export default function ContractShares({ basis }) {
                 <span className="td-card-tag">{brokerRows.length} {brokerRows.length === 1 ? 'BROKER' : 'BROKERS'}</span>
               </div>
               <div className="td-card-body">
-                <div className="td-hint">This desk's share of the order, and any co-broker's where it is split.</div>
+                <div className="td-hint">
+                  This desk's order — 100% unless a co-broker takes part of it. The placed order follows the
+                  reinsurers' signed shares, pro rata to each order, and the bar shows how far the order is placed.
+                </div>
                 <table className="shares-table">
                   <thead>
-                    <tr><th>Broker</th><th>Role</th><th className="r">Written share</th><th className="r">Signed share</th><th>Note</th><th /></tr>
+                    <tr>
+                      <th>Broker</th><th>Role</th><th className="r">Order</th><th className="r">Placed order</th>
+                      <th>Placement</th><th>Note</th><th />
+                    </tr>
                   </thead>
                   <tbody>
                     {brokerRows.map((r) => {
                       const m = r.market_id ? marketById.get(r.market_id) : null;
+                      const order = toNumber(r.written_pct) || 0;
+                      const placed = placedOf(r);
+                      const progress = order > 0 ? round4((placed / order) * 100) : 0;
+                      const st = order > 0 ? placedStatus(progress) : null;
+                      const barText = order <= 0 ? 'No order' : st ? `${fmtPct(progress)} · ${st.text.toLowerCase()}` : `${fmtPct(0)} · nothing placed yet`;
                       return (
                         <tr key={r.key} data-testid="share-row">
                           <td>
@@ -222,12 +244,16 @@ export default function ContractShares({ basis }) {
                             </select>
                           </td>
                           <td className="pct">
-                            <NumField suffix="%" value={r.written_pct} readOnly={ro} aria-label="Written share %" placeholder="e.g. 100%"
+                            <NumField suffix="%" value={r.written_pct} readOnly={ro} aria-label="Order %" placeholder="e.g. 100%"
                               onChange={(v) => editBroker(r.key, { written_pct: v })} />
                           </td>
-                          <td className="pct">
-                            <NumField suffix="%" value={r.signed_pct} readOnly={ro} aria-label="Signed share %" placeholder="e.g. 100%"
-                              onChange={(v) => editBroker(r.key, { signed_pct: v })} />
+                          <td className="placed mono" data-testid="broker-placed">{fmtPct(placed)}</td>
+                          <td className="bar">
+                            <div className="shares-bar" data-testid="placement-bar">
+                              <ProgressBar value={progress} tone={BAR_TONE[st?.tone] || 'emerald'} showValue={false}
+                                label={`Placement: ${fmtPct(progress)} of the order placed`} />
+                              <span className="shares-bar-text">{barText}</span>
+                            </div>
                           </td>
                           <td>
                             <input className="fi" value={r.note} readOnly={ro} aria-label="Broker note" placeholder="Optional"
@@ -242,21 +268,21 @@ export default function ContractShares({ basis }) {
                         </tr>
                       );
                     })}
-                    {brokerRows.length === 0 && <tr><td colSpan="6" className="muted">No broker share yet.</td></tr>}
+                    {brokerRows.length === 0 && <tr><td colSpan="7" className="muted">No broker share yet.</td></tr>}
                   </tbody>
                   <tfoot>
                     <tr>
                       <td colSpan="2">Total</td>
-                      <td className="r mono" data-testid="broker-total-written">{fmtPct(totals.broker.written)}</td>
-                      <td className="r mono" data-testid="broker-total-signed">{fmtPct(totals.broker.signed)}</td>
-                      <td colSpan="2" />
+                      <td className="r mono" data-testid="broker-total-order">{fmtPct(totals.broker.order)}</td>
+                      <td className="r mono" data-testid="broker-total-placed">{fmtPct(totals.broker.placed)}</td>
+                      <td colSpan="3" />
                     </tr>
                   </tfoot>
                 </table>
                 {canEdit && (
                   <div className="shares-add">
                     <button type="button" className="btn btn-secondary btn-sm" disabled={busy} data-testid="add-broker"
-                      onClick={add(setBrokerRows, 'broker', brokerRows.length ? {} : { name: HOUSE, role: 'lead' })}>+ Add broker</button>
+                      onClick={add(setBrokerRows, 'broker', brokerRows.length ? {} : { name: HOUSE, role: 'lead', written_pct: '100' })}>+ Add broker</button>
                   </div>
                 )}
               </div>

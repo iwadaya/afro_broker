@@ -324,19 +324,21 @@ export default async function run() {
       await broker.waitForSelector('[data-testid=reinsurer-shares]', { timeout: 10000 });
       await broker.waitForSelector('h2:has-text("Shares")');
       assert.ok((await broker.locator('[data-testid=contract-summary]').innerText()).includes(cedantName), 'the same contract heads the page');
-      // Written and signed columns on both tables.
-      for (const table of ['broker-shares', 'reinsurer-shares']) {
-        const heads = (await broker.locator(`[data-testid=${table}] thead th`).allTextContents()).map((t) => t.trim());
-        assert.ok(heads.includes('Written share') && heads.includes('Signed share'), `${table}: ${heads.join(' | ')}`);
-      }
-      // This desk heads the broker share by default.
+      // Written and signed columns on the reinsurer table; order, placed order and the placement bar on the broker's.
+      const reHeads = (await broker.locator('[data-testid=reinsurer-shares] thead th').allTextContents()).map((t) => t.trim());
+      assert.ok(reHeads.includes('Written share') && reHeads.includes('Signed share'), reHeads.join(' | '));
+      const brHeads = (await broker.locator('[data-testid=broker-shares] thead th').allTextContents()).map((t) => t.trim());
+      assert.deepEqual(brHeads.filter(Boolean), ['Broker', 'Role', 'Order', 'Placed order', 'Placement', 'Note']);
+      // This desk heads the broker share by default, with the whole order and nothing placed yet.
       const brokerRows = broker.locator('[data-testid=broker-shares] [data-testid=share-row]');
       assert.equal(await brokerRows.count(), 1);
       assert.equal(await brokerRows.first().locator('[aria-label="Broker"]').inputValue(), 'Universe Broking');
       assert.equal(await brokerRows.first().locator('[aria-label="Broker role"]').inputValue(), 'lead');
-      await brokerRows.first().locator('[aria-label="Written share %"]').fill('100');
-      await brokerRows.first().locator('[aria-label="Signed share %"]').fill('100');
-      await broker.waitForSelector('[data-testid=broker-total-signed]:has-text("100%")');
+      assert.equal(await brokerRows.first().locator('[aria-label="Order %"]').inputValue(), '100%');
+      assert.equal(await brokerRows.first().locator('[aria-label="Signed share %"]').count(), 0, 'no signed column on the broker side');
+      assert.equal((await brokerRows.first().locator('[data-testid=broker-placed]').innerText()).trim(), '0%');
+      assert.ok((await brokerRows.first().locator('[data-testid=placement-bar]').innerText()).includes('nothing placed yet'));
+      assert.equal(await brokerRows.first().locator('[role=progressbar]').getAttribute('aria-valuenow'), '0');
       // Two reinsurers off the register, the first leading; the rating reads through.
       await broker.click('[data-testid=add-reinsurer]');
       await broker.click('[data-testid=add-reinsurer]');
@@ -355,6 +357,24 @@ export default async function run() {
       await broker.waitForSelector('[data-testid=reinsurer-total-written]:has-text("110%")');
       await broker.waitForSelector('[data-testid=reinsurer-total-signed]:has-text("100%")');
       await broker.waitForSelector('[data-testid=placed-status]:has-text("Fully placed")');
+      // The broker's placed order follows the reinsurers' signed total, and its placement bar fills.
+      await broker.waitForSelector('[data-testid=broker-placed]:has-text("100%")');
+      const bar = brokerRows.first().locator('[data-testid=placement-bar]');
+      assert.ok((await bar.innerText()).includes('100% · fully placed'), await bar.innerText());
+      assert.equal(await bar.locator('[role=progressbar]').getAttribute('aria-valuenow'), '100');
+      await broker.waitForSelector('[data-testid=broker-total-placed]:has-text("100%")');
+      // Sign Munich Re down to 25%: the order is 20% short, and the bar says so.
+      await reRows.nth(1).locator('[aria-label="Signed share %"]').fill('25');
+      await broker.waitForSelector('[data-testid=placement-bar]:has-text("80% · 20% short")');
+      assert.equal(await bar.locator('[role=progressbar]').getAttribute('aria-valuenow'), '80');
+      await reRows.nth(1).locator('[aria-label="Signed share %"]').fill('45');
+      await broker.waitForSelector('[data-testid=placement-bar]:has-text("100% · fully placed")');
+      // The Add buttons sit on the tables' right edge, in line with the remove buttons.
+      for (const [table, add] of [['broker-shares', 'add-broker'], ['reinsurer-shares', 'add-reinsurer']]) {
+        const addBox = await broker.locator(`[data-testid=${add}]`).boundingBox();
+        const tableBox = await broker.locator(`[data-testid=${table}] .shares-table`).boundingBox();
+        assert.ok(Math.abs((addBox.x + addBox.width) - (tableBox.x + tableBox.width)) < 2, `${add} is right-justified`);
+      }
       // Save from the dock; a reload brings the table back.
       await wakeDock(broker);
       await broker.click('[data-testid=save-shares]');
@@ -365,7 +385,7 @@ export default async function run() {
       assert.equal(await reRows.nth(0).locator('[aria-label="Signed share %"]').inputValue(), '55%');
       assert.equal(await reRows.nth(0).locator('[aria-label="Reference"]').inputValue(), 'SR/27/1');
       const stored = await apiAs(broker, 'GET', `/placements/${propId}/shares`);
-      assert.deepEqual(stored.broker.map((s) => [s.name, s.role, s.written_pct, s.signed_pct]), [['Universe Broking', 'lead', 100, 100]]);
+      assert.deepEqual(stored.broker.map((s) => [s.name, s.role, s.written_pct, s.signed_pct]), [['Universe Broking', 'lead', 100, null]], 'the order; the placed order is derived');
       assert.deepEqual(stored.reinsurers.map((s) => [s.name, s.role, s.written_pct, s.signed_pct]), [['Swiss Re', 'lead', 60, 55], ['Munich Re', 'follow', 50, 45]]);
       assert.ok(stored.reinsurers[0].market_id, 'bound to the register');
       assert.equal(stored.reinsurers[0].market_rating, 'AA-');
