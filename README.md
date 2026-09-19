@@ -347,8 +347,12 @@ then the demo seed — users, register, the demo renewal book and the three demo
 renewal packs — adding only what is missing and leaving everything else as the
 last demonstration left it. Set `SEED_RESET=1` (in `render.yaml`, or in the
 service's environment until the blueprint next syncs) to have each deploy drop
-every placement and rebuild the demo book instead.
-Remove the seed step and `DEMO_PASSWORD` for anything beyond a demonstration.
+every placement and rebuild the demo book instead. With `DEMO_AUTO_LOGIN`
+(the blueprint sets it to the demo broker) opening the URL lands on the
+dashboard already signed in — no login screen; Sign out shows it, with a
+**Continue as** button, and a new tab is signed in again by itself.
+Remove the seed step, `DEMO_PASSWORD` and `DEMO_AUTO_LOGIN` for anything
+beyond a demonstration.
 
 Production mode (`NODE_ENV=production`) tightens several things that stay
 relaxed in development:

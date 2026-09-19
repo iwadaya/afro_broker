@@ -18,15 +18,19 @@ daily backups and no expiry.
    the pre-deploy hook then applies the migrations and runs the demo seed (see
    [Demo data on every deploy](#demo-data-on-every-deploy)), and
    `node src/server.js` starts.
-4. Sign in as any demo user — the login screen lists them — with the demo
-   password `demo2026` (`DEMO_PASSWORD`). The demo renewal book and the three
-   demo renewal packs are already there.
+4. Open the service URL. It **signs you in by itself** as the demo broker
+   (`DEMO_AUTO_LOGIN`) and lands on the dashboard — no login screen. The demo
+   renewal book is already there. **Sign out** in the account menu shows the
+   login screen, which lists every demo user (the demo password `demo2026`,
+   `DEMO_PASSWORD`, is filled in) and offers **Continue as Demo Broker** to
+   take the automatic session back; a new tab is signed in again by itself.
 
 That is the whole first deploy for a demonstration. For a real deployment:
 
 1. Before the first deploy, remove `&& npm run seed` from `preDeployCommand`
-   and the `DEMO_PASSWORD` and `SEED_RESET` variables from `render.yaml`, so no
-   demo account with a password committed to this repository is ever created.
+   and the `DEMO_PASSWORD`, `DEMO_AUTO_LOGIN` and `SEED_RESET` variables from
+   `render.yaml`, so no demo account with a password committed to this
+   repository is ever created and nobody is signed in without one.
 2. The service then comes up with **no users**, so nothing can sign in yet. In
    the service's **Environment** tab add:
 
@@ -75,6 +79,7 @@ genuinely does not need those packages; only the build step does.
 | `SERVE_STATIC` | `true` | Serve `frontend/dist` from the API process. |
 | `MIGRATE_ON_BOOT` | `false` | Migrations run in `preDeployCommand` instead — see below. |
 | `DEMO_PASSWORD` | `demo2026` | Demo sign-in: every user's password, and a user dropdown on the login screen. |
+| `DEMO_AUTO_LOGIN` | `broker@broking.local` | Demo auto sign-in: a fresh visit is signed in as this user with no login screen (an email, or `1` for the first demo user). Anyone with the URL gets that session. |
 | `SEED_RESET` | `0` | Whether the pre-deploy seed rebuilds the demo book on each deploy (`1`) or only adds what is missing (`0`). |
 
 `PORT` is injected by Render and read automatically.
@@ -185,9 +190,13 @@ lose, that upgrade is the one worth making first.
 ```bash
 curl https://<service>.onrender.com/health
 # {"status":"ok","service":"universe-broking"}
+curl -s -X POST https://<service>.onrender.com/api/auth/auto-login
+# {"enabled":true,"token":"…","user":{"email":"broker@broking.local",…}}
 ```
 
-Then open the URL, sign in, and drive a placement through to `BOUND`.
+Then open the URL: it lands on the dashboard signed in as the demo broker.
+Open **Contracts**, set up a proportional contract, and find it on the
+renewal calendar.
 
 ## Running the same configuration locally
 

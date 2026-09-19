@@ -12,8 +12,12 @@ window, opening on its basis page), **portfolio intelligence** with its
 programme analysis, and **market intelligence** (a market by country, a trip
 with its return, a note, the honest no-key gather, an account opening as a
 contract) — plus the dashboard's launcher and calendar shelf, the register's
-search and basis filter, the top bar's search and recents, and Admin's
-role-gating.
+search and basis filter, the top bar's search and recents, Admin's
+role-gating, and the demo **auto sign-in** (`DEMO_AUTO_LOGIN`: a fresh visit
+lands on the dashboard signed in, Sign out shows the login screen with a
+"Continue as" button, a new tab is signed in again — skipped when the server
+under test has it off). The `login()` helper signs out first when the server
+has signed the visit in by itself, so every spec runs either way.
 
 This package is **not** part of the root npm workspaces, so a normal
 `npm install` stays lean and doesn't pull a browser. Install it on demand.

@@ -70,6 +70,12 @@ services:
       # login screen. Remove this for anything beyond a demonstration.
       - key: DEMO_PASSWORD
         value: demo2026
+      # Demo auto sign-in: opening the URL lands on the dashboard signed in as
+      # this user, no login screen (Sign out still shows it, with a "Continue
+      # as" button). Anyone with the URL gets that user's session — remove
+      # this for anything beyond a demonstration.
+      - key: DEMO_AUTO_LOGIN
+        value: broker@broking.local
       # What the pre-deploy seed does to demo data already there. "0": leave it
       # and only add what is missing. "1": drop every placement and rebuild the
       # demo book and packs, so each deploy starts the demonstration clean.

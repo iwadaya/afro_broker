@@ -68,18 +68,51 @@ router.post(
   }),
 );
 
+/** The demo order: brokers first, then the senior brokers, underwriters, admins. */
+const DEMO_ORDER = `ORDER BY array_position(ARRAY['broker','senior_broker','underwriter','admin'], role), name`;
+
+/**
+ * The user a visitor is signed in as automatically (DEMO_AUTO_LOGIN): the
+ * named email, or — for a bare truthy value — the first active user in the
+ * demo order. Null when auto sign-in is off, or the user is missing or
+ * deactivated.
+ */
+async function autoLoginUser() {
+  const setting = String(config.demoAutoLogin || '').trim();
+  if (!setting) return null;
+  const { rows } = setting.includes('@')
+    ? await query('SELECT * FROM users WHERE lower(email) = lower($1) AND active = TRUE', [setting])
+    : ['1', 'true', 'yes', 'on'].includes(setting.toLowerCase())
+      ? await query(`SELECT * FROM users WHERE active = TRUE ${DEMO_ORDER} LIMIT 1`)
+      : { rows: [] };
+  return rows[0] || null;
+}
+
 /* Demo sign-in: the users to pick from on the login screen, with the one
-   demo password, when DEMO_PASSWORD is set. Public by design — it is the
-   demonstration's front door — and empty otherwise. */
+   demo password, when DEMO_PASSWORD is set; and who a visitor is signed in
+   as automatically, when DEMO_AUTO_LOGIN is set. Public by design — it is
+   the demonstration's front door — and empty otherwise. */
 router.get(
   '/demo-users',
   asyncHandler(async (_req, res) => {
-    if (!config.demoPassword) return res.json({ enabled: false, users: [] });
-    const { rows } = await query(
-      `SELECT email, name, role FROM users WHERE active = TRUE
-       ORDER BY array_position(ARRAY['broker','senior_broker','underwriter','admin'], role), name`,
-    );
-    res.json({ enabled: true, password: config.demoPassword, users: rows });
+    const auto = await autoLoginUser();
+    const auto_login = auto ? { email: auto.email, name: auto.name, role: auto.role } : null;
+    if (!config.demoPassword) return res.json({ enabled: false, users: [], auto_login });
+    const { rows } = await query(`SELECT email, name, role FROM users WHERE active = TRUE ${DEMO_ORDER}`);
+    res.json({ enabled: true, password: config.demoPassword, users: rows, auto_login });
+  }),
+);
+
+/* Demo auto sign-in: the session of the DEMO_AUTO_LOGIN user, handed to
+   whoever opens the app, so a demonstration starts on the dashboard with
+   no login screen. Answers { enabled: false } — never an error — when it is
+   off, so the app's first request stays quiet. */
+router.post(
+  '/auto-login',
+  asyncHandler(async (_req, res) => {
+    const user = await autoLoginUser();
+    if (!user) return res.json({ enabled: false });
+    res.json({ enabled: true, token: signToken(user), user: publicUser(user) });
   }),
 );
 

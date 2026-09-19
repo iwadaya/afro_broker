@@ -94,6 +94,11 @@ export const config = {
   // at boot and the login screen offers a dropdown of users with it filled
   // in. For demonstrations only — clear it for real use.
   demoPassword: process.env.DEMO_PASSWORD || '',
+  // Demo auto sign-in: opening the app signs the visitor in as this user
+  // with no login screen — an email, or a truthy value for the first demo
+  // user (a broker). Anyone with the URL gets that user's session, so this
+  // is for demonstrations only; empty (the default) turns it off.
+  demoAutoLogin: process.env.DEMO_AUTO_LOGIN || '',
   // Where the browser is sent back to after Microsoft's sign-in. Empty means
   // the API's own origin (the single-service deploy serves the SPA); in
   // development the SPA is on the Vite server.
