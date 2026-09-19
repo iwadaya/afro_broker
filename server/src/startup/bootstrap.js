@@ -16,7 +16,7 @@ export async function bootstrap() {
   if (env.runMigrationsOnBoot) { await runMigrations(); logger.info('migrations complete'); }
   else logger.info('migrations skipped (RUN_MIGRATIONS_ON_BOOT is off)');
 
-  const app = createApp();
+  const app = await createApp();
   const server = app.listen(env.port, () => {
     logger.info('http server listening', { port: env.port, url: `http://localhost:${env.port}` });
   });

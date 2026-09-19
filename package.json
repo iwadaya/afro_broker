@@ -24,6 +24,7 @@
     "test:client": "npm test --prefix client",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
+    "screenshots": "AB_SCREENSHOTS=1 playwright test --project screenshots",
     "verify": "npm run lint && npm run typecheck && npm run test:server && npm run build && npm run test:client"
   },
   "devDependencies": {
