@@ -34,6 +34,16 @@ export async function login(browser, role, sink) {
   page.on('dialog', (d) => d.accept().catch(() => {}));
   const c = CREDENTIALS[role];
   await page.goto(BASE, { waitUntil: 'networkidle' });
+  // With DEMO_AUTO_LOGIN set the server signs a fresh visit in by itself, so
+  // the shell appears instead of the form: sign out first, then sign in as
+  // the role asked for.
+  await page.waitForSelector('.topbar, .login', { timeout: 15000 });
+  if (await page.locator('.topbar').count()) {
+    await page.click('.topbar-account');
+    await page.waitForSelector('.account-menu');
+    await page.click('.account-menu >> text=Sign out');
+    await page.waitForSelector('.login', { timeout: 15000 });
+  }
   await page.fill('input[placeholder=email]', c.email);
   await page.fill('input[placeholder=password]', c.password);
   await page.click('button:has-text("Sign in")');

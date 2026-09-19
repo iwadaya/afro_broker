@@ -67,6 +67,9 @@ jobs:
       TEST_DATABASE_URL: postgres://postgres:postgres@localhost:5432/broking_test
       JWT_SECRET: ci-secret
       BASE_URL: http://localhost:4173
+      # The demo auto sign-in, as the Render blueprint sets it, so the suite
+      # drives it and every other spec signs out of it first.
+      DEMO_AUTO_LOGIN: broker@broking.local
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -136,6 +139,7 @@ jobs:
       JWT_SECRET: ci-production-secret-at-least-32-characters-long
       SERVE_STATIC: "true"
       DEMO_PASSWORD: demo2026
+      DEMO_AUTO_LOGIN: broker@broking.local
       # Set as an operator following the first-deploy notes would; the seed
       # fills the users table first, so this must stay a no-op.
       BOOTSTRAP_ADMIN_EMAIL: ops@broking.local
@@ -212,6 +216,16 @@ jobs:
             -H 'content-type: application/json' \
             -d '{"email":"broker@broking.local","password":"demo2026"}')
           test "$code" = "200" || { echo "::error::demo broker login returned $code"; exit 1; }
+      # The blueprint's auto sign-in: a visitor gets the demo broker's session
+      # with no password, and it is a real session.
+      - name: Auto sign-in hands out the demo broker's session
+        run: |
+          body=$(curl -s -X POST http://localhost:8080/api/auth/auto-login)
+          echo "$body" | grep -q '"enabled":true' || { echo "::error::auto sign-in is off: $body"; exit 1; }
+          echo "$body" | grep -q '"email":"broker@broking.local"' || { echo "::error::auto sign-in picked the wrong user: $body"; exit 1; }
+          token=$(echo "$body" | sed -n 's/.*"token":"\([^"]*\)".*/\1/p')
+          code=$(curl -s -o /dev/null -w '%{http_code}' -H "authorization: Bearer $token" http://localhost:8080/api/auth/me)
+          test "$code" = "200" || { echo "::error::the auto sign-in token was refused ($code)"; exit 1; }
       # The first-admin bootstrap only fires on an empty users table, so on a
       # seeded deploy it must not add an account.
       - name: Bootstrap admin stays a no-op once the seed has run

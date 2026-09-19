@@ -7,10 +7,10 @@ import BrandLockup from '../BrandLockup.jsx';
 const ROLE_LABEL = { broker: 'Broker', senior_broker: 'Senior Broker', underwriter: 'Underwriter', admin: 'Admin' };
 
 export default function Login() {
-  const { login } = useAuth();
+  const { login, autoLogin } = useAuth();
   const [email, setEmail] = useState('broker@broking.local');
   const [password, setPassword] = useState('');
-  const [demo, setDemo] = useState(null); // { enabled, password, users }
+  const [demo, setDemo] = useState(null); // { enabled, password, users, auto_login }
   const [error, setError] = useState(null);
 
   // Demo sign-in: a dropdown of users with the one demo password filled in,
@@ -43,6 +43,17 @@ export default function Login() {
     if (demo?.enabled) setPassword(demo.password);
   };
 
+  // Demo auto sign-in: after a sign-out the screen offers the demo user's
+  // session back with one click, no password.
+  async function continueAs() {
+    setError(null);
+    try {
+      await autoLogin();
+    } catch (err) {
+      setError(err);
+    }
+  }
+
   return (
     <div className="login-wrap">
       <Blueprint className="login">
@@ -50,6 +61,11 @@ export default function Login() {
           <BrandLockup size="login" className="brand-name" />
           <div className="brand-sub">Reinsurance placement</div>
         </div>
+        {demo?.auto_login && (
+          <button type="button" className="btn btn-primary btn-block" onClick={continueAs} data-testid="auto-login">
+            Continue as {demo.auto_login.name}
+          </button>
+        )}
         <form onSubmit={submit}>
           {demo?.enabled && demo.users.length > 0 && (
             <label className="field">
@@ -71,7 +87,7 @@ export default function Login() {
             <span>Password</span>
             <input className="input" value={password} type="password" onChange={(e) => setPassword(e.target.value)} placeholder="password" autoComplete="current-password" />
           </label>
-          <button type="submit" className="btn btn-primary btn-block">Sign in</button>
+          <button type="submit" className={`btn ${demo?.auto_login ? 'btn-secondary' : 'btn-primary'} btn-block`}>Sign in</button>
         </form>
         <ErrorBanner error={error} />
         {demo?.enabled
