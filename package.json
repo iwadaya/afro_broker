@@ -1,40 +1,17 @@
 {
-  "name": "afro-broker",
-  "private": true,
+  "name": "universe-broking",
   "version": "0.1.0",
-  "description": "Afro_Asian_Business_Intelligence (AABI) — reinsurance broking treaty capture. Universe-compatible module layout: server/src/broking, client/src/broking, shared/broking.",
-  "license": "UNLICENSED",
-  "type": "module",
-  "engines": {
-    "node": ">=20.18.0"
-  },
+  "private": true,
+  "description": "Placement and distribution system for treaty/fac reinsurance broking, linked to Universe.",
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
   "scripts": {
-    "install:all": "npm install && npm install --prefix server && npm install --prefix client",
-    "dev": "concurrently \"npm run dev --prefix server\" \"npm run dev --prefix client\"",
-    "build": "npm run build --prefix client",
-    "start": "node server/src/index.js",
-    "migrate": "npm run migrate --prefix server",
-    "migrate:status": "npm run migrate:status --prefix server",
-    "seed": "npm run seed --prefix server",
-    "lint": "eslint . --max-warnings=0",
-    "lint:fix": "eslint . --fix",
-    "typecheck": "npm run typecheck --prefix client",
-    "test": "npm run test:server && npm run test:client",
-    "test:server": "npm test --prefix server",
-    "test:client": "npm test --prefix client",
-    "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui",
-    "screenshots": "AB_SCREENSHOTS=1 playwright test --project screenshots",
-    "verify": "npm run lint && npm run typecheck && npm run test:server && npm run build && npm run test:client"
+    "dev": "npm --workspace backend run dev",
+    "test": "npm --workspace backend test",
+    "migrate": "npm --workspace backend run migrate",
+    "seed": "npm --workspace backend run seed"
   },
-  "devDependencies": {
-    "@eslint/js": "^9.17.0",
-    "@playwright/test": "1.56.1",
-    "concurrently": "^9.1.0",
-    "eslint": "^9.17.0",
-    "eslint-plugin-jsx-a11y": "^6.10.2",
-    "eslint-plugin-react": "^7.37.2",
-    "eslint-plugin-react-hooks": "^5.1.0",
-    "globals": "^15.14.0"
-  }
+  "license": "UNLICENSED"
 }

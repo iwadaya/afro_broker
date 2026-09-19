@@ -1,53 +1,235 @@
-name: ci
+name: CI
+
 on:
   push:
-    branches: [main, master]
+    branches: [main]
   pull_request:
-permissions:
-  contents: read
+    branches: [main]
+
 jobs:
-  lint-unit-build:
+  backend:
+    name: Backend tests + frontend build
     runs-on: ubuntu-latest
-    timeout-minutes: 25
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version-file: .nvmrc }
-      - run: npm ci && npm ci --prefix server && npm ci --prefix client
-      - run: npm run lint
-      - run: npm run typecheck
-      - run: npm test --prefix server
-      - run: npm run build --prefix client
-      - run: npm test --prefix client
-  integration:
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-    needs: lint-unit-build
     services:
       postgres:
         image: postgres:16
-        env: { POSTGRES_USER: postgres, POSTGRES_PASSWORD: postgres, POSTGRES_DB: afro_broker_test }
-        ports: ['5432:5432']
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U postgres" --health-interval 10s --health-timeout 5s --health-retries 10
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     env:
-      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/afro_broker_test
-      NODE_ENV: test
-      TEST_WITH_DB: '1'
-      ALLOW_DEMO_AUTH: 'true'
-      BROKING_ENABLED: 'true'
-      BROKING_LLOYDS_BROKER_NO: '0621'
+      TEST_DATABASE_URL: postgres://postgres:postgres@localhost:5432/broking_test
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/broking_dev
+      JWT_SECRET: ci-secret
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version-file: .nvmrc }
-      - run: npm ci && npm ci --prefix server && npm ci --prefix client
-      - run: npm run migrate --prefix server
-      - run: npm run seed --prefix server
-      - run: npm test --prefix server
-      - run: npm run build --prefix client
-      - run: npx playwright install --with-deps chromium
-      - run: npm run test:e2e
-      - uses: actions/upload-artifact@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install
+        run: npm ci
+      - name: Create databases
+        run: |
+          PGPASSWORD=postgres psql -h localhost -U postgres -c 'CREATE DATABASE broking_test;'
+          PGPASSWORD=postgres psql -h localhost -U postgres -c 'CREATE DATABASE broking_dev;'
+      - name: Backend tests (unit + integration)
+        run: npm test
+      - name: Frontend build
+        run: npm --workspace frontend run build
+
+  e2e:
+    name: Browser end-to-end
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/broking_dev
+      TEST_DATABASE_URL: postgres://postgres:postgres@localhost:5432/broking_test
+      JWT_SECRET: ci-secret
+      BASE_URL: http://localhost:4173
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install root workspaces
+        run: npm ci
+      - name: Install e2e deps + browser
+        working-directory: e2e
+        run: |
+          npm install
+          npx playwright install --with-deps chromium
+      - name: Create database
+        run: PGPASSWORD=postgres psql -h localhost -U postgres -c 'CREATE DATABASE broking_dev;'
+      - name: Migrate + seed
+        run: |
+          npm run migrate
+          npm run seed
+      - name: Build frontend
+        run: npm --workspace frontend run build
+      - name: Start backend
+        run: |
+          node backend/src/server.js > backend.log 2>&1 &
+          npx wait-on http://localhost:4000/health -t 30000
+      - name: Start frontend (static preview with /api proxy)
+        run: |
+          npm --workspace frontend run preview > frontend.log 2>&1 &
+          npx wait-on http://localhost:4173 -t 30000
+      - name: Run e2e
+        env:
+          BASE_URL: http://localhost:4173
+        run: npm --prefix e2e test
+      - name: Upload logs on failure
         if: failure()
-        with: { name: playwright-report, path: playwright-report/ }
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-logs
+          path: |
+            backend.log
+            frontend.log
+
+  production:
+    name: Production build (single-origin, as deployed)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    # Mirrors render.yaml: one process serving the API and the built SPA.
+    # NODE_ENV is deliberately NOT set job-wide — it would make `npm ci` omit
+    # devDependencies and the frontend build would lose vite. It is set on the
+    # steps that actually need production behaviour.
+    env:
+      PORT: 8080
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/broking_prod
+      JWT_SECRET: ci-production-secret-at-least-32-characters-long
+      SERVE_STATIC: "true"
+      DEMO_PASSWORD: demo2026
+      # Set as an operator following the first-deploy notes would; the seed
+      # fills the users table first, so this must stay a no-op.
+      BOOTSTRAP_ADMIN_EMAIL: ops@broking.local
+      BOOTSTRAP_ADMIN_PASSWORD: ci-bootstrap-password
+      BASE_URL: http://localhost:8080
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      # Same command render.yaml uses, so a build-time regression shows up here.
+      - name: Install root workspaces
+        run: npm ci --include=dev
+      - name: Install e2e deps + browser
+        working-directory: e2e
+        run: |
+          npm install
+          npx playwright install --with-deps chromium
+      - name: Create database
+        run: PGPASSWORD=postgres psql -h localhost -U postgres -c 'CREATE DATABASE broking_prod;'
+      - name: Build frontend
+        run: npm --workspace frontend run build
+      # Mirrors render.yaml's preDeployCommand: schema changes are applied once,
+      # before the new version takes traffic, against an empty database, then
+      # the demo seed fills it.
+      - name: Pre-deploy migrations + demo seed
+        env:
+          NODE_ENV: production
+        run: npm run migrate && npm run seed
+      # Every deploy runs the hook again, so a second run must leave the seeded
+      # book exactly as it found it.
+      - name: A redeploy re-runs the seed without touching the book
+        env:
+          NODE_ENV: production
+        run: |
+          count() { PGPASSWORD=postgres psql -h localhost -U postgres -d broking_prod -Atc \
+            'SELECT count(*) FROM placement UNION ALL SELECT count(*) FROM renewal_pack UNION ALL SELECT count(*) FROM users' | tr '\n' ' '; }
+          before=$(count)
+          npm run seed
+          after=$(count)
+          test "$before" = "$after" || { echo "::error::re-seeding changed the book: $before -> $after (placements, packs, users)"; exit 1; }
+          echo "re-seed left the book unchanged: $before(placements, packs, users)"
+      - name: Start production server
+        env:
+          NODE_ENV: production
+          MIGRATE_ON_BOOT: "false"
+        run: |
+          npm --workspace backend run start > production.log 2>&1 &
+          npx wait-on http://localhost:8080/health -t 60000
+      # A weak signing key in production lets anyone mint an admin token, so the
+      # process must die rather than start. `timeout` catches the regression
+      # where it boots and blocks forever instead of exiting non-zero.
+      - name: Refuse to boot without a real JWT_SECRET
+        env:
+          NODE_ENV: production
+        run: |
+          for secret in "" "dev-secret-change-me" "tooshort"; do
+            set +e
+            out=$(JWT_SECRET="$secret" PORT=8099 timeout 30 node backend/src/server.js 2>&1)
+            code=$?
+            set -e
+            if [ "$code" = "0" ] || [ "$code" = "124" ]; then
+              echo "::error::server did not refuse JWT_SECRET='$secret' (exit $code)"
+              exit 1
+            fi
+            echo "$out" | grep -q 'JWT_SECRET must' || {
+              echo "::error::JWT_SECRET='$secret' failed for the wrong reason: $out"; exit 1; }
+            echo "rejected JWT_SECRET='$secret'"
+          done
+      - name: Seeded demo user can sign in with the demo password
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' -X POST http://localhost:8080/api/auth/login \
+            -H 'content-type: application/json' \
+            -d '{"email":"broker@broking.local","password":"demo2026"}')
+          test "$code" = "200" || { echo "::error::demo broker login returned $code"; exit 1; }
+      # The first-admin bootstrap only fires on an empty users table, so on a
+      # seeded deploy it must not add an account.
+      - name: Bootstrap admin stays a no-op once the seed has run
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' -X POST http://localhost:8080/api/auth/login \
+            -H 'content-type: application/json' \
+            -d '{"email":"ops@broking.local","password":"ci-bootstrap-password"}')
+          test "$code" = "401" || { echo "::error::bootstrap admin login returned $code on a seeded database"; exit 1; }
+      - name: SPA and API share one origin
+        run: |
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/placements)" = "200"
+          curl -s http://localhost:8080/api/nope | grep -q '"code"' \
+            || { echo "::error::unknown /api route did not return JSON"; exit 1; }
+      - name: Run e2e against the production build
+        run: npm --prefix e2e test
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-logs
+          path: production.log

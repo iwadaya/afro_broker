@@ -1,0 +1,514 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   Themes — selected via <html data-theme="...">, exactly as in the Universe
+   modelling tool (modelling_tool client/src/styles/themes.css). styles.css
+   defines Daylight — the modelling tool's default — as the base token set;
+   each block here swaps those tokens for another Universe palette. Daylight
+   needs no block — it IS the defaults.
+
+   Each block carries the modelling tool's tokens verbatim, then a short
+   "Broker IQ extensions" tail for tokens only this product consumes
+   (the dark nav palette, the semantic status tints, the design layer's neutrals).
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Midnight — executive dark + mint/blue accents ─────────────────────── */
+html[data-theme="midnight"] {
+  --bg0: #08111f;
+  --bg1: #111b2d;
+  --body-spot-1: rgba(31, 224, 141, .16);
+  --body-spot-2: rgba(56, 189, 248, .10);
+  --bg-wash-1: rgba(31, 224, 141, .12);
+  --bg-wash-2: rgba(56, 189, 248, .10);
+  --bg-depth-line: rgba(148, 163, 184, .075);
+  --surface-2: rgba(18, 31, 55, .56);
+  --surface-solid: #111c30;
+  --surface-elevated: rgba(19, 32, 56, .94);
+  --surface-muted: rgba(7, 13, 24, .60);
+  --surface-hover: rgba(255, 255, 255, .055);
+  --panel-bg: linear-gradient(180deg, rgba(19, 32, 56, .92), rgba(8, 15, 28, .78));
+  --panel-bg-strong: linear-gradient(180deg, rgba(21, 36, 62, .97), rgba(8, 15, 28, .92));
+  --topbar-bg: linear-gradient(180deg, rgba(18, 31, 55, .94), rgba(8, 15, 28, .82));
+  --sidebar-bg: linear-gradient(180deg, rgba(7, 13, 24, .78), rgba(7, 13, 24, .55));
+  --control-bg: rgba(8, 16, 30, .66);
+  --control-hover: rgba(255, 255, 255, .065);
+  --table-head-bg: rgba(8, 16, 30, .74);
+  --table-row-bg: rgba(9, 17, 31, .50);
+  --table-row-alt: rgba(255, 255, 255, .026);
+  --table-row-hover: rgba(31, 224, 141, .07);
+  --glass-grad-top: rgba(19, 32, 56, .90);
+  --glass-grad-bot: rgba(10, 18, 32, .70);
+  --text: #f1f5f9;
+  --text-strong: rgba(241, 245, 249, 1);
+  --text-rgb: 241, 245, 249;
+  --muted: #c8daf0;
+  --muted-2: rgba(184, 204, 223, .8);
+  --text-subtle: rgba(226, 232, 240, .75);
+  --accent: #1fe08d;
+  --accent2: #12c97a;
+  --accent-contrast: #07140f;
+  --accent-blue: #38bdf8;
+  --accent-amber: #fbbf24;
+  --accent-rose: #fb7185;
+  --accent-rgb: 31, 224, 141;
+  --accent2-rgb: 18, 201, 122;
+  --accent-blue-rgb: 56, 189, 248;
+  --accent-amber-rgb: 251, 191, 36;
+  --accent-rose-rgb: 251, 113, 133;
+  --stroke: rgba(90, 120, 180, .45);
+  --stroke-soft: rgba(148, 163, 184, .22);
+  --hairline: rgba(255, 255, 255, .075);
+  --hairline-strong: rgba(255, 255, 255, .14);
+  --focus: rgba(31, 224, 141, .28);
+  --shadow2: 0 10px 30px rgba(0, 0, 0, .45);
+  --shadow-high: 0 22px 70px rgba(0, 0, 0, .48);
+  --shadow-control: 0 10px 24px rgba(0, 0, 0, .30), inset 0 1px 0 rgba(255, 255, 255, .06);
+  --glass-blur: 10px;
+
+  /* Broker IQ extensions */
+  --nav: #060d19;
+  --nav-hover: #12203a;
+  --nav-ink: #e8eefc;
+  --tint-mint: rgba(31, 224, 141, .14);
+  --tint-green-ink: #5ff0b6;
+  --tint-gold: rgba(251, 191, 36, .14);
+  --tint-gold-ink: #fcd34d;
+  --tint-blue: rgba(56, 189, 248, .15);
+  --tint-red: rgba(251, 113, 133, .16);
+  --tint-neutral: rgba(148, 163, 184, .14);
+  --tint-neutral-ink: #b6c2d4;
+  --color-neutral-100: rgba(255, 255, 255, .04);
+  --color-neutral-200: rgba(255, 255, 255, .07);
+  --color-neutral-300: rgba(148, 163, 184, .25);
+  --color-neutral-400: #64748b;
+  --color-neutral-500: #94a3b8;
+  --color-neutral-700: #cbd5e1;
+  --color-neutral-800: #e2e8f0;
+  --chart-gross: #38bdf8;
+  --chart-gross-rgb: 56, 189, 248;
+  --chart-net: #1fe08d;
+  --chart-net-rgb: 31, 224, 141;
+  /* Programme-analysis chart series: the dataviz palette's dark steps,
+     validated for CVD separation and contrast on this theme's card surface. */
+  --viz-1: #3987e5;
+  --viz-1-rgb: 57, 135, 229;
+  --viz-2: #d95926;
+  --viz-3: #199e70;
+  --viz-4: #c98500;
+  --viz-5: #d55181;
+  --viz-6: #008300;
+  --viz-other: #64748b;
+}
+
+/* ── Ocean — precise teal + steel blue ──────────────────────────────────── */
+html[data-theme="ocean"] {
+  --bg0: #051722;
+  --bg1: #0a2737;
+  --body-spot-1: rgba(34, 211, 238, .17);
+  --body-spot-2: rgba(94, 234, 212, .10);
+  --bg-wash-1: rgba(34, 211, 238, .13);
+  --bg-wash-2: rgba(94, 234, 212, .09);
+  --bg-depth-line: rgba(125, 211, 252, .08);
+  --surface-2: rgba(9, 37, 54, .56);
+  --surface-solid: #0d2b3d;
+  --surface-elevated: rgba(10, 40, 58, .94);
+  --surface-muted: rgba(4, 16, 25, .62);
+  --surface-hover: rgba(255, 255, 255, .06);
+  --panel-bg: linear-gradient(180deg, rgba(10, 40, 58, .93), rgba(4, 18, 28, .80));
+  --panel-bg-strong: linear-gradient(180deg, rgba(13, 48, 70, .97), rgba(4, 18, 28, .92));
+  --topbar-bg: linear-gradient(180deg, rgba(9, 37, 54, .95), rgba(4, 18, 28, .84));
+  --sidebar-bg: linear-gradient(180deg, rgba(4, 16, 25, .80), rgba(4, 16, 25, .58));
+  --control-bg: rgba(5, 23, 35, .68);
+  --control-hover: rgba(255, 255, 255, .065);
+  --table-head-bg: rgba(5, 23, 35, .75);
+  --table-row-bg: rgba(5, 23, 35, .50);
+  --table-row-alt: rgba(255, 255, 255, .028);
+  --table-row-hover: rgba(34, 211, 238, .075);
+  --glass-grad-top: rgba(10, 40, 58, .91);
+  --glass-grad-bot: rgba(5, 23, 35, .68);
+  --text: #e0f2fe;
+  --text-strong: #f0f9ff;
+  --text-rgb: 224, 242, 254;
+  --muted: #a7d7ef;
+  --muted-2: rgba(167, 215, 239, .8);
+  --text-subtle: rgba(224, 242, 254, .75);
+  --accent: #22d3ee;
+  --accent2: #06b6d4;
+  --accent-contrast: #031316;
+  --accent-blue: #60a5fa;
+  --accent-amber: #fbbf24;
+  --accent-rose: #fb7185;
+  --accent-rgb: 34, 211, 238;
+  --accent2-rgb: 6, 182, 212;
+  --accent-blue-rgb: 96, 165, 250;
+  --accent-amber-rgb: 251, 191, 36;
+  --accent-rose-rgb: 251, 113, 133;
+  --stroke: rgba(56, 189, 248, .38);
+  --stroke-soft: rgba(125, 211, 252, .22);
+  --hairline: rgba(186, 230, 253, .075);
+  --hairline-strong: rgba(186, 230, 253, .15);
+  --focus: rgba(34, 211, 238, .32);
+  --shadow2: 0 10px 30px rgba(0, 0, 0, .45);
+  --shadow-high: 0 22px 70px rgba(0, 0, 0, .48);
+  --shadow-control: 0 10px 24px rgba(0, 0, 0, .30), inset 0 1px 0 rgba(255, 255, 255, .06);
+  --glass-blur: 10px;
+
+  /* Broker IQ extensions */
+  --nav: #03101a;
+  --nav-hover: #0d3145;
+  --nav-ink: #e0f2fe;
+  --tint-mint: rgba(34, 211, 238, .14);
+  --tint-green-ink: #7be8f6;
+  --tint-gold: rgba(251, 191, 36, .14);
+  --tint-gold-ink: #fcd34d;
+  --tint-blue: rgba(96, 165, 250, .16);
+  --tint-red: rgba(251, 113, 133, .16);
+  --tint-neutral: rgba(125, 211, 252, .13);
+  --tint-neutral-ink: #a7d7ef;
+  --color-neutral-100: rgba(255, 255, 255, .04);
+  --color-neutral-200: rgba(255, 255, 255, .07);
+  --color-neutral-300: rgba(125, 211, 252, .22);
+  --color-neutral-400: #5c7f93;
+  --color-neutral-500: #7ea3b8;
+  --color-neutral-700: #bae6fd;
+  --color-neutral-800: #e0f2fe;
+  --chart-gross: #fb7185;
+  --chart-gross-rgb: 251, 113, 133;
+  --chart-net: #22d3ee;
+  --chart-net-rgb: 34, 211, 238;
+  /* Programme-analysis chart series: the dataviz palette's dark steps,
+     validated for CVD separation and contrast on this theme's card surface. */
+  --viz-1: #3987e5;
+  --viz-1-rgb: 57, 135, 229;
+  --viz-2: #d95926;
+  --viz-3: #199e70;
+  --viz-4: #c98500;
+  --viz-5: #d55181;
+  --viz-6: #008300;
+  --viz-other: #64748b;
+}
+
+/* ── Graphite — neutral charcoal + violet/mint accents ─────────────────── */
+html[data-theme="graphite"] {
+  --bg0: #0a0b10;
+  --bg1: #161820;
+  --body-spot-1: rgba(167, 139, 250, .15);
+  --body-spot-2: rgba(45, 212, 191, .08);
+  --bg-wash-1: rgba(167, 139, 250, .12);
+  --bg-wash-2: rgba(45, 212, 191, .08);
+  --bg-depth-line: rgba(196, 181, 253, .07);
+  --surface-2: rgba(27, 29, 38, .56);
+  --surface-solid: #1b1d26;
+  --surface-elevated: rgba(28, 31, 41, .94);
+  --surface-muted: rgba(10, 11, 16, .62);
+  --surface-hover: rgba(255, 255, 255, .055);
+  --panel-bg: linear-gradient(180deg, rgba(28, 31, 41, .93), rgba(11, 12, 18, .80));
+  --panel-bg-strong: linear-gradient(180deg, rgba(34, 36, 48, .97), rgba(11, 12, 18, .92));
+  --topbar-bg: linear-gradient(180deg, rgba(27, 29, 38, .95), rgba(10, 11, 16, .84));
+  --sidebar-bg: linear-gradient(180deg, rgba(10, 11, 16, .80), rgba(10, 11, 16, .58));
+  --control-bg: rgba(14, 15, 21, .70);
+  --control-hover: rgba(255, 255, 255, .06);
+  --table-head-bg: rgba(14, 15, 21, .76);
+  --table-row-bg: rgba(14, 15, 21, .52);
+  --table-row-alt: rgba(255, 255, 255, .027);
+  --table-row-hover: rgba(167, 139, 250, .075);
+  --glass-grad-top: rgba(28, 31, 41, .91);
+  --glass-grad-bot: rgba(14, 15, 21, .70);
+  --text: #ede9fe;
+  --text-strong: #f5f3ff;
+  --text-rgb: 237, 233, 254;
+  --muted: #c4b5fd;
+  --muted-2: rgba(196, 181, 253, .75);
+  --text-subtle: rgba(237, 233, 254, .75);
+  --accent: #a78bfa;
+  --accent2: #8b5cf6;
+  --accent-contrast: #120d20;
+  --accent-blue: #60a5fa;
+  --accent-amber: #fbbf24;
+  --accent-rose: #fb7185;
+  --accent-rgb: 167, 139, 250;
+  --accent2-rgb: 139, 92, 246;
+  --accent-blue-rgb: 96, 165, 250;
+  --accent-amber-rgb: 251, 191, 36;
+  --accent-rose-rgb: 251, 113, 133;
+  --stroke: rgba(167, 139, 250, .35);
+  --stroke-soft: rgba(167, 139, 250, .18);
+  --hairline: rgba(237, 233, 254, .075);
+  --hairline-strong: rgba(237, 233, 254, .14);
+  --focus: rgba(167, 139, 250, .3);
+  --shadow2: 0 10px 30px rgba(0, 0, 0, .45);
+  --shadow-high: 0 22px 70px rgba(0, 0, 0, .48);
+  --shadow-control: 0 10px 24px rgba(0, 0, 0, .30), inset 0 1px 0 rgba(255, 255, 255, .06);
+  --glass-blur: 10px;
+
+  /* Broker IQ extensions */
+  --nav: #08090d;
+  --nav-hover: #1d1f2a;
+  --nav-ink: #ede9fe;
+  --tint-mint: rgba(45, 212, 191, .14);
+  --tint-green-ink: #7ee8d8;
+  --tint-gold: rgba(251, 191, 36, .14);
+  --tint-gold-ink: #fcd34d;
+  --tint-blue: rgba(96, 165, 250, .16);
+  --tint-red: rgba(251, 113, 133, .16);
+  --tint-neutral: rgba(196, 181, 253, .12);
+  --tint-neutral-ink: #c4b5fd;
+  --color-neutral-100: rgba(255, 255, 255, .04);
+  --color-neutral-200: rgba(255, 255, 255, .07);
+  --color-neutral-300: rgba(167, 139, 250, .2);
+  --color-neutral-400: #6b7280;
+  --color-neutral-500: #9ca3af;
+  --color-neutral-700: #ddd6fe;
+  --color-neutral-800: #ede9fe;
+  --chart-gross: #fb7185;
+  --chart-gross-rgb: 251, 113, 133;
+  --chart-net: #a78bfa;
+  --chart-net-rgb: 167, 139, 250;
+  /* Programme-analysis chart series: the dataviz palette's dark steps,
+     validated for CVD separation and contrast on this theme's card surface. */
+  --viz-1: #3987e5;
+  --viz-1-rgb: 57, 135, 229;
+  --viz-2: #d95926;
+  --viz-3: #199e70;
+  --viz-4: #c98500;
+  --viz-5: #d55181;
+  --viz-6: #008300;
+  --viz-other: #64748b;
+}
+
+/* ── Sunset — aubergine dusk + amber/blue accents ──────────────────────── */
+html[data-theme="sunset"] {
+  --bg0: #170d16;
+  --bg1: #241725;
+  --body-spot-1: rgba(251, 191, 36, .15);
+  --body-spot-2: rgba(96, 165, 250, .08);
+  --bg-wash-1: rgba(251, 191, 36, .12);
+  --bg-wash-2: rgba(96, 165, 250, .08);
+  --bg-depth-line: rgba(253, 186, 116, .07);
+  --surface-2: rgba(45, 29, 43, .56);
+  --surface-solid: #2a1b29;
+  --surface-elevated: rgba(49, 32, 47, .94);
+  --surface-muted: rgba(16, 9, 16, .62);
+  --surface-hover: rgba(255, 255, 255, .055);
+  --panel-bg: linear-gradient(180deg, rgba(49, 32, 47, .93), rgba(18, 10, 18, .80));
+  --panel-bg-strong: linear-gradient(180deg, rgba(57, 36, 53, .97), rgba(18, 10, 18, .92));
+  --topbar-bg: linear-gradient(180deg, rgba(45, 29, 43, .95), rgba(18, 10, 18, .84));
+  --sidebar-bg: linear-gradient(180deg, rgba(16, 9, 16, .80), rgba(16, 9, 16, .58));
+  --control-bg: rgba(23, 13, 22, .70);
+  --control-hover: rgba(255, 255, 255, .06);
+  --table-head-bg: rgba(23, 13, 22, .76);
+  --table-row-bg: rgba(23, 13, 22, .52);
+  --table-row-alt: rgba(255, 255, 255, .027);
+  --table-row-hover: rgba(251, 191, 36, .075);
+  --glass-grad-top: rgba(49, 32, 47, .91);
+  --glass-grad-bot: rgba(23, 13, 22, .70);
+  --text: #fff7ed;
+  --text-strong: #fffbeb;
+  --text-rgb: 255, 247, 237;
+  --muted: #fed7aa;
+  --muted-2: rgba(254, 215, 170, .75);
+  --text-subtle: rgba(255, 247, 237, .75);
+  --accent: #fbbf24;
+  --accent2: #f97316;
+  --accent-contrast: #1e1304;
+  --accent-blue: #60a5fa;
+  --accent-amber: #fbbf24;
+  --accent-rose: #fb7185;
+  --accent-rgb: 251, 191, 36;
+  --accent2-rgb: 249, 115, 22;
+  --accent-blue-rgb: 96, 165, 250;
+  --accent-amber-rgb: 251, 191, 36;
+  --accent-rose-rgb: 251, 113, 133;
+  --stroke: rgba(251, 191, 36, .34);
+  --stroke-soft: rgba(251, 191, 36, .18);
+  --hairline: rgba(255, 247, 237, .075);
+  --hairline-strong: rgba(255, 247, 237, .14);
+  --focus: rgba(251, 191, 36, .30);
+  --shadow2: 0 10px 30px rgba(0, 0, 0, .45);
+  --shadow-high: 0 22px 70px rgba(0, 0, 0, .48);
+  --shadow-control: 0 10px 24px rgba(0, 0, 0, .30), inset 0 1px 0 rgba(255, 255, 255, .06);
+  --glass-blur: 10px;
+
+  /* Broker IQ extensions */
+  --nav: #120a11;
+  --nav-hover: #2d1d2b;
+  --nav-ink: #fff7ed;
+  --tint-mint: rgba(74, 222, 128, .14);
+  --tint-green-ink: #86efac;
+  --tint-gold: rgba(251, 191, 36, .15);
+  --tint-gold-ink: #fcd34d;
+  --tint-blue: rgba(96, 165, 250, .16);
+  --tint-red: rgba(251, 113, 133, .16);
+  --tint-neutral: rgba(253, 186, 116, .13);
+  --tint-neutral-ink: #fed7aa;
+  --color-neutral-100: rgba(255, 255, 255, .04);
+  --color-neutral-200: rgba(255, 255, 255, .07);
+  --color-neutral-300: rgba(253, 186, 116, .2);
+  --color-neutral-400: #7c6a72;
+  --color-neutral-500: #a3919a;
+  --color-neutral-700: #fde8d0;
+  --color-neutral-800: #fff7ed;
+  --chart-gross: #fb7185;
+  --chart-gross-rgb: 251, 113, 133;
+  --chart-net: #fbbf24;
+  --chart-net-rgb: 251, 191, 36;
+  /* Programme-analysis chart series: the dataviz palette's dark steps,
+     validated for CVD separation and contrast on this theme's card surface. */
+  --viz-1: #3987e5;
+  --viz-1-rgb: 57, 135, 229;
+  --viz-2: #d95926;
+  --viz-3: #199e70;
+  --viz-4: #c98500;
+  --viz-5: #d55181;
+  --viz-6: #008300;
+  --viz-other: #64748b;
+}
+
+/* ── Maksure — client theme for Maksure Risk Solutions (maksure.co.za) ─────
+   A light corporate palette in the broker's own colours, sampled from the
+   site and its logo. Charcoal — the logo's dark dots, #201e1e — carries
+   every primary action, because the brand orange (#ed6e27, the site's
+   buttons and top bar) holds only 3.1:1 against white; the orange is the
+   ·IQ brand mark, the gross chart series, the focus ring and the hover and
+   background washes instead. The dot mark's cyan (#3fb1dc), deepened to
+   #0c7599 so it reads as text, is the informational blue. Statuses keep
+   their meaning — green for what is bound or approved, amber for decisions,
+   red for exceptions — so the workflow reads the same as in Daylight; only
+   the brand changes. Every value the theme owns is in this one block. ── */
+html[data-theme="maksure"] {
+  --bg0: #faf9f7;
+  --bg1: #eeebe6;
+  --body-spot-1: rgba(237, 110, 39, .10);
+  --body-spot-2: rgba(63, 177, 220, .07);
+  --bg-wash-1: rgba(237, 110, 39, .07);
+  --bg-wash-2: rgba(63, 177, 220, .05);
+  --bg-depth-line: rgba(32, 30, 30, .07);
+  --surface-2: rgba(255, 255, 255, .70);
+  --surface-solid: #ffffff;
+  --surface-elevated: rgba(255, 255, 255, .97);
+  --surface-muted: rgba(244, 242, 239, .74);
+  --surface-hover: rgba(32, 30, 30, .045);
+  --panel-bg: linear-gradient(180deg, rgba(255, 255, 255, .97), rgba(247, 245, 242, .84));
+  --panel-bg-strong: linear-gradient(180deg, rgba(255, 255, 255, .985), rgba(250, 249, 247, .95));
+  --topbar-bg: linear-gradient(180deg, rgba(255, 255, 255, .95), rgba(247, 245, 242, .86));
+  --sidebar-bg: linear-gradient(180deg, rgba(255, 255, 255, .82), rgba(247, 245, 242, .68));
+  --control-bg: rgba(255, 255, 255, .78);
+  --control-hover: rgba(32, 30, 30, .045);
+  --table-head-bg: rgba(244, 242, 239, .88);
+  --table-row-bg: rgba(255, 255, 255, .58);
+  --table-row-alt: rgba(32, 30, 30, .024);
+  --table-row-hover: rgba(237, 110, 39, .07);
+  --glass-grad-top: rgba(255, 255, 255, .97);
+  --glass-grad-bot: rgba(250, 249, 247, .84);
+  --text: #232120;
+  --text-strong: #141212;
+  --text-rgb: 35, 33, 32;
+  --muted: #5f5c5a;
+  --muted-2: rgba(95, 92, 90, .85);
+  --text-subtle: rgba(70, 67, 65, .80);
+  --accent: #2b2826;
+  --accent2: #201e1e;
+  --accent-contrast: #ffffff;
+  --accent-blue: #0c7599;
+  --accent-amber: #b45309;
+  --accent-rose: #c8102e;
+  --accent-rgb: 43, 40, 38;
+  --accent2-rgb: 32, 30, 30;
+  --accent-blue-rgb: 12, 117, 153;
+  --accent-amber-rgb: 180, 83, 9;
+  --accent-rose-rgb: 200, 16, 46;
+  --stroke: rgba(120, 116, 112, .45);
+  --stroke-soft: rgba(120, 116, 112, .22);
+  --hairline: rgba(32, 30, 30, .09);
+  --hairline-strong: rgba(32, 30, 30, .16);
+  --focus: rgba(237, 110, 39, .34);
+  --shadow2: 0 10px 30px rgba(32, 30, 30, .09);
+  --shadow-high: 0 24px 70px rgba(32, 30, 30, .14);
+  --shadow-control: 0 10px 24px rgba(32, 30, 30, .09), inset 0 1px 0 rgba(255, 255, 255, .80);
+  --glass-blur: 10px;
+
+  /* Broker IQ extensions */
+  --brand-mark: #ed6e27;
+  --nav: #201e1e;
+  --nav-hover: #353131;
+  --nav-ink: #f3f0ec;
+  --tint-mint: rgba(13, 110, 78, .12);
+  --tint-green-ink: #0b6b4a;
+  --tint-gold: rgba(180, 83, 9, .12);
+  --tint-gold-ink: #92400e;
+  --tint-blue: rgba(63, 177, 220, .16);
+  --tint-red: rgba(200, 16, 46, .10);
+  --tint-neutral: rgba(111, 107, 102, .14);
+  --tint-neutral-ink: #5f5c5a;
+  --color-accent-800: #201e1e;
+  --color-accent-900: #141212;
+  --color-neutral-100: #f4f2ef;
+  --color-neutral-200: #e7e4df;
+  --color-neutral-300: #d0ccc6;
+  --color-neutral-400: #9d9892;
+  --color-neutral-500: #6f6b66;
+  --color-neutral-700: #3d3a37;
+  --color-neutral-800: #262322;
+  --chart-gross: #ed6e27;
+  --chart-gross-rgb: 237, 110, 39;
+  --chart-net: #201e1e;
+  --chart-net-rgb: 32, 30, 30;
+}
+
+/* ── Brand lockup (BrandLockup.jsx — the top bar and the login screen) ─────
+   The wordmark alone on every theme; a client theme with a logo in its
+   THEMES entry leads with it, then a hairline divider. `:where()` keeps the
+   display rule at zero specificity, so the top bar's ≤900px
+   `.topbar-brand { display: none }` in styles.css still wins over it. ── */
+:where(.brand-lockup) { display: flex; align-items: center; }
+.brand-lockup--topbar { gap: 10px; }
+.brand-lockup--login  { gap: 14px; }
+.brand-lockup-text { white-space: nowrap; }
+.brand-lockup-logo { flex: none; display: inline-flex; align-items: center; }
+.brand-lockup-logo img { display: block; width: auto; object-fit: contain; }
+/* 30px in the 72px top bar, 44px on login; a width cap so a very wide mark
+   can never push the top bar's search. */
+.brand-lockup--topbar .brand-lockup-logo img { height: 30px; max-width: 180px; }
+.brand-lockup--login  .brand-lockup-logo img { height: 44px; max-width: 260px; }
+/* Artwork drawn for a dark ground (THEMES[].logoOnDark) sits on a nav chip. */
+.brand-lockup-logo--chip { background: var(--nav); border-radius: 6px; padding: 4px 8px; }
+.brand-lockup-divider { flex: none; width: 1px; align-self: stretch; background: var(--hairline-strong); }
+
+/* ── Theme switcher (in the top bar's account menu, on the theme's control tokens) ── */
+.theme-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  line-height: 1;
+}
+.theme-switcher__swatch {
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  border: 1px solid var(--stroke);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14), 0 4px 10px rgba(0, 0, 0, .12);
+}
+.theme-switcher__swatch[data-theme-key="midnight"] { background: linear-gradient(135deg, #07111f 0 34%, #1fe08d 35% 67%, #38bdf8 68%); }
+.theme-switcher__swatch[data-theme-key="ocean"]    { background: linear-gradient(135deg, #041019 0 34%, #22d3ee 35% 67%, #5eead4 68%); }
+.theme-switcher__swatch[data-theme-key="graphite"] { background: linear-gradient(135deg, #0a0b10 0 34%, #a78bfa 35% 67%, #2dd4bf 68%); }
+.theme-switcher__swatch[data-theme-key="sunset"]   { background: linear-gradient(135deg, #170d16 0 34%, #fbbf24 35% 67%, #60a5fa 68%); }
+.theme-switcher__swatch[data-theme-key="daylight"] { background: linear-gradient(135deg, #f8fafc 0 34%, #059669 35% 67%, #2563eb 68%); }
+.theme-switcher__swatch[data-theme-key="maksure"]  { background: linear-gradient(135deg, #faf9f7 0 34%, #201e1e 35% 67%, #ed6e27 68%); }
+.theme-switcher__select {
+  min-height: 28px;
+  padding: 4px 26px 4px 9px;
+  border-radius: 8px;
+  border: 1px solid var(--stroke);
+  background-color: var(--control-bg);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: calc(100% - 13px) 11px, calc(100% - 8px) 11px;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}
+.theme-switcher__select option { background: var(--surface-solid); color: var(--text); }

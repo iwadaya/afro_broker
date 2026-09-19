@@ -1,0 +1,13 @@
+{
+  "name": "@universe-broking/e2e",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Browser end-to-end tests for Universe Broking (Playwright).",
+  "scripts": {
+    "test": "node run.mjs"
+  },
+  "dependencies": {
+    "playwright": "^1.47.0"
+  }
+}

@@ -1,0 +1,77 @@
+# Render Blueprint — https://render.com/docs/blueprint-spec
+#
+# One web service (Express API + the built React SPA on a single origin) and one
+# managed PostgreSQL instance. Deploy with: New → Blueprint → pick this repo.
+#
+# After the first deploy, set BOOTSTRAP_ADMIN_EMAIL / BOOTSTRAP_ADMIN_PASSWORD
+# in the dashboard to create the first admin, then clear them. See docs/DEPLOY.md.
+
+databases:
+  - name: broker-iq-db
+    databaseName: broking
+    user: broking
+    # Smallest paid tier: daily backups, no 30-day expiry. Render has renamed
+    # these plans over time — if the blueprint is rejected on this field, check
+    # the current identifier in the dashboard and update it here.
+    plan: basic-256mb
+    postgresMajorVersion: "16"
+    ipAllowList: []   # private network only; no external connections
+
+services:
+  - type: web
+    name: broker-iq
+    runtime: node
+    plan: starter
+    region: oregon
+    branch: main
+    # --include=dev is required: NODE_ENV=production makes npm omit devDependencies,
+    # and vite (the frontend build tool) is one. Without it the build fails with
+    # "vite: not found". Only the build needs them; the runtime does not.
+    buildCommand: npm ci --include=dev && npm --workspace frontend run build
+    startCommand: npm --workspace backend run start
+    # Paid instances get a pre-deploy hook, so schema changes run once here
+    # rather than on every boot. This keeps migrations out of the request path
+    # and stops multiple instances racing to migrate if the service is scaled.
+    #
+    # The demo seed runs after them on every deploy: the demo users, the market
+    # register, the demo renewal book and the three demo renewal packs
+    # (DEMO-27-QS / -XL / -COMBINED). It only adds what is missing, so a
+    # redeploy never touches data entered since — set SEED_RESET=1 below to
+    # rebuild the demo book from scratch on each deploy instead. Drop
+    # `&& npm run seed` (and DEMO_PASSWORD) for anything beyond a demonstration.
+    preDeployCommand: npm run migrate && npm run seed
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NODE_ENV
+        value: production
+      # Render generates a strong value on first deploy and keeps it stable.
+      # Changing it invalidates every issued token (all users must sign in again).
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: broker-iq-db
+          property: connectionString
+      # The internal connection string is already on a private network. Set this
+      # to true only when pointing at an external/managed database over TLS.
+      - key: DATABASE_SSL
+        value: "false"
+      # Serve the SPA from the API process — one origin, so no CORS needed.
+      - key: SERVE_STATIC
+        value: "true"
+      # Migrations are handled by preDeployCommand above, so boot must not also
+      # attempt them.
+      - key: MIGRATE_ON_BOOT
+        value: "false"
+      # Demo sign-in: one password for every user, and a user dropdown on the
+      # login screen. Remove this for anything beyond a demonstration.
+      - key: DEMO_PASSWORD
+        value: demo2026
+      # What the pre-deploy seed does to demo data already there. "0": leave it
+      # and only add what is missing. "1": drop every placement and rebuild the
+      # demo book and packs, so each deploy starts the demonstration clean.
+      - key: SEED_RESET
+        value: "0"

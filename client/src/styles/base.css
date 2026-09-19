@@ -1,6 +1,0 @@
-/* Base shell for the AABI app. Colours come from tokens.css + themes.css. */
-*{ box-sizing:border-box; }
-html,body{ height:100%; }
-body{ margin:0; font-family:var(--font-sans); font-size:14px; color:var(--text); background:linear-gradient(180deg, var(--bg0), var(--bg1)) fixed; -webkit-font-smoothing:antialiased; }
-button{ font-family:inherit; }
-#root{ min-height:100%; }
