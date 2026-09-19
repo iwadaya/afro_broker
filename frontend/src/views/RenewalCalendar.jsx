@@ -61,7 +61,7 @@ export default function RenewalCalendar() {
             Upcoming renewals — next {months} months
             {calendar.data && ` · ${renewals.length} ${renewals.length === 1 ? 'placement' : 'placements'}`}
           </SectionLabel>
-          <span className="hint">click a reference to open the placement</span>
+          <span className="hint">click a reference to open the contract</span>
           <div className="sechead-actions">
             <Link className="btn btn-secondary btn-sm" to="/portfolio">Portfolio intelligence →</Link>
             <div className="segmini" role="group" aria-label="Renewal window">
@@ -108,7 +108,7 @@ export default function RenewalCalendar() {
                     <span className="muted"> · {daysUntil(row.renews_on)}d</span>
                   </td>
                   <td>
-                    <button className="refbtn" onClick={() => navigate(`/placements/${row.id}`)}>
+                    <button className="refbtn" onClick={() => navigate(`/contracts/${row.id}`)}>
                       {row.reference}
                     </button>
                   </td>

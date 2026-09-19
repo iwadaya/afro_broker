@@ -1,18 +1,19 @@
-# Universe Broking — end-to-end tests
+# Broker IQ — end-to-end tests
 
 Browser tests (Playwright) that drive the real UI against a live backend. They
-cover the full placement lifecycle (`DRAFT→BOUND`, four-eyes, exact signing-down),
-signing by contract (the Signing pill asking which contract, the programme
-and the written and signed lines of the one chosen, the preview before the
-signing is applied and the ledger after), secondary actions (admin gating, subjectivities, line decline, accept-shortfall,
-documents), the table of retentions (the class / % of capacity table and
-grading an occupancy automatically), negotiation (the pack going to market, the
-quotes coming back against the structures quoted, and a lead answering with a
-structure of its own), and the dynamic financial analysis desk (what to model
-asked on arrival, one contract run by itself, the verdict strip, the eight
-stages, an edit marking the run stale, the tower, a frontier scan, a
-multi-year horizon, the structuring sweep with its pick adopted and its
-one-pager, a standalone book typed from scratch, and the whole portfolio).
+cover the tool's four functions: **Contracts** (the launcher pill's two options
+— Proportional opens the Universe treaty detail with its four panes, the
+lookups' dropdowns, the treaty-type gating, the derived amounts, the renewal
+default, the required-field hold, the sliding scale, loss participation and
+EPI split modals, a save that lands on the contract's own URL and reads back
+after a reload; Non-proportional opens the contract details pane only, with the
+non-proportional treaty types), the **renewal calendar** (the contract in its
+window, opening on its basis page), **portfolio intelligence** with its
+programme analysis, and **market intelligence** (a market by country, a trip
+with its return, a note, the honest no-key gather, an account opening as a
+contract) — plus the dashboard's launcher and calendar shelf, the register's
+search and basis filter, the top bar's search and recents, and Admin's
+role-gating.
 
 This package is **not** part of the root npm workspaces, so a normal
 `npm install` stays lean and doesn't pull a browser. Install it on demand.

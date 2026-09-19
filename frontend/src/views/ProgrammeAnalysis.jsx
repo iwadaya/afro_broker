@@ -246,7 +246,7 @@ export default function ProgrammeAnalysis() {
   ));
   const selBroker = sel.broker ? brokers.find((b) => b.key === sel.broker) : null;
   const selReinsurer = sel.reinsurer ? reinsurers.find((r) => r.market_id === sel.reinsurer) : null;
-  const openProgramme = (p) => navigate(`/placements/${p.id}`);
+  const openProgramme = (p) => navigate(`/contracts/${p.id}`);
 
   const otherHouses = brokers.filter((b) => b.name && !b.is_house).length;
 
@@ -406,7 +406,7 @@ export default function ProgrammeAnalysis() {
               rows={reinsurers.map((r) => ({
                 key: r.market_id,
                 cells: [
-                  <Link to={`/markets/${r.market_id}`}>{r.name}</Link>, r.rating || '—', r.programmes,
+                  r.name, r.rating || '—', r.programmes,
                   `${r.programmes_lead} · ${r.programmes_follow} · ${r.programmes_unroled}`,
                   `${r.lines} (${r.signed_lines})`, <MoneyCell money={r.premium_on_lines} />, <MoneyCell money={r.premium_signed} />,
                   r.programmes_led || '—', r.brokers.length,
@@ -459,7 +459,7 @@ export default function ProgrammeAnalysis() {
               ariaLabel={`${measureNoun} by reinsurer and broker`}
               onSelect={(cell) => setSel(cell ? { broker: cell.col, reinsurer: cell.row } : { broker: null, reinsurer: null })}
               selected={{ row: sel.reinsurer, col: sel.broker }}
-              renderRowLabel={(r) => <Link to={`/markets/${r.key}`}>{r.label}</Link>}
+              renderRowLabel={(r) => r.label}
               emptyNote={waiting ? 'Loading…' : 'No written line in this scope yet.'}
             />
           </Panel>

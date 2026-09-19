@@ -519,7 +519,7 @@ function BookPanel({ d, allYears, year }) {
             {accounts.map((a) => (
               <tr key={a.id}>
                 <td className="mono pi-nowrap" style={{ fontSize: 12.5 }}>{fmtDate(a.inception, { shortYear: true })}</td>
-                <td><Link className="refbtn" to={`/placements/${a.id}`}>{a.reference}</Link></td>
+                <td><Link className="refbtn" to={`/contracts/${a.id}`}>{a.reference}</Link></td>
                 <td>{a.cedant_name}</td>
                 <td>{a.country_name || a.cedant_country || '—'}</td>
                 <td style={{ fontSize: 13, color: 'var(--color-neutral-700)' }}>{a.class}</td>

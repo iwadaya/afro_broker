@@ -9,10 +9,15 @@ collecting written lines, signing down, and binding.
 This repository implements the design in `universebrokingdesign.md`: a complete
 Express + PostgreSQL service covering all 12 phases / modules of the plan — with
 the integrity-critical pieces (immutable FOT, four-eyes, the signing-down engine)
-covered by tests — plus a React + Vite frontend that drives the full placement
-lifecycle end to end (dashboard, market register, placements, a layer workspace
-for the quote board → FOT → lines → signing → bind → closing flow, and a wording
-library for drafting and comparing contract wordings).
+covered by tests — plus a React + Vite frontend **stripped to four functions**:
+the **Contracts** function (a proportional treaty opens the Universe modelling
+tool's treaty detail; a non-proportional one its contract details pane),
+**Portfolio intelligence**, the **Renewal calendar** and **Market
+intelligence**, under the home dashboard. The backend still serves the whole
+placement lifecycle through its API — the sections below that describe the
+placement page, the layer workspace, signing, wording, claims and premium,
+renewal packs and the dynamic financial analysis document that API and its
+rules; their screens are no longer in the interface.
 
 ## Stack
 
@@ -71,32 +76,75 @@ on the login screen; and `/?theme=maksure` opens a fresh browser in that
 theme for a demonstration.
 
 There is no left rail: every screen runs the full width of the window, and
-the **dashboard is the hub**. Under its welcome, a launcher lists the
-workspace's destinations as two rows of four green pills — Renewal pack
-analysis, Placements, Markets, Contracts, Signing, Wording, Claims & premium
-and Dynamic financial analysis. Placements is the register, where **New
-placement** is the first button. Signing asks which contract on arrival, so
-it always leads somewhere; Claims & premium follows the working placement,
-so it waits, greyed, until the book has given the hub a context. **Home** in
-the top bar brings the hub back from any page. The
-**Acting as** switch, the theme picker, Admin (for an admin or underwriter)
-and sign-out live in the top bar's account menu, under the signed-in user's
-name.
+the **dashboard is the hub** — the treaty renewal book as it always was: the
+welcome, the headline metrics, the placement spine, the renewal-pack store
+by cedant and the renewal calendar shelf. Under its welcome, a launcher lists
+the tool's four functions as one row of green pills — **Contracts**,
+**Renewal calendar**, **Portfolio intelligence** and **Market
+intelligence** — and **Home** in the top bar brings the hub back from any
+page. The **Acting as** switch, the theme picker, Admin (for an admin or
+underwriter) and sign-out live in the top bar's account menu, under the
+signed-in user's name.
 
-Six screens cover the treaty placement lifecycle, reachable from the launcher:
+**Contracts** (`/contracts`) opens on two options — **Proportional** and
+**Non-proportional** — above the contracts already on the book (every
+placement, with its class of business, treaty type and basis, searchable
+from the page or from the top bar's search box, and narrowed by basis). A
+contract is a placement: the record the calendar, the portfolio and the
+market intelligence read.
 
-| # | Screen | Route | What it is for |
-|---|--------|-------|----------------|
-| 01 | Dashboard | `/` | The book: the seven headline metrics, the renewal-pack store by cedant, the renewal calendar, what is blocked |
-| 02 | Renewal pack | `/placements/:id/pack` | Four-step wizard — inherit a source pack, carry/refresh/omit each section, bind bordereaux, review the diff and build |
-| 03 | Layer workspace | `/layers/:id` | Quote board vs the technical benchmark, firm order terms (four-eyes), order completion, written lines |
-| 04 | Signing | `/signing`, `/signing/:id`, `/layers/:id/signing` | Which contract first — a pop-up on arrival — then its programme and its signings: the written line and the signed line of every market on every layer. The worksheet is one layer's signing-down arithmetic and its reconciliation to the order |
-| 05 | Wording | `/wording` | Three tabs — the market's wordings, slip comparison, and the slip being drafted |
-| 06 | Claims & premium | `/placements/:id/claims` | The loss exhibit, bordereaux ingested, large losses, premium schedule |
+- **Proportional** (`/contracts/proportional`, then
+  `/contracts/proportional/:id` once saved) is the Universe modelling tool's
+  proportional Treaty Detail, field for field: the summary strip with the
+  *Triangulations available* toggle, the contract line, then the 2×2 grid
+  **CONTRACT DETAILS** · **LIMIT DETAILS** · **COMMISSIONS** · **LOSS
+  PARTICIPATION** (with EPI and BROKERAGE & TAXES). The dropdowns are the
+  tool's reference lookups (see *Reference data behind Treaty Detail*): the
+  country filters the cedant register (a cedant can be registered from the
+  dropdown), the treaty type offers the proportional types only, the line
+  of business is the tool's class-of-business modal, the broker and the
+  currency their lists. The tool's logic comes with it: the treaty type
+  gates the quota-share and surplus fields (*Not applicable for this treaty
+  type* on the rest); Retention % and Cession % always sum to 100; the
+  retention and cession amounts, the total treaty capacity (QS limit · max
+  retention × lines · both), the UW year and the contract description
+  (*2027 Cedant Treaty Type (classes) GB*) derive live; the renewal date
+  defaults to inception + 12 months until edited by hand; FIXED / SLIDING
+  and YES / NO dim the inactive block; the manual slide, the stepped loss
+  participation (up to five corridors) and the EPI split by class (an equal
+  share until entered, reconciled against the total) open in modals; the
+  required fields (the tool's rules: the active half's limit, retention and
+  EPI, the fixed commissions or the sliding bounds with at least two rows of
+  the slide, the loss-participation scalars when it is on) are highlighted
+  after the first save attempt with a *Required: …* summary; Enter moves
+  field to field and pane to pane, and Ctrl+S saves. Saving writes the
+  contract details onto the placement, the terms onto its proportional
+  structure (`quote_structures[].prop`) and its quota-share / surplus
+  layers — one per half the treaty type activates, carrying the limit and
+  the EPI at 100% — so the calendar and the portfolio read the treaty's
+  size; a new contract lands on its own URL.
+- **Non-proportional** (`/contracts/non-proportional`, then
+  `/contracts/non-proportional/:id`) is the **left pane only** of the tool's
+  NP Treaty Detail — CONTRACT DETAILS, with the non-proportional treaty
+  types (Risk XL, CAT XL, Risk & CAT XL, Stop Loss, Aggregate XL) and the
+  *Classes of Business* picker, the same derived UW year, description and
+  renewal default, and the same required set (country, cedant, treaty type,
+  classes, broker, currency, inception, experience start year). The tool's
+  right pane — the structure terms — is not part of this tool. Saving
+  writes the placement's header; nothing else.
+
+A contract by id (`/contracts/:id` — where the calendar, the portfolio, the
+market intelligence and the top bar's recents point) opens on its basis page,
+the treaty type's category deciding; the placement page's old address
+(`/placements/:id`) lands there too. The module is
+`frontend/src/views/contracts/`: the Universe arithmetic and required-field
+rules in `calcs.js`, the terms model and modals in `propTerms.jsx`, the
+placement mapping in `contractModel.js`, the shared contract details pane and
+its state in `ContractDetailsPane.jsx`, and the two pages.
 
 The top bar, present on every page, carries a **Home** button that returns
-to the dashboard from anywhere. Two more screens hang off it rather than
-the launcher, side by side:
+to the dashboard from anywhere. Two of the functions sit on it as well, side
+by side:
 the **Renewal calendar** (`/renewals`) — every placement renewing in the
 next 3, 6 or 12 months, with the treaty's shape and the desk's position on
 it — and **Portfolio intelligence** (`/portfolio`), the book read by who
@@ -175,92 +223,6 @@ market in full), with `/visits` and `/notes` beneath them
 (`backend/src/modules/intelligence`, the ROI reading in `roi.js` and the
 gather in `backend/src/integrations/marketBrief.js`).
 
-The Wording screen carries three tabs:
-
-- **Wording** — every wording in the market, filtered by reinsurer, class of
-  business and treaty type. Open one to read it in full beside the version a
-  reinsurer holds of it, word-level differences marked inline.
-- **Comparison** — read a market's slip and measure it against our own form.
-  Upload one (PDF or text, or paste it) and every clause is flagged
-  `standard` / `non-standard` / `additional` / `missing`; upload two and the
-  slips are compared with each other as well, with the standard flag alongside.
-  The counts double as filters, so the divergences are one click from the top.
-- **Draft slip** — the wording being assembled for the working layer.
-
-Slip text is cut into clauses by `backend/src/domain/slipParser.js`, which
-recognises the heading shapes slips actually use — numbered articles,
-capitalised headings, market references such as LMA5400 — and the clauses are
-matched against the library by `alignClauseSets`: market reference first, then
-title, then body similarity.
-
-The launcher's other pills keep everything else reachable: Placements (the
-register and the placement page — **New placement** is the register's
-first button), Markets (the counterparty register), Contracts (the treaty
-programmes and their years) and Dynamic financial analysis. The wording
-drafts editor lives inside Wording, and the audit trail under Admin in the
-account menu. **Market operations** (`/layers/:id/operations`)
-carries the market-facing input paths — approaching markets, capturing quotes
-and subjectivities, proposing FOT, writing and declining lines, binding and
-issuing documents.
-
-**Renewal packs** (`/renewal-packs`, the launcher's first pill) is the upload
-desk: name the cedant, class and treaty type, upload the cedant's own
-submissions and have the model read them. Arriving asks how the pack is being
-made — *Create manually* runs the placement workflow to the pack builder;
-*Upload a renewal pack* then asks **Quick renewal pack or Full renewal pack**.
-Full is the manual route: the broker names the cedant, class and treaty type
-and uploads the packs on the desk. Quick takes the pack first: the AI reads
-those same details off it (`POST /api/renewal-analyses/intake` — cedant,
-country, treaty type, classes of business, a line of context, and which year
-each file is), constrained to the reference lists the dropdowns hold, and
-fills the form for the broker to correct and add to. Every filled field says
-where it was read and how sure the model was, a changed one reads
-*Corrected*, and the packs go onto the record with the create so the desk
-opens with them in place. The only difference between the routes is who
-fills the form first; the record keeps `intake_mode` and, for a quick
-intake, the model's picks beside the broker's review of each field
-(accepted / corrected / added). Each uploaded pack opens as a
-six-stage renewal desk (`/renewal-packs/:id`) — *01 Renewal pack*, *02 AI
-summary*, *03 Market email*, *04 Responses*, *05 Signed lines*, *06 Claims* —
-one tab strip in the pattern of the contract-year workspace, each tab an
-ordinal, a label and the record's state underneath. The stage is in the URL
-(`?tab=summary`) so it can be linked and survives a reload; with no `?tab=`
-a record opens on the furthest stage its data supports. The strip is one
-Tab stop, and the arrow keys move along it.
-
-- *01 Renewal pack* — the intake: upload the expiring and current
-  submissions, run the model, and link the pack to the placement it was
-  written for. Everything downstream works on that placement's own layers,
-  lines and documents, never a parallel copy.
-- *02 AI summary* — the model's draft as a document: the programme facts,
-  the layer schedule, the changes and the experience, every gap flagged
-  rather than estimated, with the extraction trace beside it. A broker
-  **verifies and signs off** (`POST /api/renewal-analyses/:id/verify`,
-  withdrawn with `DELETE`); editing the prose, uploading or removing a
-  document, or re-running the model clears the sign-off, and nothing goes to
-  market without it.
-- *03 Market email* — the firm-order invitation drafted from the verified
-  summary, with the summary and the layer schedule attached as PDFs and the
-  panel pre-selected from last year's writers. Sending creates a negotiation
-  submission under four-eyes: the broker submits, an underwriter or admin
-  releases, and a reminder goes to each silent recipient before the response
-  deadline.
-- *04 Responses* — one row per reinsurer, written and signed by layer on the
-  line ledger. Signing down is the engine's, and a line is never signed above
-  what was written, so a short layer is firmed at written by an explicit
-  action. Releasing the signed lines is the gate to the next stage.
-- *05 Signed lines* — the signing advice: one template, merged per reinsurer
-  with its own layer / written / signed / premium rows, so no market sees
-  another's line; declinatures receive a courtesy note.
-- *06 Claims* — a contract search first, then everything for the contract
-  you open: a header plate, the KPIs, and the two bases as a segmented pair.
-  Non-proportional carries the inbox monitoring and the notices matched to
-  the contract, the advices table with each layer's erosion, and the claim
-  workspace — the settlement ladder, the preliminary and claim advices, and
-  the reinsurer breakdown on signed lines. Proportional carries the
-  bordereaux and the large losses. The contract, the basis and the open
-  claim live in the URL too (`?tab=claims&contract=…&basis=np&claim=…`).
-
 Every action on the desk confirms itself with one transient toast.
 
 The account menu's **Acting as** switch (Broker / Analyst / Underwriter) is a lens on
@@ -268,35 +230,15 @@ what the interface offers. It never grants anything: the server enforces RBAC
 and four-eyes on every call, so an action is only surfaced when the signed-in
 user's real role could actually perform it.
 
-**Signing opens on a question, not on a layer.** The Signing pill lands on
-`/signing`, which asks *which contract's signings?* in a pop-up: every
-placement with a programme, searchable by cedant, reference, class, treaty
-type or year, each with where its signing stands (no lines yet, lines
-written, partly signed, signed) and the working placement first. Choosing
-one opens `/signing/:id` — linkable, and reopened from the screen's
-**Change contract** button — with the **programme** (the layers in tower
-order: cover, order, premium 100%, firm order terms, Σ written, Σ signed,
-factor, state, and a link to each layer's worksheet) and the **signings**:
-for each layer, the written line each market gave, whether it stands, the
-line it signed, its signed premium and its status, read by layer or by
-reinsurer. A layer whose signing has not been applied shows the engine's
-preview in the signed column, styled and labelled as a preview, with the
-sentence that explains it; once applied, the column reads from the line
-ledger. The read model is `GET /api/signing/contracts?q=` and
-`GET /api/signing/contracts/:placementId` (`backend/src/modules/signing`),
-read-only — applying a signing stays on the layer's own endpoints.
-
-Signed percentages, premiums and the signing factor are **derived on every
-render** from written lines, the stand set and the order — never stored in the
-client. `frontend/src/signing.js` mirrors `backend/src/domain/signingDown.js`
-so toggling a line to stand recomputes the factor, every signed line, every
-premium and the reconciliation variance live, with no save step; the server
-remains the source of truth when signing is applied.
-
-Screens built before the redesign — the placement wizard, negotiation,
-bordereau ingest and analysis, the wordings drafts editor — keep their own
-layouts. They were already built against the Daylight tokens, so they and the
-designed screens read as one interface.
+**What was stripped.** The placement page and its wizard, the layer
+workspace and market operations, signing, the wording library, claims and
+premium, renewal packs, the market and cedant registers, the spine's
+contract-year workspace and the dynamic financial analysis are no longer in
+the interface; their routes are gone and `*` returns to the hub. The backend
+keeps every module and its API (documented below), the demo seed and the
+tests, and the pure modules those tests and the seed pin — the modelling
+engine, pricing and workflow, the occupancy grading and the servicing model
+— stay under `frontend/src` as shared logic without a screen.
 
 ## Getting started
 

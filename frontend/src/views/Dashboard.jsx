@@ -1,11 +1,10 @@
 import React, { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { api } from '../api.js';
 import {
   useFetch, Blueprint, SectionLabel, StatusPill, ErrorBanner,
   fmtCompact, fmtDate, fmtMoney,
 } from '../components.jsx';
-import { useScreenHead, useWorkspace } from '../shell.jsx';
+import { useScreenHead } from '../shell.jsx';
 import { useAuth } from '../auth.jsx';
 import { parseClass } from './treatyDetail.jsx';
 import { countryOfDomicile, regionOfDomicile } from '../refData.js';
@@ -25,7 +24,6 @@ function currencyNote(money, empty = 'nothing recorded') {
 export default function Dashboard() {
   useScreenHead('Book overview', 'Treaty renewal book');
   const navigate = useNavigate();
-  const ws = useWorkspace();
   const { user } = useAuth();
 
   const metrics = useFetch('GET', '/dashboards/metrics');
@@ -40,22 +38,10 @@ export default function Dashboard() {
 
   const m = metrics.data;
 
-  // Open a placement: to its layer workspace when a layer is already in the
-  // market, otherwise into the pack builder.
-  async function openPlacement(row) {
-    try {
-      const full = await api('GET', `/placements/${row.id}`);
-      ws.setPlacement(full);
-      const hot = (full.layers || []).find((l) => l.status !== 'OPEN');
-      if (hot) {
-        ws.setLayer({ ...hot, placement: full });
-        navigate(`/layers/${hot.id}`);
-      } else {
-        navigate(`/placements/${full.id}/pack`);
-      }
-    } catch {
-      navigate(`/placements/${row.id}/pack`);
-    }
+  // Open a renewal: the contract, on its basis page (proportional treaty
+  // detail or non-proportional contract details).
+  function openContract(row) {
+    navigate(`/contracts/${row.id}`);
   }
 
   return (
@@ -73,7 +59,7 @@ export default function Dashboard() {
           This is your placement workspace hub. Build or upload the renewal pack, take placements
           to market and drive layers through firm order, signing and binding.
         </div>
-        <Launcher placementId={ws.placement?.id} />
+        <Launcher />
       </section>
 
       <div className="kpis">
@@ -123,7 +109,7 @@ export default function Dashboard() {
           hint="approved by a Senior Broker — cleared for market"
           emptyText="No approved packs yet."
         />
-        <CalendarStore calendar={calendar} onOpen={openPlacement} />
+        <CalendarStore calendar={calendar} onOpen={openContract} />
       </div>
 
     </div>
@@ -405,7 +391,7 @@ function CalendarStore({ calendar, onOpen }) {
     <section>
       <div className="sechead">
         <SectionLabel>Renewal calendar — next {calendar.data?.window_days ?? 225} days</SectionLabel>
-        <span className="hint">open a row to work the placement</span>
+        <span className="hint">open a row to work the contract</span>
       </div>
 
       <Blueprint className="packstore" style={{ marginTop: 10 }}>
@@ -637,35 +623,25 @@ function SpineOverview({ spine }) {
 }
 
 /**
- * The launcher: the workspace's destinations as two rows of four pills under
- * the welcome — what the primary rail used to list, in the green the hero's
- * actions have always worn. Placements is the register, where New placement
- * is the first button, so one pill covers both. Signing asks which contract
- * on arrival, so it always leads somewhere; Claims & premium follows the
- * working placement (see WorkspaceProvider), so until the book has given the
- * hub a context it waits, greyed, rather than lead nowhere. The pills are
- * links, not buttons: Home in the top bar brings the hub back from any of them.
+ * The launcher: the tool's four functions as one row of pills under the
+ * welcome, in the green the hero's actions have always worn — Contracts
+ * (proportional or non-proportional, the Universe treaty detail), the
+ * renewal calendar, portfolio intelligence and market intelligence. The
+ * pills are links, not buttons: Home in the top bar brings the hub back from
+ * any of them.
  */
-function Launcher({ placementId }) {
+function Launcher() {
   const pills = [
-    { label: 'Renewal packs', to: '/renewal-packs' },
-    { label: 'Placements', to: '/placements' },
-    { label: 'Markets', to: '/markets' },
     { label: 'Contracts', to: '/contracts' },
-    { label: 'Signing', to: '/signing' },
-    { label: 'Wording', to: '/wording' },
-    { label: 'Claims & premium', to: '/claims-premiums' },
-    { label: 'Dynamic financial analysis', to: '/dfa' },
+    { label: 'Renewal calendar', to: '/renewals' },
+    { label: 'Portfolio intelligence', to: '/portfolio' },
+    { label: 'Market intelligence', to: '/portfolio/market-intelligence' },
   ];
   return (
     <nav className="launcher" aria-label="Workspace">
-      {pills.map((p) => (p.to
-        ? <Link key={p.label} to={p.to} className="action-pill action-pill--primary">{p.label}</Link>
-        : (
-          <span key={p.label} className="action-pill action-pill--primary is-off" aria-disabled="true" title={p.waits}>
-            {p.label}
-          </span>
-        )))}
+      {pills.map((p) => (
+        <Link key={p.label} to={p.to} className="action-pill action-pill--primary">{p.label}</Link>
+      ))}
     </nav>
   );
 }

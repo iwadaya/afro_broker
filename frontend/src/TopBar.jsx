@@ -13,7 +13,7 @@ import BrandLockup from './BrandLockup.jsx';
  * menu. There is no primary rail — the dashboard is the hub, its launcher
  * lists every destination, and Home brings it back from any page.
  *
- * Search hands off to the placements workspace, which owns the query in its
+ * Search hands off to the contracts register, which owns the query in its
  * URL so a search result is linkable and survives a refresh.
  */
 export default function TopBar() {
@@ -31,7 +31,7 @@ export default function TopBar() {
 
   function submit(e) {
     e.preventDefault();
-    navigate(`/placements?q=${encodeURIComponent(term.trim())}`);
+    navigate(`/contracts?q=${encodeURIComponent(term.trim())}`);
   }
 
   return (
@@ -64,8 +64,8 @@ export default function TopBar() {
           className="input"
           value={term}
           onChange={(e) => setTerm(e.target.value)}
-          placeholder="Search placements, markets, cedants…"
-          aria-label="Search placements, markets and cedants"
+          placeholder="Search contracts, cedants…"
+          aria-label="Search contracts and cedants"
         />
       </form>
 
@@ -123,8 +123,8 @@ export default function TopBar() {
           <button
             type="button"
             className="iconbtn"
-            aria-label="Recent placements"
-            title="Recent placements"
+            aria-label="Recent contracts"
+            title="Recent contracts"
             aria-expanded={recentsOpen}
             onClick={() => setRecentsOpen((o) => !o)}
           >
@@ -133,7 +133,7 @@ export default function TopBar() {
             </svg>
           </button>
           {recentsOpen && (
-            <div className="popover topbar-recents" role="dialog" aria-label="Recent placements">
+            <div className="popover topbar-recents" role="dialog" aria-label="Recent contracts">
               <div className="kicker" style={{ marginBottom: 8 }}>Recent</div>
               <RecentList onPick={() => setRecentsOpen(false)} />
             </div>
@@ -237,7 +237,7 @@ function RecentList({ onPick }) {
   const navigate = useNavigate();
   const items = readRecents();
   if (!items.length) {
-    return <p className="muted small" style={{ margin: 0 }}>Placements you open appear here.</p>;
+    return <p className="muted small" style={{ margin: 0 }}>Contracts you open appear here.</p>;
   }
   return (
     <div className="recent-list">
@@ -246,7 +246,7 @@ function RecentList({ onPick }) {
           key={r.id}
           type="button"
           className="refbtn recent-item"
-          onClick={() => { onPick(); navigate(`/placements/${r.id}`); }}
+          onClick={() => { onPick(); navigate(`/contracts/${r.id}`); }}
         >
           <span className="recent-ref">{r.reference}</span>
           {r.subtitle && <span className="recent-sub">{r.subtitle}</span>}
@@ -267,8 +267,8 @@ export function readRecents() {
   }
 }
 
-/** Record a visited placement so it shows in the top bar's recents. */
-export function rememberPlacement(entry) {
+/** Record a contract worked on so it shows in the top bar's recents. */
+export function rememberContract(entry) {
   if (!entry?.id) return;
   try {
     const next = [entry, ...readRecents().filter((r) => r.id !== entry.id)].slice(0, 6);
