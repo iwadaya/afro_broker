@@ -54,7 +54,7 @@ function Shell() {
           <Routes>
             {/* The hub. */}
             <Route path="/" element={<Dashboard />} />
-            {/* Reached from the top bar's renewal-calendar button and the launcher. */}
+            {/* Reached from the launcher's Renewal calendar pill. */}
             <Route path="/renewals" element={<RenewalCalendar />} />
             {/* Its neighbour in the top bar: the book by who leads, places and writes it. */}
             <Route path="/portfolio" element={<PortfolioIntelligence />} />

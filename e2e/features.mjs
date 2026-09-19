@@ -26,9 +26,10 @@ export default async function run() {
       await uw.waitForSelector('text=Pending approvals');
     });
 
-    await step('portfolio intelligence: the calendar\'s neighbour in the top bar', async () => {
-      // The top bar carries it beside the renewal calendar.
-      await broker.click('.topbar-portfolio');
+    await step('portfolio intelligence: from the launcher, and across to the calendar', async () => {
+      // Reached from the dashboard's launcher; the top bar carries no button for it.
+      assert.equal(await broker.locator('.topbar-portfolio, .topbar >> text="Renewal calendar"').count(), 0, 'no book buttons in the top bar');
+      await goHub(broker, 'Portfolio intelligence');
       await broker.waitForSelector('h2:has-text("Portfolio intelligence")', { timeout: 10000 });
       // Who is leading: the seeded book's lead reinsurers, with their accounts.
       await broker.waitForSelector('table >> text=Swiss Re', { timeout: 10000 });
