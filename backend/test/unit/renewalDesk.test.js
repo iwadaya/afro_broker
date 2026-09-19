@@ -65,7 +65,7 @@ test('the covering email carries the verified figures and leaves out what the pa
   assert.doesNotMatch(body, /Deposit premium/, 'a figure the packs did not state is not sent blank');
   assert.match(body, /1\. Renewal pack as received from the cedant \(Kenya_Re_2027\.xlsx\)/);
   assert.match(body, /by close of business Friday 20 November 2026\. Lines are invited on a signing-down basis; the order is 100% of each layer\./);
-  assert.match(body, /Alice Njoroge\nUniverse Broking$/);
+  assert.match(body, /Alice Njoroge\nAfro-Asian Insurance Services$/);
 });
 
 test('dates read as the email names them', () => {

@@ -152,7 +152,7 @@ function coverPage(doc, pack, width) {
   doc.rect(0, 0, doc.page.width, 120).fill(TEAL);
   doc.rect(0, 0, doc.page.width, 120).fillOpacity(0.25).fill(GREEN);
   doc.fillOpacity(1);
-  doc.fillColor('#ffffff').font('Helvetica-Bold').fontSize(24).text('BROKER IQ', MARGIN, 34);
+  doc.fillColor('#ffffff').font('Helvetica-Bold').fontSize(24).text('AFRO-ASIAN INSURANCE SERVICES', MARGIN, 34);
   doc.font('Helvetica').fontSize(13)
     .text(safe(`${pack.reference} — Renewal Pack v${pack.version}`), MARGIN, 68);
   doc.fontSize(9).fillColor(ZEBRA)
@@ -251,7 +251,7 @@ export function packToPdf(pack) {
         const top = doc.page.margins.top;
         doc.page.margins.top = 0;
         doc.fillColor(GREEN).font('Helvetica-Bold').fontSize(7.5)
-          .text('BROKER IQ', MARGIN, 16, { lineBreak: false });
+          .text('AFRO-ASIAN INSURANCE SERVICES', MARGIN, 16, { lineBreak: false });
         doc.fillColor(SOFT).font('Helvetica').fontSize(7.5)
           .text(safe(pack.header), MARGIN + 60, 16, { width: width - 60, align: 'right', lineBreak: false });
         doc.moveTo(MARGIN, 28).lineTo(MARGIN + width, 28).strokeColor(RULE).lineWidth(0.5).stroke();

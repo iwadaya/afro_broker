@@ -29,7 +29,7 @@ test('an empty book analyses as empty, not as an error', async () => {
     const r = await get(api, '?year=2026');
     assert.equal(r.status, 200);
     assert.equal(r.body.year, 2026);
-    assert.equal(r.body.house, 'Universe Broking');
+    assert.equal(r.body.house, 'Afro-Asian Insurance Services');
     assert.equal(r.body.summary.programmes, 0);
     assert.equal(r.body.summary.order_share_pct, null);
     assert.equal(r.body.summary.avg_panel_size, null);
@@ -105,10 +105,10 @@ test('the programmes read by who places them and who writes them', async () => {
     // ---- by broker: this desk first, then the other house ----
     assert.deepEqual(
       r.brokers.map((b) => [b.name, b.is_house, b.programmes, b.led, b.followed]),
-      [['Universe Broking', true, 1, 1, 0], ['Guy Carpenter', false, 1, 0, 1]],
+      [['Afro-Asian Insurance Services', true, 1, 1, 0], ['Guy Carpenter', false, 1, 0, 1]],
     );
     const house = r.brokers[0];
-    assert.equal(house.key, 'universe broking');
+    assert.equal(house.key, 'afro-asian insurance services');
     assert.equal(house.register_id, null);
     assert.equal(house.layers, 1);
     assert.equal(house.lines, 2);
@@ -166,7 +166,7 @@ test('the programmes read by who places them and who writes them', async () => {
     assert.equal(leadRe.premium_follow.total, 0);
     assert.deepEqual(
       leadRe.brokers.map((b) => [b.name, b.is_house, b.programmes, b.lines, b.premium_on_lines.total]),
-      [['Universe Broking', true, 1, 1, 600_000]],
+      [['Afro-Asian Insurance Services', true, 1, 1, 600_000]],
     );
     assert.deepEqual(leadRe.classes.map((c) => [c.class, c.programmes, c.lines, c.premium_on_lines.total]), [['Property Cat XoL', 1, 1, 600_000]]);
     assert.deepEqual(leadRe.programme_ids, [led.placement.id]);
@@ -183,7 +183,7 @@ test('the programmes read by who places them and who writes them', async () => {
     // It writes on both houses' programmes — this desk's first.
     assert.deepEqual(
       followRe.brokers.map((b) => [b.name, b.is_house, b.programmes, b.lines, b.premium_on_lines.total]),
-      [['Universe Broking', true, 1, 1, 400_000], ['Guy Carpenter', false, 1, 1, 125_000]],
+      [['Afro-Asian Insurance Services', true, 1, 1, 400_000], ['Guy Carpenter', false, 1, 1, 125_000]],
     );
     assert.deepEqual(
       followRe.classes.map((c) => [c.class, c.programmes, c.premium_on_lines.total]),
@@ -209,8 +209,8 @@ test('the programmes read by who places them and who writes them', async () => {
     const a = byRef[led.placement.reference];
     assert.equal(a.year, 2026);
     assert.equal(a.broker_role, 'Lead');
-    assert.equal(a.lead_broker, 'Universe Broking');
-    assert.equal(a.broker_key, 'universe broking');
+    assert.equal(a.lead_broker, 'Afro-Asian Insurance Services');
+    assert.equal(a.broker_key, 'afro-asian insurance services');
     assert.equal(a.lead_reinsurer, `Lead Re ${led.tag}`);
     assert.equal(a.layers, 1);
     assert.equal(a.lines, 2);

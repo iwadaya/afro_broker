@@ -1,4 +1,4 @@
-# Broker IQ — Universe Broking
+# Afro-Asian Insurance Services — reinsurance placement
 
 Placement and distribution system for treaty/fac reinsurance broking, linked to
 [Universe](#universe-integration). Universe stays the technical engine (pricing,
@@ -160,7 +160,7 @@ market intelligence read.
   reads, a broker or admin writes.
 - **Shares** (`/contracts/<basis>/:id/shares`) is the third step: who takes
   what of the programme, in percent of it. **BROKER SHARE** is this desk —
-  Universe Broking, the lead broker by default — and any co-broker the
+  Afro-Asian Insurance Services, the lead broker by default — and any co-broker the
   order is split with: each broker's **Order** (100% unless split), its
   **Placed order** — the reinsurers' signed total, pro rata to the order —
   and a **placement bar** showing how far the order is placed (fully
@@ -746,7 +746,7 @@ boot lists against it so the copies cannot drift.
 
 **Cedants.** The tool's cedants (its `companies` table — the canonical list
 its boot asserts plus the ones its reference seed adds: Saudi Arabia, the UAE,
-Kuwait, Bahrain, Oman, Egypt and the UK) are carried into Broker IQ's cedant
+Kuwait, Bahrain, Oman, Egypt and the UK) are carried into the app's cedant
 register on every boot as well, each under its country with its entry on the
 Insurers tab of the market register, so the placement page's Cedant Name
 dropdown offers, for a country, the cedants Universe offers. The list is
@@ -949,7 +949,7 @@ collects the lines:
 
 - **Final Quote** (`PUT /api/placements/:id/final`). *Who leads the placement* —
   captured on every placement for market intelligence: whether **we won the
-  lead** (the lead broker is then Universe Broking) or another house did (its
+  lead** (the lead broker is then Afro-Asian Insurance Services) or another house did (its
   name entered, plus the **type of treaty** placed), and the **lead
   reinsurer** (picked from the register, or named; when we lead it follows
   from the terms taken). *Final terms*, one row per line of the structures to

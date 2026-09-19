@@ -11,6 +11,7 @@
  */
 
 import { isoDay } from '../negotiation/submissionEmail.js';
+import { HOUSE } from '../../lib/house.js';
 
 const num = (v) => (v == null || v === '' || Number.isNaN(Number(v)) ? '—' : Number(v).toLocaleString('en-GB', { maximumFractionDigits: 2 }));
 const pct = (v) => (v == null || v === '' || Number.isNaN(Number(v)) ? '—' : `${Number(v).toLocaleString('en-GB', { maximumFractionDigits: 4 })}%`);
@@ -79,7 +80,7 @@ export function renderFotEmail({ placement, cedant, final, pack, author }) {
     '',
     'Kind regards,',
     author?.name || 'The broking team',
-    'Universe Broking',
+    HOUSE,
   ].join('\n');
 }
 
@@ -110,7 +111,7 @@ export function renderConfirmationEmail({ placement, cedant, final, author }) {
     '',
     'Kind regards,',
     author?.name || 'The broking team',
-    'Universe Broking',
+    HOUSE,
   ].join('\n');
 }
 
@@ -139,7 +140,7 @@ export function renderDeclinatureEmail({ placement, cedant, author }) {
     '',
     'Kind regards,',
     author?.name || 'The broking team',
-    'Universe Broking',
+    HOUSE,
   ].join('\n');
 }
 

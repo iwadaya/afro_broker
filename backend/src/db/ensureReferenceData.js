@@ -8,10 +8,10 @@
 //
 // The cedants the tool holds (its `companies` table: the canonical list its
 // boot asserts plus the ones its reference seed adds) are carried into
-// Broker IQ's cedant register too, each under its country and with its
+// Afro-Asian's cedant register too, each under its country and with its
 // entry on the Insurers tab of the market register — so the placement
 // page's Cedant Name dropdown offers, for a country, the cedants Universe
-// offers. The tool's reinsurers stay Broker IQ's own market register.
+// offers. The tool's reinsurers stay Afro-Asian's own market register.
 import { query } from './pool.js';
 
 export const countries = [
@@ -42,6 +42,7 @@ export const currencies = [
 ];
 
 export const brokers = [
+  'Afro-Asian Insurance Services',
   'Aon','Marsh','Willis Towers Watson','Guy Carpenter','Gallagher Re',
   'Lockton Re','Ed Broking','BMS Group','UIB','Howden','Direct',
 ];

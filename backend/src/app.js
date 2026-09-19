@@ -107,7 +107,7 @@ export function createApp() {
   // 25mb: uploaded bordereau files travel as base64 in the JSON body.
   app.use(express.json({ limit: '25mb' }));
 
-  app.get('/health', (_req, res) => res.json({ status: 'ok', service: 'universe-broking' }));
+  app.get('/health', (_req, res) => res.json({ status: 'ok', service: 'afro-asian-broking' }));
 
   // Auth + the counterparty register (markets and cedants).
   app.use('/api/auth', authRoutes);

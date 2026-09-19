@@ -15,6 +15,7 @@ import * as final from '../final/final.service.js';
 import { renderDeclinatureSubject, renderDeclinatureEmail } from '../final/final.email.js';
 import { responsesContext } from './renewalDesk.responses.js';
 import { renewalYear } from './renewalDesk.email.js';
+import { HOUSE } from '../../lib/house.js';
 
 const clean = (v) => String(v ?? '').trim();
 const fmtPct = (v) => `${Number(v || 0).toFixed(2)}%`;
@@ -88,7 +89,7 @@ export function renderAdvice({ analysis, placement, layers, author }) {
     'We thank you for your continued support of this programme.',
     '',
     author?.name || 'The broking team',
-    'Universe Broking',
+    HOUSE,
   ].join('\n');
 }
 

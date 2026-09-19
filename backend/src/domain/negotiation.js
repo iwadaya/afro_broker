@@ -26,7 +26,7 @@ const num = (v) => {
  * The modelling tool's treaty mode for a proportional treaty type name:
  * 'quota', 'surplus' or 'both'. Quota Share & Surplus is both; any surplus,
  * and Fac Oblig, is surplus; anything else reads as quota. The legacy
- * Broker IQ names (QS / Surplus / QS + Surplus) map the same way.
+ * Afro-Asian names (QS / Surplus / QS + Surplus) map the same way.
  */
 export function propMode(name) {
   const n = String(name || '').trim().toLowerCase();

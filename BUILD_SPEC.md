@@ -1,4 +1,4 @@
-# Broker IQ — Build Specification
+# Afro-Asian Insurance Services — Build Specification
 
 **Product:** Placement platform for reinsurance brokers.
 **Scope now:** Treaty. **Scope later:** Facultative.
@@ -369,7 +369,7 @@ types and market-standard variants, pack templates, users and roles. Everything 
 ### M13 — Pack read API (Universe-facing)
 Versioned, service-authenticated read API over reviewed renewal packs, consumed by Universe
 to populate its pricing inputs. See D8 for the full requirements and the unresolved data
-scope question. Broker IQ must function fully with Universe absent — this is a publisher,
+scope question. Afro-Asian must function fully with Universe absent — this is a publisher,
 never a dependency.
 
 Build after M2. The endpoint is small; the discipline is in treating the pack projection as
@@ -504,10 +504,10 @@ Not because it should be used, but because a control with no legitimate escape h
 on 31 December gets bypassed with a shared login — and then you have neither the control nor
 the audit trail.
 
-### D8 — Universe integration: separate products, Broker IQ publishes
-Broker IQ and Universe remain separate products with separate databases and separate release
-cycles. Broker IQ **exposes a read API**; Universe consumes it to populate its own inputs
-from the standard renewal pack. No shared data layer, no reverse dependency — Broker IQ must
+### D8 — Universe integration: separate products, Afro-Asian publishes
+Afro-Asian and Universe remain separate products with separate databases and separate release
+cycles. Afro-Asian **exposes a read API**; Universe consumes it to populate its own inputs
+from the standard renewal pack. No shared data layer, no reverse dependency — Afro-Asian must
 function fully with Universe absent.
 
 Requirements:

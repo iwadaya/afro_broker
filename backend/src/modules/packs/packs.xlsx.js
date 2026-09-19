@@ -5,7 +5,7 @@
  * order — including the sections with nothing behind them, which carry their
  * "what would fill this" note. The styling follows the Universe pack theme
  * (gradient title bar, header row, zebra body, frozen panes, fit-to-width
- * print setup) so a pack out of Broker IQ sits alongside the modelling tool's
+ * print setup) so a pack out of Afro-Asian sits alongside the modelling tool's
  * own exports.
  */
 
@@ -54,7 +54,7 @@ function titleBar(ws, ncols, title, subtitle) {
   const t = ws.getCell(1, 1);
   t.value = {
     richText: [
-      { text: 'BROKER IQ', font: { name: T.font, size: 16, bold: true, color: { argb: T.white } } },
+      { text: 'AFRO-ASIAN INSURANCE SERVICES', font: { name: T.font, size: 16, bold: true, color: { argb: T.white } } },
       { text: `    ${title || ''}`, font: { name: T.font, size: 13, color: { argb: T.zebraA } } },
     ],
   };
@@ -113,7 +113,7 @@ function finishSheet(ws, headerRowIdx, generated) {
     printTitlesRow: `1:${headerRowIdx}`,
   };
   ws.headerFooter = {
-    oddFooter: `&L&"Calibri"&8 Broker IQ — renewal pack ${generated} &RPage &P of &N`,
+    oddFooter: `&L&"Calibri"&8 Afro-Asian — renewal pack ${generated} &RPage &P of &N`,
   };
 }
 
@@ -141,7 +141,7 @@ function coverSheet(wb, pack) {
   const t = ws.getCell(2, 2);
   t.value = {
     richText: [
-      { text: 'BROKER IQ\n', font: { name: T.font, size: 26, bold: true, color: { argb: T.white } } },
+      { text: 'AFRO-ASIAN INSURANCE SERVICES\n', font: { name: T.font, size: 26, bold: true, color: { argb: T.white } } },
       { text: `${pack.reference} — Renewal Pack v${pack.version}`, font: { name: T.font, size: 14, color: { argb: T.zebraA } } },
     ],
   };
@@ -306,7 +306,7 @@ function screensSheet(wb, pack) {
 /** The pack as an .xlsx buffer. */
 export async function packToXlsx(pack) {
   const wb = new ExcelJS.Workbook();
-  wb.creator = 'Broker IQ';
+  wb.creator = 'Afro-Asian';
   wb.created = new Date(pack.generated_at || Date.now());
   coverSheet(wb, pack);
   if (pack.screens) screensSheet(wb, pack);

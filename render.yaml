@@ -18,6 +18,9 @@ databases:
     ipAllowList: []   # private network only; no external connections
 
 services:
+  # The names below keep the product's original name: a Blueprint matches
+  # resources by name, so renaming them would create a new service and a
+  # new, empty database beside the ones already serving.
   - type: web
     name: broker-iq
     runtime: node

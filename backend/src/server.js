@@ -24,7 +24,7 @@ async function main() {
   await ensureReferenceData();
   const app = createApp();
   const server = app.listen(config.port, () => {
-    console.log(`Universe Broking backend listening on :${config.port} (${config.env})`);
+    console.log(`Afro-Asian Insurance Services backend listening on :${config.port} (${config.env})`);
   });
   // Read the connected Outlook inbox for underwriters' replies while running
   // (a no-op until a mailbox is connected).

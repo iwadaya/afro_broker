@@ -27,7 +27,7 @@ test('an empty book reads as empty, not as an error', async () => {
     const r = await get(api, '?year=2026');
     assert.equal(r.status, 200);
     assert.equal(r.body.year, 2026);
-    assert.equal(r.body.house, 'Universe Broking');
+    assert.equal(r.body.house, 'Afro-Asian Insurance Services');
     assert.equal(r.body.summary.accounts, 0);
     assert.equal(r.body.summary.order_share_pct, null, 'no premium seen means no share, not zero');
     assert.deepEqual(r.body.lead_reinsurers, []);
@@ -113,7 +113,7 @@ test('the book reads who leads, who places and which accounts we lead', async ()
     // This desk first, then the other house — linked to its register entry.
     assert.deepEqual(
       r.brokers.map((b) => [b.name, b.is_house, b.accounts_count]),
-      [['Universe Broking', true, 1], ['Guy Carpenter', false, 1]],
+      [['Afro-Asian Insurance Services', true, 1], ['Guy Carpenter', false, 1]],
     );
     assert.equal(r.brokers[0].register_id, null);
     assert.equal(r.brokers[0].premium.total, 1_000_000);
@@ -128,7 +128,7 @@ test('the book reads who leads, who places and which accounts we lead', async ()
     const byRef = Object.fromEntries(r.accounts.map((a) => [a.reference, a]));
     const a = byRef[led.placement.reference];
     assert.equal(a.broker_role, 'Lead');
-    assert.equal(a.lead_broker, 'Universe Broking');
+    assert.equal(a.lead_broker, 'Afro-Asian Insurance Services');
     assert.equal(a.role_source, 'order');
     assert.equal(a.lead_reinsurer, `Lead Re ${led.tag}`);
     assert.equal(a.lead_source, 'approach');

@@ -21,7 +21,7 @@ function account(over) {
     cedant_country: 'GB', cedant_region: 'EMEA', class: 'Property Cat XoL', treaty_types: 'XoL',
     status: 'SIGNED', inception: '2027-01-01', inception_year: 2027, expiry: '2027-12-31', currency: 'USD',
     est_gwp: null, layer_count: 1, total_premium100: 1_000_000, premium_order: 1_000_000, order_share_pct: 100,
-    brokerage_pct: 10, brokerage_expected: 100_000, broker_role: 'Lead', lead_broker: 'Universe Broking', role_source: 'order',
+    brokerage_pct: 10, brokerage_expected: 100_000, broker_role: 'Lead', lead_broker: 'Afro-Asian Insurance Services', role_source: 'order',
     lead_won: null, final_status: null, lead_reinsurers: [], lead_reinsurer: null, lead_source: null, panel: [], panel_size: 0,
     ...over,
   };
@@ -60,7 +60,7 @@ function book(accounts, lines, { brokers = [] } = {}) {
     panel.get(l.market_id).push(l);
   }
   return {
-    year: null, house: 'Universe Broking', summary: {}, lead_reinsurers: [],
+    year: null, house: 'Afro-Asian Insurance Services', summary: {}, lead_reinsurers: [],
     reinsurers: [...panel.entries()].map(([id, ls]) => panelRow(id, ls[0].name, ls)),
     brokers, accounts, lines,
   };
@@ -150,13 +150,13 @@ test('brokers, classes and years fold a mixed-currency book, currency by currenc
     line({ placement_id: 'c', market_id: 'm2', name: 'Beta Re', role: 'lead', signed_pct: 50, written_pct: 50, currency: 'EUR', premium100: 300_000 }),
   ];
   const brokers = [
-    { key: 'universe broking', name: 'Universe Broking', is_house: true, register_id: null },
+    { key: 'afro-asian insurance services', name: 'Afro-Asian Insurance Services', is_house: true, register_id: null },
     { key: 'guy carpenter', name: 'Guy Carpenter', is_house: false, register_id: 'reg-gc' },
   ];
   const r = analyseProgrammes(book(accounts, lines, { brokers }));
 
   // Brokers: this desk first; the other house's premium split into our order and the rest, per currency.
-  assert.deepEqual(r.brokers.map((b) => [b.name, b.programmes, b.led, b.followed]), [['Universe Broking', 2, 2, 0], ['Guy Carpenter', 1, 0, 1]]);
+  assert.deepEqual(r.brokers.map((b) => [b.name, b.programmes, b.led, b.followed]), [['Afro-Asian Insurance Services', 2, 2, 0], ['Guy Carpenter', 1, 0, 1]]);
   assert.deepEqual(r.brokers[0].premium.by_currency, { USD: 1_000_000, EUR: 300_000 });
   assert.equal(r.brokers[0].premium_rest.total, 0);
   assert.equal(r.brokers[0].reinsurer_count, 2);
@@ -170,7 +170,7 @@ test('brokers, classes and years fold a mixed-currency book, currency by currenc
   const alpha = r.reinsurers.find((x) => x.name === 'Alpha Re');
   assert.equal(alpha.programmes, 2);
   assert.deepEqual(alpha.premium_on_lines.by_currency, { USD: 600_000, EUR: 100_000 });
-  assert.deepEqual(alpha.brokers.map((b) => [b.name, b.is_house, b.programmes]), [['Universe Broking', true, 1], ['Guy Carpenter', false, 1]]);
+  assert.deepEqual(alpha.brokers.map((b) => [b.name, b.is_house, b.programmes]), [['Afro-Asian Insurance Services', true, 1], ['Guy Carpenter', false, 1]]);
   // Equal programme counts rank by the premium the lines carry: 600k on the Property programme, 100k on the Motor one.
   assert.deepEqual(alpha.classes.map((c) => [c.class, c.programmes]), [['Property Cat XoL', 1], ['Motor Quota Share', 1]]);
 

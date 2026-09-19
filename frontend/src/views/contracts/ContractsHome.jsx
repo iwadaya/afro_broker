@@ -50,7 +50,7 @@ export default function ContractsHome() {
       <section>
         <div className="sechead">
           <SectionLabel>Set up a contract</SectionLabel>
-          <span className="hint">pick the basis — the Universe treaty detail follows</span>
+          <span className="hint">pick the basis — the treaty detail follows</span>
         </div>
         <div className="contract-choices" style={{ marginTop: 10 }}>
           <Link to="/contracts/proportional" className="contract-choice" data-testid="contracts-proportional">

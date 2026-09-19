@@ -51,14 +51,18 @@ export default async function run() {
     // is deterministic.
     await apiAs(broker, 'POST', '/cedants', { name: cedantName, domicile: 'GB' });
 
-    await step('the house logo heads every screen: the top bar carries Afro-Asian Insurance Services with the wordmark', async () => {
+    await step('the house heads every screen: the top bar carries the Afro-Asian Insurance Services logo, the tab its name', async () => {
       const logo = broker.locator('.topbar [data-testid=brand-logo]');
       await logo.waitFor({ timeout: 10000 });
       assert.match(await logo.getAttribute('alt'), /^Afro-Asian Insurance Services/);
       assert.equal(await logo.getAttribute('src'), '/brand/afro-asian/logo.png');
       assert.ok(await logo.evaluate((img) => img.complete && img.naturalWidth > 0), 'the image loaded');
       assert.ok((await logo.boundingBox()).height >= 40, 'large enough to read');
-      assert.ok(await broker.locator('.topbar .brand-lockup-text:has-text("BROKER")').count() > 0, 'the wordmark follows it');
+      // The old product name is gone: no wordmark beside the logo, the tab titled for the house.
+      const barText = await broker.locator('.topbar').innerText();
+      assert.ok(!barText.includes('BROKER·IQ') && !/\bIQ\b/.test(barText), `no wordmark: ${barText}`);
+      assert.equal(await broker.locator('body:has-text("Universe Broking")').count(), 0, 'no old house name');
+      assert.match(await broker.title(), /^Afro-Asian Insurance Services/);
     });
 
     await step('the launcher\'s Contracts pill lands on the two options and the register', async () => {
@@ -342,7 +346,7 @@ export default async function run() {
       // This desk heads the broker share by default, with the whole order and nothing placed yet.
       const brokerRows = broker.locator('[data-testid=broker-shares] [data-testid=share-row]');
       assert.equal(await brokerRows.count(), 1);
-      assert.equal(await brokerRows.first().locator('[aria-label="Broker"]').inputValue(), 'Universe Broking');
+      assert.equal(await brokerRows.first().locator('[aria-label="Broker"]').inputValue(), 'Afro-Asian Insurance Services');
       assert.equal(await brokerRows.first().locator('[aria-label="Broker role"]').inputValue(), 'lead');
       assert.equal(await brokerRows.first().locator('[aria-label="Order %"]').inputValue(), '100%');
       assert.equal(await brokerRows.first().locator('[aria-label="Signed share %"]').count(), 0, 'no signed column on the broker side');
@@ -395,7 +399,7 @@ export default async function run() {
       assert.equal(await reRows.nth(0).locator('[aria-label="Signed share %"]').inputValue(), '55%');
       assert.equal(await reRows.nth(0).locator('[aria-label="Reference"]').inputValue(), 'SR/27/1');
       const stored = await apiAs(broker, 'GET', `/placements/${propId}/shares`);
-      assert.deepEqual(stored.broker.map((s) => [s.name, s.role, s.written_pct, s.signed_pct]), [['Universe Broking', 'lead', 100, null]], 'the order; the placed order is derived');
+      assert.deepEqual(stored.broker.map((s) => [s.name, s.role, s.written_pct, s.signed_pct]), [['Afro-Asian Insurance Services', 'lead', 100, null]], 'the order; the placed order is derived');
       assert.deepEqual(stored.reinsurers.map((s) => [s.name, s.role, s.written_pct, s.signed_pct]), [['Swiss Re', 'lead', 60, 55], ['Munich Re', 'follow', 50, 45]]);
       assert.ok(stored.reinsurers[0].market_id, 'bound to the register');
       assert.equal(stored.reinsurers[0].market_rating, 'AA-');
@@ -554,7 +558,7 @@ export default async function run() {
       await broker.waitForURL(/\/contracts$/, { timeout: 10000 });
       const stored = await apiAs(broker, 'GET', `/placements/${npId}/shares`);
       assert.deepEqual(stored.reinsurers.map((s) => [s.name, s.role, s.written_pct, s.signed_pct]), [['Hannover Re', 'lead', 100, 100]]);
-      assert.equal(stored.broker[0]?.name, 'Universe Broking', 'this desk is the broker share by default');
+      assert.equal(stored.broker[0]?.name, 'Afro-Asian Insurance Services', 'this desk is the broker share by default');
     });
 
     await step('the dashboard keeps its book, its launcher has the four functions, and its calendar shelf opens the contract', async () => {

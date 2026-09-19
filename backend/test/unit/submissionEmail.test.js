@@ -65,7 +65,7 @@ test('the covering email quotes only pack figures and keeps the salutation a tok
   assert.match(body, /Loss ratio: 36\.9%/);
   assert.match(body, /Renewal pack v3$/m, 'an approved pack is not flagged as a draft');
   assert.match(body, /Wording: Property Cat XoL wording \(issued\)/);
-  assert.match(body, /A Broker\nUniverse Broking$/);
+  assert.match(body, /A Broker\nAfro-Asian Insurance Services$/);
 });
 
 test('a draft pack and a missing wording are stated, not hidden', () => {

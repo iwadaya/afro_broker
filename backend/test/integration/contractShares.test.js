@@ -47,7 +47,7 @@ test('a broker writes the broker share and the reinsurer shares with written and
       token: broker.token,
       body: {
         broker: [
-          { name: 'Universe Broking', role: 'lead', written_pct: 70, signed_pct: 70 },
+          { name: 'Afro-Asian Insurance Services', role: 'lead', written_pct: 70, signed_pct: 70 },
           { name: 'Cornerstone Broking', role: 'follow', written_pct: 30, signed_pct: 30, note: 'Co-broker on the London order' },
         ],
         reinsurers: [
@@ -59,7 +59,7 @@ test('a broker writes the broker share and the reinsurer shares with written and
     });
     assert.equal(put.status, 200);
     assert.deepEqual(put.body.broker.map((s) => [s.name, s.role, s.written_pct, s.signed_pct, s.position]), [
-      ['Universe Broking', 'lead', 70, 70, 0],
+      ['Afro-Asian Insurance Services', 'lead', 70, 70, 0],
       ['Cornerstone Broking', 'follow', 30, 30, 1],
     ]);
     assert.equal(put.body.broker[1].note, 'Co-broker on the London order');
@@ -83,7 +83,7 @@ test('a broker writes the broker share and the reinsurer shares with written and
     // A PUT replaces the table: the rows dropped are gone.
     const again = await api('PUT', `/api/placements/${p.id}/shares`, {
       token: broker.token,
-      body: { broker: [{ name: 'Universe Broking', role: 'lead', written_pct: 100, signed_pct: 100 }], reinsurers: [{ name: 'Munich Re', written_pct: 100, signed_pct: 100 }] },
+      body: { broker: [{ name: 'Afro-Asian Insurance Services', role: 'lead', written_pct: 100, signed_pct: 100 }], reinsurers: [{ name: 'Munich Re', written_pct: 100, signed_pct: 100 }] },
     });
     assert.equal(again.status, 200);
     assert.equal(again.body.broker.length, 1);

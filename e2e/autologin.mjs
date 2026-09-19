@@ -44,6 +44,8 @@ export default async function run() {
       const logo = page.locator('.login [data-testid=brand-logo]');
       await logo.waitFor({ timeout: 10000 });
       assert.ok(await logo.evaluate((img) => img.complete && img.naturalWidth > 0), 'the logo loaded on the login screen');
+      const cardText = await page.locator('.login').innerText();
+      assert.ok(!cardText.includes('BROKER·IQ') && !/\bIQ\b/.test(cardText), `no wordmark on the card: ${cardText}`);
       // Signed out on purpose: a reload stays on the login screen.
       await page.reload({ waitUntil: 'networkidle' });
       await page.waitForSelector('.login', { timeout: 10000 });

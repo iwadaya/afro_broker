@@ -4,8 +4,9 @@
 // Persisted in localStorage so the user's choice survives reloads.
 
 import { useEffect, useState } from 'react';
+import { HOUSE_ALT } from './brand.js';
 
-const KEY = 'BROKER_IQ_THEME_V1';
+const KEY = 'AFRO_ASIAN_THEME_V1';
 
 // A theme may carry a client logo: `logo` is a self-hosted path under
 // frontend/public (never a CDN or the client's site), `logoAlt` its alt text.
@@ -28,7 +29,7 @@ export const THEMES = [
   },
 ];
 
-// Daylight is the Universe modelling tool's default; Broker IQ follows it.
+// Daylight is the Universe modelling tool's default; the app follows it.
 export const DEFAULT_THEME = 'daylight';
 
 // The house brand — Afro-Asian Insurance Services Ltd, broker at Lloyd's —
@@ -36,10 +37,7 @@ export const DEFAULT_THEME = 'daylight';
 // the logo is the firm's). A client theme that carries a logo of its own
 // (Maksure, for its demonstrations) shows that one instead. Self-hosted under
 // frontend/public/brand/afro-asian; see the README there.
-export const HOUSE_BRAND = {
-  logo: '/brand/afro-asian/logo.png',
-  logoAlt: 'Afro-Asian Insurance Services Ltd — Broker at Lloyd\'s',
-};
+export const HOUSE_BRAND = { logo: '/brand/afro-asian/logo.png', logoAlt: HOUSE_ALT };
 
 // The key applied to <html> this session — so the current theme is known even
 // where storage is unavailable (private windows, blocked site data).

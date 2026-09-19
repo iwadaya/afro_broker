@@ -1,4 +1,4 @@
-# Broker IQ — end-to-end tests
+# Afro-Asian Insurance Services — end-to-end tests
 
 Browser tests (Playwright) that drive the real UI against a live backend. They
 cover the tool's four functions: **Contracts** (the launcher pill's two options

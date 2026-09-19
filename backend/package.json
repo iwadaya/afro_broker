@@ -1,9 +1,9 @@
 {
-  "name": "@universe-broking/backend",
+  "name": "@afro-asian/backend",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Universe Broking backend — Express + PostgreSQL placement engine.",
+  "description": "Afro-Asian Insurance Services backend — Express + PostgreSQL placement engine.",
   "main": "src/server.js",
   "scripts": {
     "dev": "node --watch src/server.js",

@@ -1,4 +1,5 @@
 import { query } from '../../db/pool.js';
+import { HOUSE } from '../../lib/house.js';
 
 /**
  * The book as Portfolio intelligence reads it — who leads each account, who
@@ -32,7 +33,7 @@ import { query } from '../../db/pool.js';
  * FX rates: the UI shows the split beside any cross-currency figure.
  */
 
-export const HOUSE = 'Universe Broking';
+export { HOUSE };
 
 /** Statuses that take an account off the book: it was lost, not placed. */
 const OFF_BOOK = ['DECLINED', 'NTU', 'LAPSED'];
