@@ -224,3 +224,12 @@ select.ab-cell { padding: 0 4px; text-align: left; }
 /* ---------- Gallery ---------- */
 .ab .ab-gallery-pane .ab-pane-head { display: none; }
 .ab .ab-right-cell { text-align: right; }
+
+/* ---------- Layer tables ---------- */
+.ab .ab-type-pills { display: inline-flex; gap: 6px; align-items: center; }
+.ab .ab-layer-table td.is-locked { opacity: .55; }
+.ab .ab-cell.is-strong { border-color: var(--info); border-width: 2px; }
+.ab .ab-layers-pane .ab-pane-body { display: block; }
+.ab .ab-layer-table td .ab-cell { min-width: 120px; }
+.ab .ab-layer-table td .ab-cell.w-s { min-width: 84px; }
+.ab .ab-layer-table th.ab-sticky, .ab .ab-layer-table td.ab-sticky { min-width: 64px; }
