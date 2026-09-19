@@ -70,10 +70,14 @@ Graphite and Sunset — and **Maksure**, a client theme for demonstrations to
 Maksure Risk Solutions in the orange and charcoal of maksure.co.za, light like
 Daylight with statuses keeping their meaning. Each theme is one block of
 tokens, so a client palette is retuned in one place; the choice persists in
-the browser. A client theme can carry a logo, self-hosted under
-`frontend/public/brand`, which then leads the brand lockup in the top bar and
-on the login screen; and `/?theme=maksure` opens a fresh browser in that
-theme for a demonstration.
+the browser. The brand lockup in the top bar and on the login screen leads
+with the **house logo** — Afro-Asian Insurance Services Ltd, broker at
+Lloyd's, self-hosted under `frontend/public/brand/afro-asian` and set as
+`HOUSE_BRAND` in `frontend/src/theme.js` — on every screen and every theme
+(the dark themes put it on a white plate; a narrow window keeps the logo and
+drops the wordmark). A client theme can carry a logo of its own under
+`frontend/public/brand`, which then leads instead; and `/?theme=maksure`
+opens a fresh browser in that theme for a demonstration.
 
 There is no left rail: every screen runs the full width of the window, and
 the **dashboard is the hub** — the treaty renewal book as it always was: the

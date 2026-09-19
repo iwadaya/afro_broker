@@ -31,6 +31,16 @@ export const THEMES = [
 // Daylight is the Universe modelling tool's default; Broker IQ follows it.
 export const DEFAULT_THEME = 'daylight';
 
+// The house brand — Afro-Asian Insurance Services Ltd, broker at Lloyd's —
+// leads the lockup on every screen, whatever the theme (themes are palettes;
+// the logo is the firm's). A client theme that carries a logo of its own
+// (Maksure, for its demonstrations) shows that one instead. Self-hosted under
+// frontend/public/brand/afro-asian; see the README there.
+export const HOUSE_BRAND = {
+  logo: '/brand/afro-asian/logo.png',
+  logoAlt: 'Afro-Asian Insurance Services Ltd — Broker at Lloyd\'s',
+};
+
 // The key applied to <html> this session — so the current theme is known even
 // where storage is unavailable (private windows, blocked site data).
 let applied = null;

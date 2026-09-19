@@ -1,32 +1,37 @@
 import React, { useState } from 'react';
-import { THEMES, useTheme } from './theme.js';
+import { THEMES, HOUSE_BRAND, useTheme } from './theme.js';
 
 /**
- * The brand lockup — BROKER·IQ — in the top bar and on the login screen.
- * When the active theme carries a client logo (THEMES[].logo) the logo
- * leads, a thin divider follows and the wordmark closes; every other theme
- * renders the wordmark alone, exactly as it always has. Generic on purpose:
- * the next client theme only adds a logo to its THEMES entry.
+ * The brand lockup in the top bar and on the login screen: the house logo —
+ * Afro-Asian Insurance Services Ltd, broker at Lloyd's (HOUSE_BRAND) — a
+ * thin divider, and the BROKER·IQ wordmark, on every screen and every
+ * theme. A client theme that carries a logo of its own (THEMES[].logo)
+ * leads with that instead; a logo that fails to load falls back to the
+ * wordmark alone rather than a broken-image glyph.
  *
- * `size` is "topbar" (a 30px logo in the 72px bar) or "login" (44px). Other
- * props — className, aria-hidden — land on the root, so the callers' own
- * classes (.topbar-brand, .brand-name) and the rules on them keep applying.
+ * `size` is "topbar" (in the 72px bar) or "login" (the card, where the
+ * house logo sits above the wordmark). Other props — className, aria-hidden
+ * — land on the root, so the callers' own classes (.topbar-brand,
+ * .brand-name) and the rules on them keep applying.
  */
 export default function BrandLockup({ size = 'topbar', className = '', ...rest }) {
   const key = useTheme();
   const theme = THEMES.find((t) => t.key === key);
-  // A logo that fails to load (file not in place, wrong path) falls back to
-  // the wordmark alone rather than a broken-image glyph. Keyed by the path so
-  // switching to another theme's logo tries afresh.
+  const brand = theme?.logo ? theme : HOUSE_BRAND;
+  const house = brand === HOUSE_BRAND;
+  // Keyed by the path so switching to another theme's logo tries afresh.
   const [failed, setFailed] = useState(null);
-  const logo = theme?.logo && theme.logo !== failed ? theme.logo : null;
+  const logo = brand.logo && brand.logo !== failed ? brand.logo : null;
 
   return (
-    <span className={`brand-lockup brand-lockup--${size}${className ? ` ${className}` : ''}`} {...rest}>
+    <span
+      className={`brand-lockup brand-lockup--${size}${logo && house ? ' brand-lockup--house' : ''}${className ? ` ${className}` : ''}`}
+      {...rest}
+    >
       {logo && (
         <>
-          <span className={`brand-lockup-logo${theme.logoOnDark ? ' brand-lockup-logo--chip' : ''}`}>
-            <img src={logo} alt={theme.logoAlt || ''} decoding="async" onError={() => setFailed(logo)} />
+          <span className={`brand-lockup-logo${brand.logoOnDark ? ' brand-lockup-logo--chip' : ''}${house ? ' brand-lockup-logo--house' : ''}`}>
+            <img src={logo} alt={brand.logoAlt || ''} decoding="async" onError={() => setFailed(logo)} data-testid="brand-logo" />
           </span>
           <span className="brand-lockup-divider" aria-hidden="true" />
         </>
