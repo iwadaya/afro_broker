@@ -5041,25 +5041,45 @@ button, .btn, .np-struct-btn, .np-green-pill, .action-pill, .segbtn, .tab, .role
 .mi-map td.r, .mi-map th.r { text-align: right; }
 .mi-map-foot { display: flex; align-items: center; gap: 12px; padding: 10px 16px 12px; font-size: 12px; color: var(--color-neutral-600); }
 /* The brief: its provenance, then the six sections as tabs — each a summary
-   paragraph, its tables and lists, what the desk added to it, its sources. */
+   paragraph across the whole panel, its tables and lists, what the desk added
+   to it, its sources. Each section has a colour of its own: the dot on its
+   tab, and — as --mi-sec, set on the panel for the section being read — the
+   active tab, the section's title and its sub-headings. One set for the
+   light themes, one for the dark. */
+:root {
+  --mi-c-sector: #1d4ed8; --mi-c-economy: #0f766e; --mi-c-regulation: #6d28d9;
+  --mi-c-statistics: #b45309; --mi-c-events: #b91c1c; --mi-c-players: #a21caf;
+}
+html[data-theme="midnight"], html[data-theme="ocean"], html[data-theme="graphite"], html[data-theme="sunset"] {
+  --mi-c-sector: #60a5fa; --mi-c-economy: #2dd4bf; --mi-c-regulation: #a78bfa;
+  --mi-c-statistics: #fbbf24; --mi-c-events: #f87171; --mi-c-players: #e879f9;
+}
 .mi-brief-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .mi-brief-head .viz-title { margin-right: auto; }
-.mi-headline { font-size: 14.5px; line-height: 1.6; margin: 0; text-wrap: pretty; max-width: 96ch; }
+.mi-headline { font-size: 15px; line-height: 1.65; margin: 0; text-wrap: pretty; }
 .mi-tabs { flex-wrap: wrap; }
-.mi-sec-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; font-size: 13px; }
-.mi-sec-head .hint { font-size: 11px; color: var(--color-neutral-600); }
-.mi-sec { display: flex; flex-direction: column; gap: 16px; }
-.mi-sub-section h5 {
-  margin: 0 0 8px; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; font-weight: 700;
-  color: var(--color-neutral-600); display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+.mi-tabs .tab.active { color: var(--mi-sec); }
+.mi-tab-label { display: inline-flex; align-items: center; gap: 7px; }
+.mi-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; flex: none; }
+.mi-sec-head { display: flex; flex-direction: column; gap: 3px; }
+.mi-sec-title {
+  margin: 0; font-family: var(--font-heading); font-size: 21px; font-weight: 800; letter-spacing: -0.015em;
+  line-height: 1.25; color: var(--mi-sec);
 }
-.mi-sub-section h5 .mi-count { font-weight: 400; }
-.mi-sub-section h5 .hint { font-size: 11px; letter-spacing: 0; text-transform: none; font-weight: 400; }
+.mi-sec-blurb { margin: 0; font-size: 12.5px; line-height: 1.5; color: var(--color-neutral-600); }
+.mi-sec { display: flex; flex-direction: column; gap: 18px; }
+.mi-sub-section h5 {
+  margin: 0 0 8px; padding-bottom: 5px; font-size: 15.5px; font-weight: 700; letter-spacing: -0.005em; color: var(--mi-sec);
+  display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+  border-bottom: 1px solid color-mix(in srgb, var(--mi-sec) 28%, transparent);
+}
+.mi-sub-section h5 .mi-count { font-size: 12px; font-weight: 500; color: var(--color-neutral-600); }
+.mi-sub-section h5 .hint { font-size: 11.5px; font-weight: 400; color: var(--color-neutral-600); }
 .mi-rows { padding: 0; }
 .mi-table { font-size: 12.5px; }
 .mi-table th { font-size: 10px; }
 .mi-table td { padding: 5px 8px; vertical-align: top; }
-.mi-table td .mi-sub { display: block; font-size: 11.5px; color: var(--color-neutral-600); margin-top: 2px; max-width: 64ch; white-space: normal; }
+.mi-table td .mi-sub { display: block; font-size: 11.5px; color: var(--color-neutral-600); margin-top: 2px; white-space: normal; }
 .mi-table a { color: var(--color-accent-700); }
 .mi-table .mi-entity { margin-left: 8px; vertical-align: middle; }
 .mi-outline { margin: 6px 0 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
@@ -5074,7 +5094,7 @@ button, .btn, .np-struct-btn, .np-green-pill, .action-pill, .segbtn, .tab, .role
   color: var(--color-accent-700); margin-right: 6px; vertical-align: middle;
 }
 .mi-desk { border-left: 3px solid var(--color-accent-400); padding: 4px 12px; font-size: 13px; line-height: 1.55; margin: 0; }
-.mi-empty { font-size: 13px; color: var(--color-neutral-600); line-height: 1.55; margin: 0; max-width: 80ch; }
+.mi-empty { font-size: 13px; color: var(--color-neutral-600); line-height: 1.55; margin: 0; }
 /* Forms: fields in a grid, the note and the actions across the whole row. */
 .mi-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px 14px; padding: 14px 16px; border-top: 1px solid var(--color-divider); align-items: end; }
 .mi-form .field.mi-wide { grid-column: 1 / -1; }
