@@ -32,7 +32,7 @@ const round0 = (n) => Math.round(n);
 /**
  * Universe treatyModeFromType: "quota" + "surplus" → both; "quota" → quota;
  * "surplus" or "fac oblig" → surplus; anything else reads as quota. The
- * codes Broker IQ's older records carried (QS, Surplus, QS + Surplus) read
+ * codes Afro-Asian's older records carried (QS, Surplus, QS + Surplus) read
  * the same way.
  */
 export function propMode(name) {

@@ -1,9 +1,9 @@
 {
-  "name": "@universe-broking/e2e",
+  "name": "@afro-asian/e2e",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Browser end-to-end tests for Universe Broking (Playwright).",
+  "description": "Browser end-to-end tests for Afro-Asian Insurance Services (Playwright).",
   "scripts": {
     "test": "node run.mjs"
   },

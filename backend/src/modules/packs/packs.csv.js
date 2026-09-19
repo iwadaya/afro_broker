@@ -18,7 +18,7 @@ const line = (cells) => cells.map(escape).join(',');
 /** The pack as a CSV string. */
 export function packToCsv(pack) {
   const out = [];
-  out.push(line([`BROKER IQ — ${pack.reference} — Renewal Pack v${pack.version}`]));
+  out.push(line([`AFRO-ASIAN INSURANCE SERVICES — ${pack.reference} — Renewal Pack v${pack.version}`]));
   out.push(line(['Basis', pack.basis_label]));
   out.push(line(['Cedant', pack.placement.cedant || '']));
   out.push(line(['Class', pack.placement.cob || pack.placement.class || '']));

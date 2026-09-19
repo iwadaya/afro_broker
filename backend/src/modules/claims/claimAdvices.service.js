@@ -19,6 +19,7 @@ import { NotFoundError, ConflictError } from '../../lib/errors.js';
 import { audit } from '../../lib/audit.js';
 import { sendMail } from '../../integrations/mailer.js';
 import { settlementFor } from '../../domain/claimSettlement.js';
+import { HOUSE } from '../../lib/house.js';
 
 const money = (ccy, v) => `${ccy} ${Number(v || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const pct = (v) => `${Number(v || 0).toFixed(4).replace(/\.?0+$/, '')}%`;
@@ -92,7 +93,7 @@ export function renderPla({ event, ladder, author }) {
       '',
       'Kind regards,',
       author?.name || 'The broking team',
-      'Universe Broking',
+      HOUSE,
     ].join('\n'),
   };
 }
@@ -143,7 +144,7 @@ export function renderClaimAdvice({ event, ladder, author }) {
       '',
       'Kind regards,',
       author?.name || 'The broking team',
-      'Universe Broking',
+      HOUSE,
     ].join('\n'),
   };
 }

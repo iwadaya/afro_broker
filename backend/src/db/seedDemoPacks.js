@@ -25,6 +25,7 @@ import { presentPack, packFilename } from '../modules/packs/packs.present.js';
 import { packToXlsx } from '../modules/packs/packs.xlsx.js';
 import { packToPdf } from '../modules/packs/packs.pdf.js';
 import { modellingBases, modellingGroups, requiredScreens } from '../../../frontend/src/modelling/workflow.js';
+import { HOUSE } from '../lib/house.js';
 
 const K = 1000;
 const YEARS = [2022, 2023, 2024, 2025, 2026]; // experience from 2022; renewal 2027
@@ -497,7 +498,7 @@ export async function seedDemoPacks(users, cedants) {
        VALUES ($1,$2,$3,'2027-01-01','2027-12-31','USD',$4,'PACK',$5,$6,$7,$8)
        ON CONFLICT (reference) DO NOTHING RETURNING id`,
       [demo.reference, cedants[demo.cedant], demo.class, demo.est_gwp,
-        'Broker: Universe Broking · Experience from 2022 · Demo placement — every screen filled',
+        `Broker: ${HOUSE} · Experience from 2022 · Demo placement — every screen filled`,
         JSON.stringify(structures), JSON.stringify(demo.expiring), broker],
     );
     if (!rows[0]) continue;

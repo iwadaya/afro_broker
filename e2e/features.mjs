@@ -62,7 +62,7 @@ export default async function run() {
       // Who places: a bar per house, this desk first. Who writes: a bar per reinsurer.
       await broker.waitForSelector('[data-testid=pa-brokers] .viz-hbar', { timeout: 10000 });
       const firstBar = await broker.locator('[data-testid=pa-brokers] .viz-hbar').first().getAttribute('aria-label');
-      assert.ok(firstBar.startsWith('Universe Broking'), 'this desk leads the broker chart');
+      assert.ok(firstBar.startsWith('Afro-Asian Insurance Services'), 'this desk leads the broker chart');
       assert.ok(await broker.locator('[data-testid=pa-brokers] .viz-hrow:has-text("Guy Carpenter")').count() > 0, 'the other house has a bar');
       assert.ok(await broker.locator('[data-testid=pa-reinsurers] .viz-hrow:has-text("Hannover Re")').count() > 0, 'a writing reinsurer has a bar');
       // The grid crosses the two: a column per house, a row per reinsurer.

@@ -377,7 +377,7 @@ test('the workbook of a version opens sheet by sheet, as the file that went to m
     // every row the full width of the sheet so the grid lines up.
     const cover = res.body.sheets[0];
     const text = cover.rows.flat().filter(Boolean).map((c) => c.w);
-    assert.ok(text.some((t) => /BROKER IQ/.test(t) && /Renewal Pack v1/.test(t)), 'the title bar reads');
+    assert.ok(text.some((t) => /AFRO-ASIAN INSURANCE SERVICES/.test(t) && /Renewal Pack v1/.test(t)), 'the title bar reads');
     assert.ok(text.includes('Cedant') && text.includes('Pack version'), 'the cover facts are there');
     assert.ok(text.includes('v1 · draft'));
     assert.ok(cover.merges.some((m) => m.rows === 3 && m.cols === 2), 'the title bar is a merged range');

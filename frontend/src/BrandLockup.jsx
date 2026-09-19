@@ -1,18 +1,17 @@
 import React, { useState } from 'react';
 import { THEMES, HOUSE_BRAND, useTheme } from './theme.js';
+import { HOUSE } from './brand.js';
 
 /**
- * The brand lockup in the top bar and on the login screen: the house logo —
- * Afro-Asian Insurance Services Ltd, broker at Lloyd's (HOUSE_BRAND) — a
- * thin divider, and the BROKER·IQ wordmark, on every screen and every
- * theme. A client theme that carries a logo of its own (THEMES[].logo)
- * leads with that instead; a logo that fails to load falls back to the
- * wordmark alone rather than a broken-image glyph.
+ * The brand in the top bar and on the login screen: the house logo —
+ * Afro-Asian Insurance Services Ltd, broker at Lloyd's (HOUSE_BRAND) — on
+ * every screen and every theme. A client theme that carries a logo of its
+ * own (THEMES[].logo) shows that instead; a logo that fails to load falls
+ * back to the house's name in text rather than a broken-image glyph.
  *
- * `size` is "topbar" (in the 72px bar) or "login" (the card, where the
- * house logo sits above the wordmark). Other props — className, aria-hidden
- * — land on the root, so the callers' own classes (.topbar-brand,
- * .brand-name) and the rules on them keep applying.
+ * `size` is "topbar" (in the 72px bar) or "login" (the card). Other props —
+ * className, aria-hidden — land on the root, so the callers' own classes
+ * (.topbar-brand, .brand-name) and the rules on them keep applying.
  */
 export default function BrandLockup({ size = 'topbar', className = '', ...rest }) {
   const key = useTheme();
@@ -28,15 +27,13 @@ export default function BrandLockup({ size = 'topbar', className = '', ...rest }
       className={`brand-lockup brand-lockup--${size}${logo && house ? ' brand-lockup--house' : ''}${className ? ` ${className}` : ''}`}
       {...rest}
     >
-      {logo && (
-        <>
-          <span className={`brand-lockup-logo${brand.logoOnDark ? ' brand-lockup-logo--chip' : ''}${house ? ' brand-lockup-logo--house' : ''}`}>
-            <img src={logo} alt={brand.logoAlt || ''} decoding="async" onError={() => setFailed(logo)} data-testid="brand-logo" />
-          </span>
-          <span className="brand-lockup-divider" aria-hidden="true" />
-        </>
+      {logo ? (
+        <span className={`brand-lockup-logo${brand.logoOnDark ? ' brand-lockup-logo--chip' : ''}${house ? ' brand-lockup-logo--house' : ''}`}>
+          <img src={logo} alt={brand.logoAlt || ''} decoding="async" onError={() => setFailed(logo)} data-testid="brand-logo" />
+        </span>
+      ) : (
+        <span className="brand-lockup-text">{HOUSE}</span>
       )}
-      <span className="brand-lockup-text">BROKER<b>·IQ</b></span>
     </span>
   );
 }

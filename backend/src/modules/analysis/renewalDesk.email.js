@@ -9,6 +9,7 @@
  * the deadline, once, to every underwriter who has not replied.
  */
 
+import { HOUSE } from '../../lib/house.js';
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 const pad = (n) => String(n).padStart(2, '0');
@@ -131,7 +132,7 @@ export function renderDeskEmail({ analysis, placement, documents = [], deadline,
     'Kind regards,',
     '',
     author?.name || 'The broking team',
-    'Universe Broking',
+    HOUSE,
   ].join('\n');
 }
 
@@ -149,6 +150,6 @@ export function renderReminder({ submission, recipient, author }) {
     'Kind regards,',
     '',
     author?.name || 'The broking team',
-    'Universe Broking',
+    HOUSE,
   ].join('\n');
 }

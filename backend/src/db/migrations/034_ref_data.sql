@@ -32,7 +32,7 @@ CREATE TABLE ref_data (
 CREATE UNIQUE INDEX idx_ref_data_kind_code ON ref_data (kind, upper(code));
 CREATE INDEX idx_ref_data_kind ON ref_data (kind, position);
 
--- Countries: the modelling tool's list plus the domiciles Broker IQ's own
+-- Countries: the modelling tool's list plus the domiciles the app's own
 -- register already uses. The group is the placement territory.
 INSERT INTO ref_data (kind, code, name, group_name, aliases, position) VALUES
   ('country', 'AE', 'United Arab Emirates', 'Middle East', ARRAY['UAE'], 1),

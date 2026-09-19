@@ -196,7 +196,7 @@ function titleBar(ws, ncols, title, subtitle) {
   const t = ws.getCell(1, 1);
   t.value = {
     richText: [
-      { text: 'BROKER IQ', font: { name: T.font, size: 16, bold: true, color: { argb: T.white } } },
+      { text: 'AFRO-ASIAN INSURANCE SERVICES', font: { name: T.font, size: 16, bold: true, color: { argb: T.white } } },
       { text: `    ${title}`, font: { name: T.font, size: 13, color: { argb: T.zebraA } } },
     ],
   };
@@ -291,7 +291,7 @@ function sizeColumns(ws, width) {
  */
 export async function buildModellingWorkbook({ placement, classes, aiSummary, crosscheck = null, generatedAt = new Date() }) {
   const wb = new ExcelJS.Workbook();
-  wb.creator = 'Broker IQ';
+  wb.creator = 'Afro-Asian';
   wb.created = generatedAt;
   const used = new Set();
   const stamp = generatedAt.toISOString().slice(0, 10);

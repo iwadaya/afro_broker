@@ -13,7 +13,10 @@ daily backups and no expiry.
 
 1. Push this branch to GitHub (Render reads the blueprint from the repo).
 2. In Render: **New → Blueprint**, pick the repository, and review the plan. It
-   creates `broker-iq` (web) and `broker-iq-db` (PostgreSQL 16).
+   creates `broker-iq` (web) and `broker-iq-db` (PostgreSQL 16). The resource
+   names keep the product's original name on purpose: a Blueprint matches
+   services by name, so renaming them would create a new service and a new,
+   empty database beside the ones already serving.
 3. Apply. The build runs `npm ci --include=dev && npm --workspace frontend run build`;
    the pre-deploy hook then applies the migrations and runs the demo seed (see
    [Demo data on every deploy](#demo-data-on-every-deploy)), and
@@ -231,7 +234,7 @@ the only switch.
 
 ```bash
 curl https://<service>.onrender.com/health
-# {"status":"ok","service":"universe-broking"}
+# {"status":"ok","service":"afro-asian-broking"}
 curl -s -X POST https://<service>.onrender.com/api/auth/auto-login
 # {"enabled":true,"token":"…","user":{"email":"broker@broking.local",…}}
 ```

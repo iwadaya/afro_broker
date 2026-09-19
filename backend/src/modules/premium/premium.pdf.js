@@ -7,7 +7,7 @@ export function renderPremiumNote(note) {
     d.on('data',b=>parts.push(b));d.on('end',()=>resolve(Buffer.concat(parts)));d.on('error',reject);
     const s=note.detail, advice=note.kind==='advice';
     d.rect(0,0,595,128).fill('#103c32');
-    d.fillColor('#99dec3').font('Helvetica-Bold').fontSize(11).text('BROKER IQ  /  TREATY PREMIUM',48,35);
+    d.fillColor('#99dec3').font('Helvetica-Bold').fontSize(11).text('AFRO-ASIAN INSURANCE SERVICES  /  TREATY PREMIUM',48,35);
     d.fillColor('white').fontSize(27).text(advice?'NIL ADJUSTMENT ADVICE':note.kind==='credit'?'CREDIT NOTE':'DEBIT NOTE',48,66);
     d.fontSize(10).text(safe(note.note_number),48,104);
     d.y=154;

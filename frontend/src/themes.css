@@ -6,7 +6,7 @@
    needs no block — it IS the defaults.
 
    Each block carries the modelling tool's tokens verbatim, then a short
-   "Broker IQ extensions" tail for tokens only this product consumes
+   "Afro-Asian extensions" tail for tokens only this product consumes
    (the dark nav palette, the semantic status tints, the design layer's neutrals).
    ═══════════════════════════════════════════════════════════════════ */
 
@@ -63,7 +63,7 @@ html[data-theme="midnight"] {
   --shadow-control: 0 10px 24px rgba(0, 0, 0, .30), inset 0 1px 0 rgba(255, 255, 255, .06);
   --glass-blur: 10px;
 
-  /* Broker IQ extensions */
+  /* Afro-Asian extensions */
   --nav: #060d19;
   --nav-hover: #12203a;
   --nav-ink: #e8eefc;
@@ -151,7 +151,7 @@ html[data-theme="ocean"] {
   --shadow-control: 0 10px 24px rgba(0, 0, 0, .30), inset 0 1px 0 rgba(255, 255, 255, .06);
   --glass-blur: 10px;
 
-  /* Broker IQ extensions */
+  /* Afro-Asian extensions */
   --nav: #03101a;
   --nav-hover: #0d3145;
   --nav-ink: #e0f2fe;
@@ -239,7 +239,7 @@ html[data-theme="graphite"] {
   --shadow-control: 0 10px 24px rgba(0, 0, 0, .30), inset 0 1px 0 rgba(255, 255, 255, .06);
   --glass-blur: 10px;
 
-  /* Broker IQ extensions */
+  /* Afro-Asian extensions */
   --nav: #08090d;
   --nav-hover: #1d1f2a;
   --nav-ink: #ede9fe;
@@ -327,7 +327,7 @@ html[data-theme="sunset"] {
   --shadow-control: 0 10px 24px rgba(0, 0, 0, .30), inset 0 1px 0 rgba(255, 255, 255, .06);
   --glass-blur: 10px;
 
-  /* Broker IQ extensions */
+  /* Afro-Asian extensions */
   --nav: #120a11;
   --nav-hover: #2d1d2b;
   --nav-ink: #fff7ed;
@@ -367,7 +367,7 @@ html[data-theme="sunset"] {
    site and its logo. Charcoal — the logo's dark dots, #201e1e — carries
    every primary action, because the brand orange (#ed6e27, the site's
    buttons and top bar) holds only 3.1:1 against white; the orange is the
-   ·IQ brand mark, the gross chart series, the focus ring and the hover and
+   brand mark, the gross chart series, the focus ring and the hover and
    background washes instead. The dot mark's cyan (#3fb1dc), deepened to
    #0c7599 so it reads as text, is the informational blue. Statuses keep
    their meaning — green for what is bound or approved, amber for decisions,
@@ -425,7 +425,7 @@ html[data-theme="maksure"] {
   --shadow-control: 0 10px 24px rgba(32, 30, 30, .09), inset 0 1px 0 rgba(255, 255, 255, .80);
   --glass-blur: 10px;
 
-  /* Broker IQ extensions */
+  /* Afro-Asian extensions */
   --brand-mark: #ed6e27;
   --nav: #201e1e;
   --nav-hover: #353131;

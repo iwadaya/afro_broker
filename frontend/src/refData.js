@@ -105,6 +105,7 @@ export const CURRENCIES = [
 ];
 
 export const BROKERS = [
+  'Afro-Asian Insurance Services',
   'Aon', 'Marsh', 'Willis Towers Watson', 'Guy Carpenter', 'Gallagher Re',
   'Lockton Re', 'Ed Broking', 'BMS Group', 'UIB', 'Howden', 'Direct',
 ];
@@ -130,7 +131,7 @@ export const CATEGORY_LABELS = { PROPORTIONAL: 'Proportional', NON_PROPORTIONAL:
 
 // ── Stored free text → reference entries ────────────────────────────────────
 //
-// Broker IQ stores names and codes on its records (a cedant's domicile, a
+// Afro-Asian stores names and codes on its records (a cedant's domicile, a
 // placement's class and currency), so what is stored has to find its way
 // back to the reference row. Records written before the reference data
 // carried the wizard's own vocabulary; these maps resolve it.
@@ -174,7 +175,7 @@ export function treatyTypeOf(value, treatyTypes) {
   return list.find((t) => norm(t.name) === norm(name)) || null;
 }
 
-/** The layer type Broker IQ's layers carry (QS / Surplus / XoL) for a treaty type. */
+/** The layer type Afro-Asian's layers carry (QS / Surplus / XoL) for a treaty type. */
 export function layerTypeOf(treatyType) {
   if (!treatyType) return 'XoL';
   if (treatyType.category === 'NON_PROPORTIONAL') return 'XoL';

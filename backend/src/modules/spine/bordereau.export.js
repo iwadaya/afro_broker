@@ -29,7 +29,7 @@ export function bordereauFilename(bordereau, extension) {
 
 export async function bordereauToXlsx(bordereau) {
   const wb = new ExcelJS.Workbook();
-  wb.creator = 'Broker IQ';
+  wb.creator = 'Afro-Asian';
   const ws = wb.addWorksheet('Written lines');
 
   const { contract_year: cy } = bordereau;

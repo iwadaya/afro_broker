@@ -5,6 +5,7 @@ import { seedWordingLibrary } from './seedWordings.js';
 import { seedMarketClauses } from './seedMarketClauses.js';
 import { markWordingLibrarySeeded } from './bootstrap.js';
 import { seedDemoPacks, seedUnderwriterContacts } from './seedDemoPacks.js';
+import { HOUSE } from '../lib/house.js';
 
 /**
  * Seed demo users and — unless SEED_DEMO_BOOK=0 — a demo renewal book: the
@@ -650,8 +651,8 @@ async function seedBook(users, cedants, markets) {
   // The 2026 Grievous Mutual programme we led and bound: who led it is on record.
   await query(
     `INSERT INTO final_placement (placement_id, lead_won, lead_broker, lead_reinsurer_id, lead_reinsurer_name, treaty_type, status, confirmed_by, confirmed_at, created_by)
-     VALUES ($1, TRUE, 'Universe Broking', $2, 'Swiss Re', 'CAT XL', 'confirmed', $3, '2025-12-18T10:00:00Z', $3)`,
-    [grv26, markets['Swiss Re'], vance],
+     VALUES ($1, TRUE, $4, $2, 'Swiss Re', 'CAT XL', 'confirmed', $3, '2025-12-18T10:00:00Z', $3)`,
+    [grv26, markets['Swiss Re'], vance, HOUSE],
   );
 
   console.log(`seeded demo book: ${3 + Object.keys(named).length + n} placements (GRV-27 layer 2: ${grvLayer2})`);

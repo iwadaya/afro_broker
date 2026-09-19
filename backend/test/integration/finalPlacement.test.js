@@ -73,7 +73,7 @@ test('the tab offers every line of the structures with the quotes captured again
     assert.equal(res.status, 200, JSON.stringify(res.body));
     assert.equal(res.body.final.status, 'draft');
     assert.equal(res.body.final.lead_won, true);
-    assert.equal(res.body.final.lead_broker, 'Universe Broking');
+    assert.equal(res.body.final.lead_broker, 'Afro-Asian Insurance Services');
     assert.deepEqual(res.body.candidates.map((c) => c.key), ['s1:l0', 's1:l1', 's2:whole']);
     const l1 = res.body.candidates[0];
     assert.equal(l1.label, 'Layer 1');
@@ -96,7 +96,7 @@ test('we won the lead: the final terms are the quotes ticked, the lead reinsurer
     });
     assert.equal(saved.status, 200, JSON.stringify(saved.body));
     const f = saved.body.final;
-    assert.equal(f.lead_broker, 'Universe Broking');
+    assert.equal(f.lead_broker, 'Afro-Asian Insurance Services');
     assert.equal(f.lead_reinsurer_id, markets['Alpha Re'].id, 'the lead reinsurer is the market whose terms were taken');
     assert.equal(f.lead_reinsurer_name, markets['Alpha Re'].name);
     assert.equal(f.terms.length, 3);

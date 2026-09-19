@@ -26,7 +26,7 @@
 
   /* Navigation — the dark rail's palette, deep slate in Daylight. The app
      no longer has a rail (the dashboard is the hub), but every theme still
-     carries the tokens. (Broker IQ extension.) */
+     carries the tokens. (Afro-Asian extension.) */
   --nav: #0f172a;
   --nav-hover: #1e293b;
   --nav-ink: #e2e8f0;
@@ -44,8 +44,8 @@
   --accent-blue-rgb: 37, 99, 235;
   --accent-amber-rgb: 180, 83, 9;
   --accent-rose-rgb: 225, 29, 72;
-  /* The ·IQ of the brand lockup — amber, unless a client theme recolours it.
-     (Broker IQ extension.) */
+  /* The brand mark — amber, unless a client theme recolours it.
+     (Afro-Asian extension.) */
   --brand-mark: var(--accent-amber);
   /* DFA chart series — a per-theme pair validated for CVD separation and
      contrast against this theme's chart surface (see themes.css tails). */
@@ -55,7 +55,7 @@
   --chart-net-rgb: 5, 150, 105;
 
   /* Semantic status tints — foreground / background pairs.
-     (Broker IQ extension, derived from the Daylight accent set.) */
+     (Afro-Asian extension, derived from the Daylight accent set.) */
   --tint-mint: rgba(5, 150, 105, .12);
   --tint-green-ink: #047857;
   --tint-gold: rgba(180, 83, 9, .12);
@@ -162,7 +162,7 @@
    Unchanged except for the token remap above.
    ═══════════════════════════════════════════════════════════════════ */
 /* =========================================================
-   Universe Broking — visual language ported from the Universe
+   Afro-Asian — visual language ported from the Universe
    modelling tool (Universe_Angular), using its "Daylight" theme
    as the default: clear light surfaces + emerald/blue accents.
 ========================================================= */
@@ -2201,12 +2201,12 @@ button.rp-check-mark:hover { box-shadow: 0 0 0 3px var(--focus); }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   The Broker IQ layer — the app shell and the six designed screens.
+   The Afro-Asian layer — the app shell and the six designed screens.
    Loaded last so its versions of the shared primitives (card, pill,
    table, field, toolbar) win across the whole app.
    ═══════════════════════════════════════════════════════════════════ */
 /* ═══════════════════════════════════════════════════════════════════════════
-   Broker IQ — Industry design system.
+   Afro-Asian — Industry design system.
    Tokens + component classes come from the Industry token sheet (the design
    handoff's design-system/styles.css); the app layer below builds the shell
    and screens on top of them. Retune colours/type/spacing here only.
@@ -3227,7 +3227,7 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
   width: 400px; padding: 28px 30px; display: flex; flex-direction: column; gap: 16px;
 }
 .login form { display: flex; flex-direction: column; gap: 10px; }
-/* The lockup — the brand name with its amber ·IQ (the theme's brand mark) over
+/* The lockup — the house logo over
    the small-caps line, on the theme's own ink (it used to borrow the dark
    rail's white). */
 .login .brand-name {
@@ -3334,7 +3334,7 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 .spine-signing { margin-top: 12px; }
 
 /* ── Renewal pack analysis: upload dropzone (the modelling tool's
-      facdoc-dropzone pattern, on Broker IQ tokens) ─────────────────────── */
+      facdoc-dropzone pattern, on Afro-Asian tokens) ─────────────────────── */
 .rpa-dropzone {
   padding: 18px;
   border-radius: 14px;
@@ -3432,7 +3432,7 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
    ─────────────────────────────────────────────────────────────────────
    Two screens, one shape: an intake object beside the renewal book, then
    the AI review read as a single summary document with its flags and its
-   provenance alongside. Every value here is a Broker IQ token, so the
+   provenance alongside. Every value here is a Afro-Asian token, so the
    screens follow whichever theme is picked rather than carrying a palette
    of their own — retune the theme, not this block.
    ═══════════════════════════════════════════════════════════════════ */
@@ -3783,7 +3783,7 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 }
 
 /* ── The sign-off banner ────────────────────────────────────────────────
-   Broker IQ's semantic colour system carries this rather than a second
+   Afro-Asian's semantic colour system carries this rather than a second
    palette: gold while a check is owed, green once it has been given. */
 .rpa-verify {
   display: flex; align-items: center; gap: 16px; flex-wrap: wrap;

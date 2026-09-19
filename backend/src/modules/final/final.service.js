@@ -20,6 +20,7 @@
  */
 
 import { query, withTransaction } from '../../db/pool.js';
+import { HOUSE } from '../../lib/house.js';
 import { NotFoundError, ConflictError, ValidationError } from '../../lib/errors.js';
 import { audit } from '../../lib/audit.js';
 import { computeSigning } from '../../domain/signingDown.js';
@@ -38,8 +39,6 @@ const EMAIL_KINDS = {
   confirmation: { subject: renderConfirmationSubject, body: renderConfirmationEmail, action: 'send_confirmation' },
   declinature: { subject: renderDeclinatureSubject, body: renderDeclinatureEmail, action: 'send_declinature' },
 };
-
-const HOUSE = 'Universe Broking';
 
 const numOrNull = (v) => (v === '' || v == null || Number.isNaN(Number(v)) ? null : Number(v));
 

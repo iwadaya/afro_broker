@@ -10,12 +10,13 @@ import { useContractHeader, ContractSummary } from './ContractDetailsPane.jsx';
 import { BASIS_LABEL, documentsPath } from './contractModel.js';
 import { NumField } from './propTerms.jsx';
 import { toNumber } from './calcs.js';
+import { HOUSE } from '../../brand.js';
 
 /**
  * Contracts → Shares: the third step of both workflows, after Documents —
  * who takes what of the programme, in percent of it:
  *
- *   BROKER SHARE — this desk (Universe Broking, the lead broker by
+ *   BROKER SHARE — this desk (Afro-Asian Insurance Services, the lead broker by
  *   default) and any co-broker the order is split with. Each broker has
  *   its Order (100% unless split), its Placed order — the reinsurers'
  *   signed total, pro rata to the order — and a placement bar showing how
@@ -33,7 +34,6 @@ import { toNumber } from './calcs.js';
  * On a broker row the stored written share is its order; its stored
  * signed share is not used — the placed order is derived.
  */
-export const HOUSE = 'Universe Broking';
 
 let seq = 0;
 const newRow = (party, patch = {}) => ({

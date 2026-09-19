@@ -7,6 +7,7 @@
  * lets one reviewed-and-approved email serve every market on the list.
  */
 
+import { HOUSE } from '../../lib/house.js';
 const num = (v) => (v == null || v === '' ? '—' : Number(v).toLocaleString('en-GB', { maximumFractionDigits: 2 }));
 
 /**
@@ -85,7 +86,7 @@ export function renderSubmissionEmail({ placement, cedant, pack, structures = []
     '',
     'Kind regards,',
     author?.name || 'The broking team',
-    'Universe Broking',
+    HOUSE,
   ].join('\n');
 }
 
