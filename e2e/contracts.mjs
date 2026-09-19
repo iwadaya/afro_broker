@@ -11,6 +11,22 @@ import { BASE, launch, login, makeStep, goHub, apiAs } from './lib.mjs';
 
 const byLabel = (page, label) => page.locator(`[aria-label="${label}"]`).first();
 
+/** Wake the floating dock (it fades when idle) before clicking into it. */
+async function wakeDock(page) {
+  await page.mouse.move(8, 8);
+  await page.mouse.move(16, 16);
+  await page.waitForSelector('[data-testid=wizard-dock]:not(.is-hidden)', { timeout: 5000 });
+}
+
+/** Upload one text file on the Documents step and wait for its row. */
+async function uploadDocument(page, name, kindLabel, text) {
+  await byLabel(page, 'Document kind').selectOption({ label: kindLabel });
+  await page.setInputFiles('input[aria-label="Files"]', { name, mimeType: 'text/plain', buffer: Buffer.from(text) });
+  const row = page.locator(`[data-testid=document-row]:has-text("${name}")`);
+  await row.waitFor({ timeout: 15000 });
+  return row;
+}
+
 export default async function run() {
   const errors = [];
   const step = makeStep(errors);
@@ -225,6 +241,48 @@ export default async function run() {
       await broker.waitForSelector('[data-testid=lp-block] .np-badge-count:has-text("1 corridor(s)")');
     });
 
+    await step('the dock floats: it fades when idle, returns on movement, and Save & next opens the Documents step', async () => {
+      // No inline footer: Back, Save and Save & next live in the floating dock.
+      assert.equal(await broker.locator('.contract-actions').count(), 0, 'no footer bar');
+      const dock = broker.locator('[data-testid=wizard-dock]');
+      assert.ok(await dock.locator('[data-testid=wizard-back]:has-text("Back: Contracts")').count() > 0);
+      assert.ok(await dock.locator('[data-testid=save-treaty-detail]:has-text("Save")').count() > 0);
+      assert.ok(await dock.locator('[data-testid=wizard-next]:has-text("Save & next: Documents")').count() > 0);
+      // Left alone it fades; any movement brings it back.
+      await broker.waitForSelector('[data-testid=wizard-dock].is-hidden', { timeout: 8000 });
+      await wakeDock(broker);
+      await broker.click('[data-testid=wizard-next]');
+      await broker.waitForURL(new RegExp(`/contracts/proportional/${propId}/documents$`), { timeout: 20000 });
+      await broker.waitForSelector('[data-testid=contract-documents]', { timeout: 10000 });
+      await broker.waitForSelector('h2:has-text("Documents")');
+      assert.ok((await broker.locator('[data-testid=contract-summary]').innerText()).includes(cedantName), 'the same contract heads the page');
+    });
+
+    await step('documents (proportional): upload a slip, open it, and remove it', async () => {
+      await broker.waitForSelector('[data-testid=documents-count]:has-text("0 FILES")', { timeout: 10000 });
+      const row = await uploadDocument(broker, `slip-${tag}.txt`, 'Slip', 'Slip wording for the treaty');
+      assert.ok(await row.locator('.pill:has-text("Slip")').count() > 0, 'the kind is on the row');
+      assert.ok((await row.innerText()).includes('Demo Broker'), 'and who uploaded it');
+      await broker.waitForSelector('[data-testid=documents-count]:has-text("1 FILE")');
+      // Open hands the browser the file under its own name.
+      const [dl] = await Promise.all([broker.waitForEvent('download', { timeout: 15000 }), row.locator('button:has-text("Open")').click()]);
+      assert.equal(dl.suggestedFilename(), `slip-${tag}.txt`);
+      // The API holds it against the contract.
+      const stored = await apiAs(broker, 'GET', `/placements/${propId}/contract-documents`);
+      assert.equal(stored.length, 1);
+      assert.equal(stored[0].kind, 'slip');
+      assert.equal(stored[0].size_bytes, 'Slip wording for the treaty'.length);
+      // Remove (the confirm is accepted by the harness), and the list is empty again.
+      await row.locator(`button[aria-label="Remove slip-${tag}.txt"]`).click();
+      await broker.waitForSelector('[data-testid=documents-count]:has-text("0 FILES")', { timeout: 10000 });
+      assert.equal(await broker.locator('[data-testid=document-row]').count(), 0);
+      // Back returns to the treaty detail.
+      await wakeDock(broker);
+      await broker.click('[data-testid=wizard-back]');
+      await broker.waitForURL(propUrl, { timeout: 10000 });
+      await broker.waitForSelector('[data-testid=prop-treaty-detail]');
+    });
+
     await step('the register and the top bar find the contract; the renewal calendar opens it on its basis', async () => {
       await goHub(broker, 'Contracts');
       await broker.waitForSelector('[data-testid=contract-row]', { timeout: 15000 });
@@ -253,14 +311,18 @@ export default async function run() {
       await broker.waitForSelector('[data-testid=prop-treaty-detail]');
     });
 
-    await step('non-proportional: the contract details pane only, with the NP treaty types', async () => {
+    await step('non-proportional: contract details on the left, the Universe structure pane on the right', async () => {
       await goHub(broker, 'Contracts');
       await broker.click('[data-testid=contracts-non-proportional]');
       await broker.waitForURL(/\/contracts\/non-proportional$/, { timeout: 10000 });
       await broker.waitForSelector('[data-testid=np-contract-details]');
-      assert.equal(await broker.locator('[data-testid=np-contract-details] .td-card--pane').count(), 1, 'the left pane only');
-      assert.equal(await broker.locator('[data-testid=limit-details]').count(), 0, 'no limit details');
-      assert.equal(await broker.locator('[data-testid=commissions]').count(), 0, 'no commissions');
+      assert.equal(await broker.locator('[data-testid=np-contract-details] .td-card--pane').count(), 2, 'contract details and structure');
+      assert.equal(await broker.locator('[data-testid=np-structure]').count(), 1, 'the STRUCTURE pane');
+      assert.equal(await broker.locator('[data-testid=limit-details]').count(), 0, 'no proportional limit details');
+      assert.equal(await broker.locator('[data-testid=commissions]').count(), 0, 'no proportional commissions');
+      for (const label of ['Number of Layers', 'Expiring · Number of Layers', 'Deductible', 'Maximum Retention', 'Accounting Method', 'Type of XL', 'Accounts', 'Est. GNPI', 'Brokerage %', 'Taxes %', 'No Claims Bonus %', 'Profit Commission %']) {
+        assert.equal(await broker.locator(`[data-testid=np-structure] [aria-label="${label}"]`).count(), 1, `${label} on the structure pane`);
+      }
       assert.ok(await broker.locator('.fr-label:has-text("Classes of Business")').count() > 0, 'the class picker is labelled Classes of Business');
       const types = (await byLabel(broker, 'Treaty Type').locator('option').allTextContents()).map((t) => t.trim());
       assert.ok(types.includes('CAT XL') && types.includes('Risk XL') && types.includes('Stop Loss') && types.includes('Aggregate XL'), `NP types offered: ${types}`);
@@ -276,6 +338,20 @@ export default async function run() {
       await byLabel(broker, 'Treaty Inception Date').fill('2027-03-01');
       assert.equal(await byLabel(broker, 'Treaty Renewal Date').inputValue(), '2028-03-01');
       assert.equal(await broker.locator('[data-testid=contract-description]').inputValue(), `2027 ${cedantName} CAT XL (Property) GB`);
+      // The structure terms, as the Universe right pane takes them.
+      await byLabel(broker, 'Number of Layers').fill('3');
+      await byLabel(broker, 'Expiring · Number of Layers').fill('2');
+      await byLabel(broker, 'Deductible').fill('1000000');
+      assert.equal(await byLabel(broker, 'Deductible').inputValue(), '1,000,000');
+      await byLabel(broker, 'Maximum Retention').fill('5000000');
+      await byLabel(broker, 'Accounting Method').selectOption({ label: 'Losses Occurring' });
+      await byLabel(broker, 'Type of XL').selectOption({ label: 'Gross XL' });
+      await byLabel(broker, 'Accounts').selectOption({ label: 'Quarterly' });
+      await byLabel(broker, 'Est. GNPI').fill('50000000');
+      await byLabel(broker, 'Brokerage %').fill('10');
+      await byLabel(broker, 'Taxes %').fill('2');
+      await byLabel(broker, 'No Claims Bonus %').fill('5');
+      await byLabel(broker, 'Profit Commission %').fill('10');
       // Held until the required set is in.
       await broker.click('[data-testid=save-contract-details]');
       await broker.waitForSelector('[data-testid=required-summary]:has-text("Broker")', { timeout: 5000 });
@@ -293,15 +369,54 @@ export default async function run() {
       assert.equal((await byLabel(broker, 'Broker').locator('option:checked').textContent()).trim(), 'Aon');
       assert.equal(await byLabel(broker, 'Experience Start Year').inputValue(), '2018');
       assert.equal(await byLabel(broker, 'Alt. Contract ID').inputValue(), `ALT-${tag}`);
-      assert.equal(await broker.locator('[data-testid=np-contract-details] .td-card--pane').count(), 1, 'still the left pane only');
+      // The structure terms read back too.
+      assert.equal(await byLabel(broker, 'Number of Layers').inputValue(), '3');
+      assert.equal(await byLabel(broker, 'Expiring · Number of Layers').inputValue(), '2');
+      assert.equal(await byLabel(broker, 'Deductible').inputValue(), '1,000,000');
+      assert.equal(await byLabel(broker, 'Maximum Retention').inputValue(), '5,000,000');
+      assert.equal(await byLabel(broker, 'Accounting Method').inputValue(), 'Losses Occurring');
+      assert.equal(await byLabel(broker, 'Type of XL').inputValue(), 'Gross XL');
+      assert.equal(await byLabel(broker, 'Accounts').inputValue(), 'Quarterly');
+      assert.equal(await byLabel(broker, 'Est. GNPI').inputValue(), '50,000,000');
+      assert.equal(await byLabel(broker, 'No Claims Bonus %').inputValue(), '5%');
       const stored = await apiAs(broker, 'GET', `/placements/${npId}`);
       assert.equal(stored.class, 'Property CAT XL');
       assert.ok(stored.notes.includes('Broker: Aon') && stored.notes.includes('Experience from 2018') && stored.notes.includes(`Alt. Contract ID: ALT-${tag}`), stored.notes);
+      const np = stored.quote_structures.find((s) => s.basis === 'NP');
+      assert.equal(np.npTreatyType, 'CAT XL');
+      assert.equal(np.np.deductible, '1000000');
+      assert.equal(np.np.xlType, 'Gross XL');
+      assert.equal(np.np.estGnpi, '50000000');
+      assert.equal(Number(stored.est_gwp), 50000000, 'Est. GNPI is the contract\'s estimated premium');
       // A contract by id opens on its basis page.
       await broker.goto(`${BASE}/contracts/${npId}`, { waitUntil: 'networkidle' });
       await broker.waitForURL(new RegExp(`/contracts/non-proportional/${npId}$`), { timeout: 10000 });
       await broker.goto(`${BASE}/placements/${propId}`, { waitUntil: 'networkidle' });
       await broker.waitForURL(new RegExp(`/contracts/proportional/${propId}$`), { timeout: 10000 });
+    });
+
+    await step('documents (non-proportional): Save & next from the contract details, an upload, and Back', async () => {
+      await broker.goto(`${BASE}/contracts/non-proportional/${npId}`, { waitUntil: 'networkidle' });
+      await broker.waitForSelector('[data-testid=np-structure]');
+      await wakeDock(broker);
+      assert.ok(await broker.locator('[data-testid=wizard-next]:has-text("Save & next: Documents")').count() > 0);
+      await broker.click('[data-testid=wizard-next]');
+      await broker.waitForURL(new RegExp(`/contracts/non-proportional/${npId}/documents$`), { timeout: 20000 });
+      await broker.waitForSelector('[data-testid=documents-count]:has-text("0 FILES")', { timeout: 10000 });
+      const row = await uploadDocument(broker, `wording-${tag}.txt`, 'Wording', 'Treaty wording');
+      assert.ok(await row.locator('.pill:has-text("Wording")').count() > 0);
+      await broker.waitForSelector('[data-testid=documents-count]:has-text("1 FILE")');
+      await wakeDock(broker);
+      assert.ok(await broker.locator('[data-testid=wizard-back]:has-text("Back: Contract Details")').count() > 0);
+      await broker.click('[data-testid=wizard-back]');
+      await broker.waitForURL(new RegExp(`/contracts/non-proportional/${npId}$`), { timeout: 10000 });
+      await broker.waitForSelector('[data-testid=np-structure]');
+      // Done from the documents step lands on the register.
+      await broker.goto(`${BASE}/contracts/non-proportional/${npId}/documents`, { waitUntil: 'networkidle' });
+      await broker.waitForSelector(`[data-testid=document-row]:has-text("wording-${tag}.txt")`, { timeout: 10000 });
+      await wakeDock(broker);
+      await broker.click('[data-testid=wizard-next]');
+      await broker.waitForURL(/\/contracts$/, { timeout: 10000 });
     });
 
     await step('the dashboard keeps its book, its launcher has the four functions, and its calendar shelf opens the contract', async () => {

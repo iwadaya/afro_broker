@@ -59,7 +59,7 @@ export default function ContractsHome() {
             <span className="contract-choice-sub">
               Quota Share, Quota Share &amp; Surplus, First / Second / Third Surplus, Fac Oblig — the
               treaty detail: contract details, limit details, commissions and loss participation, with
-              EPI, brokerage and taxes.
+              EPI, brokerage and taxes; then the documents.
             </span>
             <span className="contract-choice-arrow">Open the treaty detail →</span>
           </Link>
@@ -67,9 +67,9 @@ export default function ContractsHome() {
             <span className="contract-choice-kicker">NON-PROPORTIONAL</span>
             <span className="contract-choice-title">Non-proportional treaty</span>
             <span className="contract-choice-sub">
-              Risk XL, CAT XL, Risk &amp; CAT XL, Stop Loss, Aggregate XL — the contract details pane
-              of the non-proportional treaty detail: the cedant, the treaty type, the classes of
-              business, the period and the currency.
+              Risk XL, CAT XL, Risk &amp; CAT XL, Stop Loss, Aggregate XL — the non-proportional
+              treaty detail: the contract details, and the structure terms (layers, deductible,
+              retention, accounting, premium and commissions); then the documents.
             </span>
             <span className="contract-choice-arrow">Open the contract details →</span>
           </Link>

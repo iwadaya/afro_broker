@@ -1,14 +1,15 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../../api.js';
 import { useFetch, ErrorBanner } from '../../components.jsx';
 import { useScreenHead } from '../../shell.jsx';
 import { useHasRole } from '../../auth.jsx';
 import { useToast } from '../../toast.jsx';
 import { rememberContract } from '../../TopBar.jsx';
+import WizardNav from '../../WizardNav.jsx';
 import { Fr } from '../treatyDetail.jsx';
 import { useContractHeader, ContractDetailsPane, ContractSummary, enterMovesToNextField } from './ContractDetailsPane.jsx';
-import { propTermsOf, withPropStructure } from './contractModel.js';
+import { propTermsOf, withPropStructure, detailPath, documentsPath } from './contractModel.js';
 import {
   emptyPropTerms, propCalcs, totalEpiOf, fmtAmount, NumField, Derived, MiniPills,
   SlidingScaleModal, LpSlidesModal, EpiSplitModal,
@@ -43,7 +44,7 @@ export default function PropTreatyDetail() {
   const canEdit = useHasRole('broker', 'admin');
   const placement = useFetch('GET', id ? `/placements/${id}` : null, [id]);
   const pd = isNew ? NEW_CONTRACT : placement.data;
-  useScreenHead('Contracts · Proportional', 'Treaty Detail', pd?.reference || 'NEW');
+  useScreenHead('Contracts · Proportional · 1 of 2', 'Treaty Detail', pd?.reference || 'NEW');
 
   const h = useContractHeader({ pd, isNew, basis: 'PROP' });
   const [terms, setTerms] = useState(emptyPropTerms);
@@ -95,13 +96,15 @@ export default function PropTreatyDetail() {
     setModal('epi');
   };
 
-  async function save() {
-    if (ro || !h.ed) return;
+  /** Write the contract: the header, the terms, the layers. Resolves to the
+      contract's id, or null when held on a required field or failed. */
+  async function persist() {
+    if (ro || !h.ed) return null;
     setAttempted(true);
     setError(null);
     if (missingList.length) {
       window.scrollTo(0, 0);
-      return;
+      return null;
     }
     setBusy(true);
     try {
@@ -121,20 +124,36 @@ export default function PropTreatyDetail() {
       }
       await syncPropLayers(pid, isNew ? [] : (pd.layers || []), terms, c, h.currencyCode);
       rememberContract({ id: pid, reference: pd?.reference || h.contractDescription, subtitle: h.cedName });
-      if (isNew) {
-        // Land on the contract's own URL; the confirmation follows the move,
-        // since a route change clears whatever toast was showing.
-        navigate(`/contracts/proportional/${pid}`, { replace: true });
-        setTimeout(() => toast('Treaty detail saved.'), 0);
-      } else {
-        toast('Treaty detail saved.');
-        placement.reload();
-      }
+      return pid;
     } catch (e) {
       setError(e);
+      return null;
     } finally {
       setBusy(false);
     }
+  }
+
+  async function save() {
+    const pid = await persist();
+    if (!pid) return;
+    if (isNew) {
+      // Land on the contract's own URL; the confirmation follows the move,
+      // since a route change clears whatever toast was showing.
+      navigate(detailPath('PROP', pid), { replace: true });
+      setTimeout(() => toast('Treaty detail saved.'), 0);
+    } else {
+      toast('Treaty detail saved.');
+      placement.reload();
+    }
+  }
+
+  /** Save & next: the Documents step, once the contract is written. */
+  async function saveAndNext() {
+    if (!canEdit) { if (!isNew) navigate(documentsPath('PROP', id)); return; }
+    const pid = await persist();
+    if (!pid) return;
+    navigate(documentsPath('PROP', pid));
+    setTimeout(() => toast('Treaty detail saved.'), 0);
   }
   saveRef.current = save;
 
@@ -375,20 +394,21 @@ export default function PropTreatyDetail() {
         </div>
       </div>
 
-      <div className="contract-actions">
-        <Link className="btn btn-secondary" to="/contracts">← Contracts</Link>
-        <span className="contract-actions-gap" />
-        {!isNew && (
-          <span className="muted small">
-            {pd.reference} · {pd.status ? String(pd.status).toLowerCase().replace(/_/g, ' ') : ''}
-          </span>
-        )}
+      {/* The floating dock: Back to the register, Save, Save & next to Documents. */}
+      <WizardNav
+        hasPrev onBack={() => navigate('/contracts')} backLabel="Contracts"
+        hasNext onNext={saveAndNext} nextLabel="Documents"
+        nextText={canEdit ? 'Save & next: Documents' : 'Next: Documents'}
+        nextDisabled={busy || (!canEdit && isNew)}
+        nextTitle={!canEdit && isNew ? 'Nothing to open yet' : ''}
+      >
         {canEdit && (
-          <button type="button" className="np-green-pill" disabled={busy} onClick={save} data-testid="save-treaty-detail">
-            {busy ? 'Saving…' : 'Save treaty detail'}
+          <button type="button" className="wizard-dock-btn wizard-dock-btn--save" disabled={busy} onClick={save}
+            data-testid="save-treaty-detail">
+            {busy ? 'Saving…' : 'Save'}
           </button>
         )}
-      </div>
+      </WizardNav>
 
       {modal === 'sliding' && (
         <SlidingScaleModal terms={terms} readOnly={ro} onClose={() => setModal(null)}
