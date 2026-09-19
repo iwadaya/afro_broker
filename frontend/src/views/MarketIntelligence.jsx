@@ -722,8 +722,11 @@ function BriefSection({ spec, s }) {
 function BriefPanel({ d, section, onSection, canWrite, canVerify, busy, error, onGather, onVerify }) {
   const b = d.brief;
   const current = SECTIONS.find((s) => s.key === section) || SECTIONS[0];
+  // Each section has its own colour (styles.css, --mi-c-<key>): its tab's dot
+  // always, and — through --mi-sec — the active tab, the title and the
+  // sub-headings of the section being read.
   return (
-    <Blueprint className="viz-panel" data-testid="mi-brief">
+    <Blueprint className="viz-panel mi-brief" data-testid="mi-brief" style={{ '--mi-sec': `var(--mi-c-${current.key})` }}>
       <div className="viz-head mi-brief-head">
         <span className="viz-title">Market brief — {d.scope.label}</span>
         {b && (
@@ -770,11 +773,15 @@ function BriefPanel({ d, section, onSection, canWrite, canVerify, busy, error, o
             label="Sections of the brief"
             value={current.key}
             onChange={onSection}
-            tabs={SECTIONS.map((s) => ({ value: s.key, label: s.label, hint: itemCount(s.key, b[s.key]) || null }))}
+            tabs={SECTIONS.map((s) => ({
+              value: s.key,
+              label: <span className="mi-tab-label"><i className="mi-dot" style={{ background: `var(--mi-c-${s.key})` }} />{s.label}</span>,
+              hint: itemCount(s.key, b[s.key]) || null,
+            }))}
           />
           <div className="mi-sec-head">
-            <strong>{current.title}</strong>
-            <span className="hint">{current.blurb}</span>
+            <h3 className="mi-sec-title">{current.title}</h3>
+            <p className="mi-sec-blurb">{current.blurb}</p>
           </div>
           <BriefSection key={current.key} spec={current} s={b[current.key] || {}} />
         </>
