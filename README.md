@@ -122,16 +122,36 @@ market intelligence read.
   structure (`quote_structures[].prop`) and its quota-share / surplus
   layers — one per half the treaty type activates, carrying the limit and
   the EPI at 100% — so the calendar and the portfolio read the treaty's
-  size; a new contract lands on its own URL.
+  size; a new contract lands on its own URL, and *Save & next* goes on to
+  its documents.
 - **Non-proportional** (`/contracts/non-proportional`, then
-  `/contracts/non-proportional/:id`) is the **left pane only** of the tool's
-  NP Treaty Detail — CONTRACT DETAILS, with the non-proportional treaty
-  types (Risk XL, CAT XL, Risk & CAT XL, Stop Loss, Aggregate XL) and the
-  *Classes of Business* picker, the same derived UW year, description and
-  renewal default, and the same required set (country, cedant, treaty type,
-  classes, broker, currency, inception, experience start year). The tool's
-  right pane — the structure terms — is not part of this tool. Saving
-  writes the placement's header; nothing else.
+  `/contracts/non-proportional/:id`) is the tool's NP Treaty Detail:
+  **CONTRACT DETAILS** on the left, with the non-proportional treaty types
+  (Risk XL, CAT XL, Risk & CAT XL, Stop Loss, Aggregate XL) and the *Classes
+  of Business* picker, the same derived UW year, description and renewal
+  default, and the same required set (country, cedant, treaty type,
+  classes, broker, currency, inception, experience start year); and
+  **STRUCTURE** on the right — the layer configuration (number of layers,
+  the expiring number, deductible, maximum retention, accounting method,
+  type of XL, accounts) and the premium & commissions (Est. GNPI, brokerage,
+  taxes, no claims bonus, profit commission), none of it required. Saving
+  writes the placement's header, the terms onto its non-proportional
+  structure (`quote_structures[].np`), and Est. GNPI as its estimated
+  premium so the calendar reads the treaty's size.
+- **Documents** (`/contracts/<basis>/:id/documents`) is the second step of
+  both workflows: the contract's documents — the slip, the wording, the
+  cedant's submission, bordereaux, statements and correspondence — uploaded
+  against the contract (up to 15 MB a file, a kind and a note each), listed
+  with who put them there and when, opened and removed. They are held on
+  `contract_document` and served by `GET/POST /api/placements/:id/contract-documents`,
+  `GET /api/contract-documents/:id/download`, `PATCH` and `DELETE
+  /api/contract-documents/:id`; everyone signed in reads, a broker or admin
+  writes.
+
+Both steps carry the tool's **floating dock** at the foot of the window —
+Back, Save and *Save & next: Documents* on the detail page; Back to the
+detail and *Done: Contracts* on the documents — which fades after a few idle
+seconds and returns on any movement or keystroke (`frontend/src/WizardNav.jsx`).
 
 A contract by id (`/contracts/:id` — where the calendar, the portfolio, the
 market intelligence and the top bar's recents point) opens on its basis page,

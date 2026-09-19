@@ -17,6 +17,7 @@ import fotRoutes from './modules/fot/fot.routes.js';
 import lineRoutes from './modules/lines/lines.routes.js';
 import signingRoutes from './modules/signing/signing.routes.js';
 import documentRoutes from './modules/documents/documents.routes.js';
+import contractDocumentRoutes from './modules/documents/contractDocuments.routes.js';
 import amendmentRoutes from './modules/amendments/amendments.routes.js';
 import wordingRoutes from './modules/wordings/wordings.routes.js';
 import occupancyClassRoutes from './modules/retentions/occupancyClasses.routes.js';
@@ -138,6 +139,8 @@ export function createApp() {
   // Signing by contract: which contract, then its programme and its signings.
   app.use('/api', signingRoutes);
   app.use('/api', documentRoutes);
+  // The Documents step under Contracts: files uploaded against a contract.
+  app.use('/api', contractDocumentRoutes);
   app.use('/api', amendmentRoutes);
   app.use('/api', wordingRoutes);
   app.use('/api', occupancyClassRoutes);

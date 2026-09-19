@@ -5331,3 +5331,24 @@ button, .btn, .np-struct-btn, .np-green-pill, .action-pill, .segbtn, .tab, .role
 .mod-modal-body { padding: 14px 18px 18px; }
 .td-card--pane .np-sub-actions { flex-wrap: wrap; }
 .td-card--pane .np-badge-count { white-space: nowrap; }
+
+/* The contract pages end under the floating dock, so the last rows stay
+   reachable; the dock's Save sits between Back and Next. */
+.contract-screen { padding-bottom: 110px; }
+.wizard-dock-btn--save { background: var(--control-bg); color: var(--accent2); border-color: rgba(var(--accent-rgb), .45); }
+.wizard-dock-btn--save:hover:not(:disabled) { background: rgba(var(--accent-rgb), .08); }
+
+/* The Documents step: the upload strip and the list. */
+.doc-upload {
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 10px 14px 12px;
+  border-radius: 12px;
+  border: 1px dashed var(--hairline-strong);
+  background: var(--surface-muted);
+}
+.doc-upload .td-mini { margin: 0; }
+.doc-file { padding: 7px 10px; cursor: pointer; }
+.doc-table td { vertical-align: middle; }
+.doc-name { font-weight: 600; color: var(--text-strong); }
+.doc-meta { display: block; font-size: 11px; color: var(--text-subtle); margin-top: 2px; }
+.doc-actions { display: inline-flex; gap: 6px; }

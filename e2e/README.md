@@ -6,8 +6,11 @@ cover the tool's four functions: **Contracts** (the launcher pill's two options
 lookups' dropdowns, the treaty-type gating, the derived amounts, the renewal
 default, the required-field hold, the sliding scale, loss participation and
 EPI split modals, a save that lands on the contract's own URL and reads back
-after a reload; Non-proportional opens the contract details pane only, with the
-non-proportional treaty types), the **renewal calendar** (the contract in its
+after a reload; Non-proportional opens the contract details with the Universe
+structure pane beside them, with the non-proportional treaty types; the
+floating dock fades when idle and *Save & next* opens the **Documents** step,
+where a file is uploaded, opened and removed on both workflows), the
+**renewal calendar** (the contract in its
 window, opening on its basis page), **portfolio intelligence** with its
 programme analysis, and **market intelligence** (a market by country, a trip
 with its return, a note, the honest no-key gather, an account opening as a

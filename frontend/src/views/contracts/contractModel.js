@@ -88,6 +88,48 @@ export function withPropStructure(pd, structure) {
   return idx >= 0 ? existing.map((s, i) => (i === idx ? structure : s)) : [structure, ...existing];
 }
 
+/* The Universe NP Treaty Detail's right pane — STRUCTURE: the layer
+   configuration and the premium & commissions of a non-proportional treaty,
+   stored on the placement's non-proportional structure (`quote_structures[]`
+   with a basis other than PROP, under `np`). */
+export const NP_XL_TYPES = ['Gross XL', 'Net XL'];
+export const NP_ACCOUNTING_METHODS = ['Losses Occurring', 'Risks Attaching'];
+export const NP_ACCOUNTS = ['Half yearly', 'Quarterly', 'Annual'];
+
+export const emptyNpTerms = () => ({
+  // LAYER CONFIGURATION
+  numLayers: '', expiringNumLayers: '', deductible: '', maxRetention: '',
+  accountingMethod: '', xlType: '', accounts: '',
+  // PREMIUM & COMMISSIONS
+  estGnpi: '', brokeragePct: '', taxesPct: '', noClaimsBonusPct: '', profitCommissionPct: '',
+});
+
+/** The non-proportional terms stored on the placement, or an empty set. A
+    record written by the placement page carried its EGNPI and no-claims
+    bonus under older keys, which read through. */
+export function npTermsOf(pd) {
+  const st = (pd?.quote_structures || []).find((s) => s && s.basis && s.basis !== 'PROP');
+  const np = st?.np || {};
+  return {
+    ...emptyNpTerms(),
+    ...np,
+    estGnpi: np.estGnpi ?? np.egnpi ?? '',
+    noClaimsBonusPct: np.noClaimsBonusPct ?? np.ncbPct ?? '',
+  };
+}
+
+/** The placement's structures with the non-proportional one's terms replaced
+    (its layers, if any, kept), or added first. */
+export function withNpStructure(pd, structure) {
+  const existing = (pd?.quote_structures || []).filter(Boolean);
+  const idx = existing.findIndex((s) => s.basis && s.basis !== 'PROP');
+  return idx >= 0 ? existing.map((s, i) => (i === idx ? { ...s, ...structure } : s)) : [structure, ...existing];
+}
+
+/** The two steps of a contract's workflow: its detail page, then its documents. */
+export const detailPath = (basis, id) => `/contracts/${basisPath(basis)}/${id}`;
+export const documentsPath = (basis, id) => `/contracts/${basisPath(basis)}/${id}/documents`;
+
 /**
  * The editable contract details, hydrated from a placement: the stored
  * class, currency and broker resolve to their lookup rows; a value the
