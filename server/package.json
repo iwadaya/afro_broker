@@ -12,6 +12,7 @@
     "migrate:status": "node src/db/migrateStatus.js",
     "seed": "node src/db/seeds/run.js",
     "seed:check": "node src/db/seeds/run.js --check",
+    "user:create": "node src/db/createUser.js",
     "test": "vitest run",
     "test:watch": "vitest"
   },

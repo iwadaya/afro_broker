@@ -94,11 +94,24 @@ reports `brokingEnabled:false`, so the client hides the Broking navigation and r
 ## Build order
 
 1. **01** — this plan, folders, flag, and the standalone base (auth, lookups, reference tables). ✓
-2. **02** — `bk_*` migrations, seed contracts, SQL constraint proofs.
-3. **03** — `shared/broking/calcs.js` + unit tests cross-checked against the copied Universe helpers.
-4. **04** — `/api/broking` routes, Zod schemas, `row_version` locking, field-level audit, supertest suite.
-5. **05** — client foundation: `broking.css`, components, routes, `useBrokingContract`.
-6. **06** — Identify step (UMR), renewal copy, Amend UMR, Playwright e2e.
-7. **07** — Proportional Treaty Detail.
-8. **08** — NP Contract Details + Structure (layer table, Stop Loss, Aggregate XL).
-9. **09** — verification, security review, DEPLOYMENT.md, CHANGELOG.md.
+2. **02** — `bk_*` migrations, seed contracts, SQL constraint proofs. ✓
+3. **03** — `shared/broking/calcs.js` + unit tests cross-checked against the copied Universe helpers. ✓
+4. **04** — `/api/broking` routes, Zod schemas, `row_version` locking, field-level audit, supertest suite. ✓
+5. **05** — client foundation: `broking.css`, components, routes, `useBrokingContract`. ✓
+6. **06** — Identify step (UMR), renewal copy, Amend UMR, Playwright e2e. ✓
+7. **07** — Proportional Treaty Detail. ✓
+8. **08** — NP Contract Details + Structure (layer table, Stop Loss, Aggregate XL). ✓
+9. **09** — verification, security review, DEPLOYMENT.md, CHANGELOG.md. ✓
+
+## Status
+
+All nine steps are built and verified (`npm run verify`, `scripts/test-db.sh`, `npm run test:e2e`,
+`npm run screenshots`): server 105 tests, client 95 tests, 11 Playwright flows, component and
+walkthrough screenshots in `docs/broking/screenshots`. What changed, what deviates from
+`data-model.md` and which Universe quirks were kept on purpose are in `docs/broking/CHANGELOG.md`;
+`DEPLOYMENT.md` covers the flag, the broker number, migrations and `deploy/deploy.sh`.
+
+Dropping the module into the Universe monorepo: copy `server/src/broking`, `client/src/broking`
+and `shared/broking` as they are, renumber the four `bk_*` migrations to 158–161, mount
+`../broking/index.js` in `registerApiRoutes.js` behind `env.brokingEnabled`, add the
+`/broking/*` routes and the navigation entry behind the flag, and import `broking.css`.
