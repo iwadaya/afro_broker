@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { useRefData, entryOf } from '../RefData.jsx';
 import { parseClass } from '../refData.js';
 
-/* The Treaty Detail building blocks shared by the placement page (which is
-   also where a new placement is set up — /placements/new) and the screens
-   that read a placement's class: field rows, the date field, the class of
-   business modal, and the class parser.
+/* The Treaty Detail building blocks shared by the contract pages (the
+   proportional treaty detail and the non-proportional contract details
+   under Contracts) and the screens that read a placement's class: field
+   rows, the date field, the class of business modal, and the class parser.
 
    The dropdowns themselves are the Universe modelling tool's reference
    lookups — brokers, treaty types, classes of business, the country and

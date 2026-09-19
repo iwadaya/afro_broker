@@ -1,21 +1,8 @@
 // Runs every e2e spec sequentially and exits non-zero if any reports an error.
 // Specs assume a seeded backend + the frontend dev server are already running
 // (see e2e/README.md or the CI workflow).
-import flow from './flow.mjs';
-import signing from './signing.mjs';
 import features from './features.mjs';
-import structures from './structures.mjs';
-import ingest from './ingest.mjs';
-import packs from './packs.mjs';
-import retentions from './retentions.mjs';
-import modelling from './modelling.mjs';
-import negotiation from './negotiation.mjs';
-import wordings from './wordings.mjs';
-import spine from './spine.mjs';
-import finalization from './finalization.mjs';
-import detail from './detail.mjs';
-import renewalPacks from './renewalPacks.mjs';
-import dfa from './dfa.mjs';
+import contracts from './contracts.mjs';
 import { launch, BASE } from './lib.mjs';
 
 // Warm up the (dev) server so its first on-demand compile doesn't count against
@@ -33,7 +20,7 @@ async function warmup() {
 
 await warmup();
 
-const specs = [flow, signing, features, detail, structures, ingest, packs, retentions, modelling, negotiation, wordings, spine, finalization, renewalPacks, dfa];
+const specs = [contracts, features];
 let failed = 0;
 
 for (const spec of specs) {

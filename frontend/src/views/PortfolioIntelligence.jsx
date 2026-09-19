@@ -193,7 +193,7 @@ export default function PortfolioIntelligence() {
   const [brokerFilter, setBrokerFilter] = useState('');
   const [leadFilter, setLeadFilter] = useState('');
 
-  const openAccount = (a) => navigate(`/placements/${a.id}`);
+  const openAccount = (a) => navigate(`/contracts/${a.id}`);
 
   const options = useMemo(() => ({
     classes: uniq(accounts.map((a) => a.class)),
@@ -317,7 +317,7 @@ export default function PortfolioIntelligence() {
             <tbody>
               {leaders.map((l) => (
                 <tr key={l.market_id || `name:${l.name}`}>
-                  <td>{l.market_id ? <Link to={`/markets/${l.market_id}`}>{l.name}</Link> : l.name}</td>
+                  <td>{l.name}</td>
                   <td>{l.rating || '—'}</td>
                   <td>{l.region || '—'}</td>
                   <td><CountBar value={l.accounts_led} max={maxLed} /></td>
@@ -365,9 +365,7 @@ export default function PortfolioIntelligence() {
               {brokers.map((b) => (
                 <tr key={b.name || 'unnamed'}>
                   <td>
-                    {b.name
-                      ? (b.register_id ? <Link to={`/markets/${b.register_id}`}>{b.name}</Link> : b.name)
-                      : <span className="muted">Another house — not yet named</span>}
+                    {b.name || <span className="muted">Another house — not yet named</span>}
                     {b.is_house && <Pill tone="green" className="pi-inline">this desk</Pill>}
                   </td>
                   <td><CountBar value={b.accounts_count} max={maxBroker} /></td>
@@ -424,7 +422,7 @@ export default function PortfolioIntelligence() {
             <tbody>
               {panel.map((r) => (
                 <tr key={r.market_id}>
-                  <td><Link to={`/markets/${r.market_id}`}>{r.name}</Link></td>
+                  <td>{r.name}</td>
                   <td>{r.rating || '—'}</td>
                   <td>{r.region || '—'}</td>
                   <td><CountBar value={r.accounts} max={maxPanel} /></td>

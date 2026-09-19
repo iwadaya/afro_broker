@@ -1,5 +1,12 @@
 import React, { useRef, useState } from 'react';
-import { niceStep } from '../dfa/charts.jsx';
+
+/** A "nice" axis step for a raw interval: 1, 2 or 5 × a power of ten. */
+export function niceStep(raw) {
+  if (!(raw > 0)) return 1;
+  const mag = 10 ** Math.floor(Math.log10(raw));
+  const n = raw / mag;
+  return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * mag;
+}
 
 /*
  * The programme analysis's pictures — horizontal stacked bars, columns over

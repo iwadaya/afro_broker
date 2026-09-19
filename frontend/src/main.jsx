@@ -6,7 +6,6 @@ import { AuthProvider } from './auth.jsx';
 import { initTheme } from './theme.js';
 import './styles.css';
 import './themes.css';
-import './modelling.css';
 
 // Apply the persisted theme before React mounts so there's no flash.
 initTheme();

@@ -5245,3 +5245,89 @@ button, .btn, .np-struct-btn, .np-green-pill, .action-pill, .segbtn, .tab, .role
   .dfa-grid-structuring-inputs, .dfa-grid-decision, .dfa-grid-outcomes, .dfa-op-grid { grid-template-columns: minmax(0, 1fr); }
   .dfa-families { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* ── Contracts: the two options, the register, and the treaty detail pages ── */
+.contract-choices { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+@media (max-width: 860px) { .contract-choices { grid-template-columns: 1fr; } }
+.contract-choice {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 170px;
+  padding: 22px 24px;
+  text-decoration: none;
+  color: var(--text);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--stroke-soft);
+  background: linear-gradient(180deg, var(--glass-grad-top), var(--glass-grad-bot));
+  box-shadow: var(--shadow2);
+  transition: border-color .15s, transform .15s;
+}
+.contract-choice:hover { border-color: rgba(var(--accent-rgb), .45); transform: translateY(-1px); text-decoration: none; filter: none; }
+.contract-choice-kicker { font-size: 10px; letter-spacing: .14em; font-weight: 700; color: var(--accent2); }
+.contract-choice-title { font-size: 20px; font-weight: 700; color: var(--text-strong); }
+.contract-choice-sub { font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+.contract-choice-arrow { margin-top: auto; padding-top: 6px; font-size: 13px; font-weight: 600; color: var(--accent2); }
+.contract-register .refbtn { font-weight: 600; }
+.contract-register .filterbar { padding: 6px 0 4px; }
+
+/* The Universe treaty detail pages: the summary strip with its toggle, the
+   panes of the 2×2 grid, the dimmed inactive blocks, the footer actions. */
+.contract-summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.contract-summary-right { display: inline-flex; align-items: center; gap: 10px; }
+.td-card--pane .td-card-body { gap: 8px; }
+.td-block { display: flex; flex-direction: column; gap: 8px; }
+.td-mini { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 6px 0 0; }
+.td-card--pane .fr-label:empty { display: none; }
+.td-card--pane .fr:has(> .fr-label:empty) { grid-template-columns: 170px 1fr; }
+.contract-id { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 12px; min-height: 34px; }
+.np-badge-count--on { color: var(--accent2); font-weight: 700; }
+.contract-actions { display: flex; align-items: center; gap: 10px; }
+.contract-actions-gap { flex: 1; }
+
+/* The terms modals (the manual slide, the corridors, the EPI split). */
+.mod-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  background: rgba(15, 23, 42, .40);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.mod-modal {
+  width: min(560px, 94vw);
+  max-height: 86vh;
+  overflow: auto;
+  border-radius: 16px;
+  border: 1px solid var(--stroke-soft);
+  background: var(--surface-elevated);
+  box-shadow: var(--shadow-high);
+}
+.mod-modal--wide { width: min(980px, 96vw); }
+.mod-modal-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--hairline);
+}
+.mod-modal-title { font-size: 1rem; font-weight: 700; }
+.mod-modal-sub { color: var(--muted); font-size: .8rem; margin-top: 2px; max-width: 640px; }
+.mod-modal-x {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid var(--stroke-soft);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: .85rem;
+}
+.mod-modal-x:hover { background: var(--surface-hover); color: var(--text); }
+.mod-modal-body { padding: 14px 18px 18px; }
+.td-card--pane .np-sub-actions { flex-wrap: wrap; }
+.td-card--pane .np-badge-count { white-space: nowrap; }
