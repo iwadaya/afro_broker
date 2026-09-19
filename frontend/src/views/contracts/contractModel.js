@@ -126,9 +126,10 @@ export function withNpStructure(pd, structure) {
   return idx >= 0 ? existing.map((s, i) => (i === idx ? { ...s, ...structure } : s)) : [structure, ...existing];
 }
 
-/** The two steps of a contract's workflow: its detail page, then its documents. */
+/** The three steps of a contract's workflow: its detail page, its documents, then the shares of the programme. */
 export const detailPath = (basis, id) => `/contracts/${basisPath(basis)}/${id}`;
 export const documentsPath = (basis, id) => `/contracts/${basisPath(basis)}/${id}/documents`;
+export const sharesPath = (basis, id) => `/contracts/${basisPath(basis)}/${id}/shares`;
 
 /**
  * The editable contract details, hydrated from a placement: the stored

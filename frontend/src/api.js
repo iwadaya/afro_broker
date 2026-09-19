@@ -52,3 +52,20 @@ export async function download(path) {
   setTimeout(() => URL.revokeObjectURL(url), 10_000);
   return name;
 }
+
+/**
+ * Fetch a file from an authenticated endpoint to show it inline: a blob URL
+ * and the file's type. The caller revokes the URL once the preview closes.
+ */
+export async function fetchBlobUrl(path) {
+  const resp = await fetch(`/api${path}`, {
+    headers: { ...(getToken() ? { authorization: `Bearer ${getToken()}` } : {}) },
+  });
+  if (!resp.ok) {
+    let message = resp.statusText;
+    try { message = (await resp.json())?.error || message; } catch { /* not JSON */ }
+    throw Object.assign(new Error(message), { status: resp.status });
+  }
+  const blob = await resp.blob();
+  return { url: URL.createObjectURL(blob), mime: blob.type || resp.headers.get('content-type') || '' };
+}

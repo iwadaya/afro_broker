@@ -3,9 +3,12 @@
 // grid: contract details, limit details, commissions, loss participation)
 // with the lookups' dropdowns, the treaty-type gating, the derived amounts,
 // the renewal default and the required-field hold; non-proportional opens
-// the contract details pane only. A saved contract lands on its own URL,
-// survives a reload, and is read by the register, the renewal calendar and
-// the dashboard's calendar shelf.
+// the contract details pane with the structure pane beside it. A saved
+// contract lands on its own URL, survives a reload, and is read by the
+// register, the renewal calendar and the dashboard's calendar shelf; the
+// floating dock takes it on to the Documents step (the Universe layout) and
+// the Shares step (the broker share and the reinsurer shares, written and
+// signed).
 import assert from 'node:assert/strict';
 import { BASE, launch, login, makeStep, goHub, apiAs } from './lib.mjs';
 
@@ -18,10 +21,13 @@ async function wakeDock(page) {
   await page.waitForSelector('[data-testid=wizard-dock]:not(.is-hidden)', { timeout: 5000 });
 }
 
-/** Upload one text file on the Documents step and wait for its row. */
-async function uploadDocument(page, name, kindLabel, text) {
-  await byLabel(page, 'Document kind').selectOption({ label: kindLabel });
+/** Upload one text file on the Documents step — pick the type, the file, a title if given, ↑ Upload — and wait for its row. */
+async function uploadDocument(page, name, typeLabel, text, title) {
+  await byLabel(page, 'Document Type').selectOption({ label: typeLabel });
   await page.setInputFiles('input[aria-label="Files"]', { name, mimeType: 'text/plain', buffer: Buffer.from(text) });
+  await page.waitForSelector(`[data-testid=document-file-chip]:has-text("${name}")`);
+  if (title) await byLabel(page, 'Document Title').fill(title);
+  await page.click('[data-testid=document-upload-button]');
   const row = page.locator(`[data-testid=document-row]:has-text("${name}")`);
   await row.waitFor({ timeout: 15000 });
   return row;
@@ -258,29 +264,117 @@ export default async function run() {
       assert.ok((await broker.locator('[data-testid=contract-summary]').innerText()).includes(cedantName), 'the same contract heads the page');
     });
 
-    await step('documents (proportional): upload a slip, open it, and remove it', async () => {
+    await step('documents (proportional): the Universe layout — upload a slip with its title, view, download and delete it', async () => {
       await broker.waitForSelector('[data-testid=documents-count]:has-text("0 FILES")', { timeout: 10000 });
-      const row = await uploadDocument(broker, `slip-${tag}.txt`, 'Slip', 'Slip wording for the treaty');
-      assert.ok(await row.locator('.pill:has-text("Slip")').count() > 0, 'the kind is on the row');
-      assert.ok((await row.innerText()).includes('Demo Broker'), 'and who uploaded it');
+      assert.ok(await broker.locator('.docs-chip:has-text("Files for Treaty")').count() > 0, "the tool's header chip");
+      assert.ok((await broker.locator('[data-testid=documents-contract-id]').innerText()).trim().length > 0, 'and the contract id');
+      assert.ok(await broker.locator('.docs-dropzone:has-text("Drag & drop files here")').count() > 0, 'the dropzone');
+      assert.ok(await broker.locator('button:has-text("+ Select Files")').count() > 0);
+      assert.ok(await broker.locator('.docs-card-title:has-text("Uploaded Documents")').count() > 0);
+      assert.ok(await broker.locator('button:has-text("↻ Reload")').count() > 0);
+      // The title follows the document type, then the picked file while it is untouched; the description is optional.
+      await byLabel(broker, 'Document Type').selectOption({ label: 'Final Slip' });
+      assert.equal(await byLabel(broker, 'Document Title').inputValue(), 'Final Signed Slip');
+      await byLabel(broker, 'Description').fill('From the cedant');
+      const row = await uploadDocument(broker, `slip-${tag}.txt`, 'Final Slip', 'Slip wording for the treaty');
+      const heads = (await broker.locator('.docs-table thead th').allTextContents()).map((t) => t.trim());
+      assert.deepEqual(heads, ['File', 'Type', 'Title', 'Size', 'Uploaded', 'Actions']);
+      assert.ok(await row.locator('.docs-type-pill:has-text("Final Slip")').count() > 0, 'the type is on the row');
+      const text = await row.innerText();
+      assert.ok(text.includes(`slip-${tag}`), 'and the title, after the file');
+      assert.ok(text.includes('From the cedant'), 'and the description');
+      assert.equal(await byLabel(broker, 'Document Title').inputValue(), 'Final Signed Slip', 'the form is ready for the next file');
+      assert.equal(await byLabel(broker, 'Description').inputValue(), '');
+      assert.ok(text.includes('Demo Broker'), 'and who uploaded it');
       await broker.waitForSelector('[data-testid=documents-count]:has-text("1 FILE")');
-      // Open hands the browser the file under its own name.
-      const [dl] = await Promise.all([broker.waitForEvent('download', { timeout: 15000 }), row.locator('button:has-text("Open")').click()]);
+      // View opens the preview over the page; Close puts it away.
+      await row.locator('button:has-text("View")').click();
+      await broker.waitForSelector('[data-testid=document-preview]', { timeout: 10000 });
+      assert.ok((await broker.locator('.docs-preview-name').innerText()).includes(`slip-${tag}.txt`));
+      await broker.click('[data-testid=document-preview] button[aria-label="Close"]');
+      await broker.waitForSelector('[data-testid=document-preview]', { state: 'detached' });
+      // Download hands the browser the file under its own name.
+      const [dl] = await Promise.all([broker.waitForEvent('download', { timeout: 15000 }), row.locator('button:has-text("Download")').click()]);
       assert.equal(dl.suggestedFilename(), `slip-${tag}.txt`);
       // The API holds it against the contract.
       const stored = await apiAs(broker, 'GET', `/placements/${propId}/contract-documents`);
       assert.equal(stored.length, 1);
-      assert.equal(stored[0].kind, 'slip');
+      assert.equal(stored[0].doc_type, 'Final Slip');
+      assert.equal(stored[0].title, `slip-${tag}`);
+      assert.equal(stored[0].description, 'From the cedant');
       assert.equal(stored[0].size_bytes, 'Slip wording for the treaty'.length);
-      // Remove (the confirm is accepted by the harness), and the list is empty again.
-      await row.locator(`button[aria-label="Remove slip-${tag}.txt"]`).click();
+      // Delete (the confirm is accepted by the harness), and the list is empty again.
+      await row.locator(`button[aria-label="Delete slip-${tag}.txt"]`).click();
       await broker.waitForSelector('[data-testid=documents-count]:has-text("0 FILES")', { timeout: 10000 });
       assert.equal(await broker.locator('[data-testid=document-row]').count(), 0);
-      // Back returns to the treaty detail.
+      // The dock goes on to the shares; Back returns to the treaty detail.
       await wakeDock(broker);
+      assert.ok(await broker.locator('[data-testid=wizard-next]:has-text("Next: Shares")').count() > 0);
       await broker.click('[data-testid=wizard-back]');
       await broker.waitForURL(propUrl, { timeout: 10000 });
       await broker.waitForSelector('[data-testid=prop-treaty-detail]');
+    });
+
+    await step('shares (proportional): the broker share and the reinsurer shares, written and signed, saved and read back', async () => {
+      await broker.goto(`${BASE}/contracts/proportional/${propId}/documents`, { waitUntil: 'networkidle' });
+      await broker.waitForSelector('[data-testid=contract-documents]');
+      await wakeDock(broker);
+      await broker.click('[data-testid=wizard-next]');
+      await broker.waitForURL(new RegExp(`/contracts/proportional/${propId}/shares$`), { timeout: 20000 });
+      await broker.waitForSelector('[data-testid=reinsurer-shares]', { timeout: 10000 });
+      await broker.waitForSelector('h2:has-text("Shares")');
+      assert.ok((await broker.locator('[data-testid=contract-summary]').innerText()).includes(cedantName), 'the same contract heads the page');
+      // Written and signed columns on both tables.
+      for (const table of ['broker-shares', 'reinsurer-shares']) {
+        const heads = (await broker.locator(`[data-testid=${table}] thead th`).allTextContents()).map((t) => t.trim());
+        assert.ok(heads.includes('Written share') && heads.includes('Signed share'), `${table}: ${heads.join(' | ')}`);
+      }
+      // This desk heads the broker share by default.
+      const brokerRows = broker.locator('[data-testid=broker-shares] [data-testid=share-row]');
+      assert.equal(await brokerRows.count(), 1);
+      assert.equal(await brokerRows.first().locator('[aria-label="Broker"]').inputValue(), 'Universe Broking');
+      assert.equal(await brokerRows.first().locator('[aria-label="Broker role"]').inputValue(), 'lead');
+      await brokerRows.first().locator('[aria-label="Written share %"]').fill('100');
+      await brokerRows.first().locator('[aria-label="Signed share %"]').fill('100');
+      await broker.waitForSelector('[data-testid=broker-total-signed]:has-text("100%")');
+      // Two reinsurers off the register, the first leading; the rating reads through.
+      await broker.click('[data-testid=add-reinsurer]');
+      await broker.click('[data-testid=add-reinsurer]');
+      const reRows = broker.locator('[data-testid=reinsurer-shares] [data-testid=share-row]');
+      assert.equal(await reRows.count(), 2);
+      await reRows.nth(0).locator('[aria-label="Reinsurer"]').fill('Swiss Re');
+      await reRows.nth(0).locator('[data-testid=share-market-meta]').waitFor({ timeout: 10000 });
+      assert.ok((await reRows.nth(0).locator('[data-testid=share-market-meta]').innerText()).includes('Rated AA-'));
+      assert.ok(await reRows.nth(0).locator('[aria-label="Lead"]').isChecked(), 'the first reinsurer leads');
+      await reRows.nth(0).locator('[aria-label="Written share %"]').fill('60');
+      await reRows.nth(0).locator('[aria-label="Signed share %"]').fill('55');
+      await reRows.nth(0).locator('[aria-label="Reference"]').fill('SR/27/1');
+      await reRows.nth(1).locator('[aria-label="Reinsurer"]').fill('Munich Re');
+      await reRows.nth(1).locator('[aria-label="Written share %"]').fill('50');
+      await reRows.nth(1).locator('[aria-label="Signed share %"]').fill('45');
+      await broker.waitForSelector('[data-testid=reinsurer-total-written]:has-text("110%")');
+      await broker.waitForSelector('[data-testid=reinsurer-total-signed]:has-text("100%")');
+      await broker.waitForSelector('[data-testid=placed-status]:has-text("Fully placed")');
+      // Save from the dock; a reload brings the table back.
+      await wakeDock(broker);
+      await broker.click('[data-testid=save-shares]');
+      await broker.waitForSelector('[data-testid=save-shares]:has-text("Saved")', { timeout: 10000 });
+      await broker.reload({ waitUntil: 'networkidle' });
+      await broker.waitForSelector('[data-testid=reinsurer-shares] [data-testid=share-row]', { timeout: 10000 });
+      assert.equal(await reRows.count(), 2);
+      assert.equal(await reRows.nth(0).locator('[aria-label="Signed share %"]').inputValue(), '55%');
+      assert.equal(await reRows.nth(0).locator('[aria-label="Reference"]').inputValue(), 'SR/27/1');
+      const stored = await apiAs(broker, 'GET', `/placements/${propId}/shares`);
+      assert.deepEqual(stored.broker.map((s) => [s.name, s.role, s.written_pct, s.signed_pct]), [['Universe Broking', 'lead', 100, 100]]);
+      assert.deepEqual(stored.reinsurers.map((s) => [s.name, s.role, s.written_pct, s.signed_pct]), [['Swiss Re', 'lead', 60, 55], ['Munich Re', 'follow', 50, 45]]);
+      assert.ok(stored.reinsurers[0].market_id, 'bound to the register');
+      assert.equal(stored.reinsurers[0].market_rating, 'AA-');
+      assert.deepEqual(stored.totals.reinsurers, { written_pct: 110, signed_pct: 100 });
+      // Back returns to the documents.
+      await wakeDock(broker);
+      assert.ok(await broker.locator('[data-testid=wizard-back]:has-text("Back: Documents")').count() > 0);
+      await broker.click('[data-testid=wizard-back]');
+      await broker.waitForURL(new RegExp(`/contracts/proportional/${propId}/documents$`), { timeout: 10000 });
     });
 
     await step('the register and the top bar find the contract; the renewal calendar opens it on its basis', async () => {
@@ -395,7 +489,7 @@ export default async function run() {
       await broker.waitForURL(new RegExp(`/contracts/proportional/${propId}$`), { timeout: 10000 });
     });
 
-    await step('documents (non-proportional): Save & next from the contract details, an upload, and Back', async () => {
+    await step('documents and shares (non-proportional): Save & next from the contract details, an upload, the shares, Save & done', async () => {
       await broker.goto(`${BASE}/contracts/non-proportional/${npId}`, { waitUntil: 'networkidle' });
       await broker.waitForSelector('[data-testid=np-structure]');
       await wakeDock(broker);
@@ -403,20 +497,34 @@ export default async function run() {
       await broker.click('[data-testid=wizard-next]');
       await broker.waitForURL(new RegExp(`/contracts/non-proportional/${npId}/documents$`), { timeout: 20000 });
       await broker.waitForSelector('[data-testid=documents-count]:has-text("0 FILES")', { timeout: 10000 });
-      const row = await uploadDocument(broker, `wording-${tag}.txt`, 'Wording', 'Treaty wording');
-      assert.ok(await row.locator('.pill:has-text("Wording")').count() > 0);
+      const row = await uploadDocument(broker, `pack-${tag}.txt`, 'Renewal Pack', 'Renewal pack', 'Renewal pack 2027');
+      assert.ok(await row.locator('.docs-type-pill:has-text("Renewal Pack")').count() > 0);
+      assert.ok((await row.innerText()).includes('Renewal pack 2027'), 'the typed title');
       await broker.waitForSelector('[data-testid=documents-count]:has-text("1 FILE")');
       await wakeDock(broker);
       assert.ok(await broker.locator('[data-testid=wizard-back]:has-text("Back: Contract Details")').count() > 0);
       await broker.click('[data-testid=wizard-back]');
       await broker.waitForURL(new RegExp(`/contracts/non-proportional/${npId}$`), { timeout: 10000 });
       await broker.waitForSelector('[data-testid=np-structure]');
-      // Done from the documents step lands on the register.
+      // Next from the documents opens the shares; Save & done from there writes them and lands on the register.
       await broker.goto(`${BASE}/contracts/non-proportional/${npId}/documents`, { waitUntil: 'networkidle' });
-      await broker.waitForSelector(`[data-testid=document-row]:has-text("wording-${tag}.txt")`, { timeout: 10000 });
+      await broker.waitForSelector(`[data-testid=document-row]:has-text("pack-${tag}.txt")`, { timeout: 10000 });
       await wakeDock(broker);
       await broker.click('[data-testid=wizard-next]');
+      await broker.waitForURL(new RegExp(`/contracts/non-proportional/${npId}/shares$`), { timeout: 10000 });
+      await broker.waitForSelector('[data-testid=reinsurer-shares]', { timeout: 10000 });
+      await broker.click('[data-testid=add-reinsurer]');
+      const reRow = broker.locator('[data-testid=reinsurer-shares] [data-testid=share-row]').first();
+      await reRow.locator('[aria-label="Reinsurer"]').fill('Hannover Re');
+      await reRow.locator('[aria-label="Written share %"]').fill('100');
+      await reRow.locator('[aria-label="Signed share %"]').fill('100');
+      await wakeDock(broker);
+      assert.ok(await broker.locator('[data-testid=wizard-next]:has-text("Save & done: Contracts")').count() > 0);
+      await broker.click('[data-testid=wizard-next]');
       await broker.waitForURL(/\/contracts$/, { timeout: 10000 });
+      const stored = await apiAs(broker, 'GET', `/placements/${npId}/shares`);
+      assert.deepEqual(stored.reinsurers.map((s) => [s.name, s.role, s.written_pct, s.signed_pct]), [['Hannover Re', 'lead', 100, 100]]);
+      assert.equal(stored.broker[0]?.name, 'Universe Broking', 'this desk is the broker share by default');
     });
 
     await step('the dashboard keeps its book, its launcher has the four functions, and its calendar shelf opens the contract', async () => {

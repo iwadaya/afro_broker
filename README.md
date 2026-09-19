@@ -44,7 +44,7 @@ backend/
     integrations/  universe.js (technical pull / inwards push; stubbed offline)
                    marketIntel.js (counterparty research via lib/llm.js)
     modules/       auth, register, markets, placements, bordereaux, packs,
-                   marketing, fot, lines, signing, documents, wordings, dashboards, dfa, admin
+                   marketing, fot, lines, signing, documents, shares, wordings, dashboards, dfa, admin
   test/
     unit/          signingDown, statusMachine, wordingDiff, occupancy, negotiation,
                    submissionEmail, compliance, dfa, capitalRegimes
@@ -139,19 +139,40 @@ market intelligence read.
   structure (`quote_structures[].np`), and Est. GNPI as its estimated
   premium so the calendar reads the treaty's size.
 - **Documents** (`/contracts/<basis>/:id/documents`) is the second step of
-  both workflows: the contract's documents — the slip, the wording, the
-  cedant's submission, bordereaux, statements and correspondence — uploaded
-  against the contract (up to 15 MB a file, a kind and a note each), listed
-  with who put them there and when, opened and removed. They are held on
-  `contract_document` and served by `GET/POST /api/placements/:id/contract-documents`,
-  `GET /api/contract-documents/:id/download`, `PATCH` and `DELETE
-  /api/contract-documents/:id`; everyone signed in reads, a broker or admin
-  writes.
+  both workflows, laid out as the tool's Documents screen: the *Files for
+  Treaty* chip and the contract id; the drag-and-drop zone (*browse*, *+
+  Select Files*); the upload form — a document type off the tool's list
+  (Final Slip, Draft Slip, Expiring Slip, Renewal Pack, Large Loss List,
+  Risk Profiles, Claims Profile, Presentation, CAT Modelling, Bordereaux,
+  Accounts, Other), a title suggested from the type, an optional
+  description, the picked file and *↑ Upload* (15 MB a file); and the
+  *Uploaded Documents* card — file, type, title, size, uploaded and who by
+  — with *View* (PDFs, images and text open in a preview over the page),
+  *Download* and *Delete*. They are held on `contract_document` and served
+  by `GET/POST /api/placements/:id/contract-documents`,
+  `GET /api/contract-documents/:id/view` (inline; a file the browser could
+  run as a page is sandboxed), `GET /api/contract-documents/:id/download`,
+  `PATCH` and `DELETE /api/contract-documents/:id`; everyone signed in
+  reads, a broker or admin writes.
+- **Shares** (`/contracts/<basis>/:id/shares`) is the third step: who takes
+  what of the programme, every row with a **Written share** column (the
+  line put down) and a **Signed share** column (what it was signed down
+  to), in percent of the programme. **BROKER SHARE** is this desk —
+  Universe Broking, the lead broker by default — and any co-broker the
+  order is split with; **REINSURER SHARES** is the panel, each reinsurer
+  off the market register (its domicile and rating show through) or typed,
+  with a Lead mark, a market reference and a note. Totals foot both tables
+  and the reinsurers' signed total says whether the programme is fully
+  placed, short or over. The table is held on `contract_share` and saved
+  whole — `GET/PUT /api/placements/:id/shares` (everyone signed in reads, a
+  broker or admin writes).
 
-Both steps carry the tool's **floating dock** at the foot of the window —
-Back, Save and *Save & next: Documents* on the detail page; Back to the
-detail and *Done: Contracts* on the documents — which fades after a few idle
-seconds and returns on any movement or keystroke (`frontend/src/WizardNav.jsx`).
+All three steps carry the tool's **floating dock** at the foot of the window
+— Back, Save and *Save & next: Documents* on the detail page; Back to the
+detail and *Next: Shares* on the documents; Back to the documents (saving
+what changed), Save and *Save & done: Contracts* on the shares — which fades
+after a few idle seconds and returns on any movement or keystroke
+(`frontend/src/WizardNav.jsx`).
 
 A contract by id (`/contracts/:id` — where the calendar, the portfolio, the
 market intelligence and the top bar's recents point) opens on its basis page,

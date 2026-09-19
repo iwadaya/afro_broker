@@ -16,6 +16,7 @@ import ContractsHome from './views/contracts/ContractsHome.jsx';
 import PropTreatyDetail from './views/contracts/PropTreatyDetail.jsx';
 import NpContractDetails from './views/contracts/NpContractDetails.jsx';
 import ContractDocuments from './views/contracts/ContractDocuments.jsx';
+import ContractShares from './views/contracts/ContractShares.jsx';
 import ContractRoute, { PlacementRedirect } from './views/contracts/ContractRoute.jsx';
 import Admin from './views/Admin.jsx';
 import { RefDataProvider } from './RefData.jsx';
@@ -74,9 +75,11 @@ function Shell() {
             <Route path="/contracts/proportional/:id" element={<KeyedByParam Screen={PropTreatyDetail} />} />
             <Route path="/contracts/non-proportional" element={<NpContractDetails key="new" />} />
             <Route path="/contracts/non-proportional/:id" element={<KeyedByParam Screen={NpContractDetails} />} />
-            {/* The second step of either workflow: the contract's documents. */}
+            {/* The second and third steps of either workflow: the contract's documents, then the shares of the programme. */}
             <Route path="/contracts/proportional/:id/documents" element={<KeyedByParam Screen={ContractDocuments} basis="PROP" />} />
             <Route path="/contracts/non-proportional/:id/documents" element={<KeyedByParam Screen={ContractDocuments} basis="NP" />} />
+            <Route path="/contracts/proportional/:id/shares" element={<KeyedByParam Screen={ContractShares} basis="PROP" />} />
+            <Route path="/contracts/non-proportional/:id/shares" element={<KeyedByParam Screen={ContractShares} basis="NP" />} />
             {/* A contract by id opens on its basis page; the placement page's
                 old address still lands there. */}
             <Route path="/contracts/:id" element={<ContractRoute />} />
