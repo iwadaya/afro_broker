@@ -74,9 +74,9 @@ log "building client"; npm run build --prefix client >/dev/null
 log "applying migrations"; npm run migrate --prefix server
 npm run migrate:status --prefix server | tail -n 3 || true
 
-# ── 5. seed (reference data; demo users only when ALLOW_DEMO_AUTH=true) ───────
+# ── 5. seed (reference data; demo users + sample contracts only with --seed-demo) ──
 if [ "$DO_SEED" = 1 ]; then
-  log "seeding reference data${SEED_DEMO:+ + demo data}"
+  if [ "$SEED_DEMO" = 1 ]; then log "seeding reference data + demo users and sample contracts"; else log "seeding reference data (demo data skipped)"; fi
   if [ "$SEED_DEMO" = 1 ]; then npm run seed --prefix server -- --demo; else npm run seed --prefix server; fi
 fi
 
