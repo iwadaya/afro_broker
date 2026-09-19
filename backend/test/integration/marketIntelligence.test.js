@@ -6,9 +6,9 @@ import { gather } from '../../src/modules/intelligence/marketIntelligence.servic
 
 /**
  * Market intelligence (/api/market-intelligence): a market by country or
- * region — the book there, the AI's brief, and the brokers' own visits
- * with their return and the notes they keep on a cedant, a country or a
- * region.
+ * region — the book there, the AI's brief in its six sections, and the
+ * brokers' own visits with their return and the notes they keep on a
+ * cedant, a country or a region.
  */
 let broker;
 let other;
@@ -303,19 +303,54 @@ test('a trip\'s notes go with the trip; a note on its own stays', async () => {
   });
 });
 
-/** A complete answer, as the live model returns one. */
-const ANSWER = {
-  headline: 'The UK is Europe\'s largest reinsurance buyer.',
-  market_dynamics: [{ topic: 'pricing', detail: 'Property cat rates softened at 1/1/2026.' }],
-  cedants: [{ name: 'Aviva', overview: 'Composite insurer.', reinsurance: 'Buys cat XL through Aon.', url: 'https://aviva.com' }],
-  regulatory: [{ headline: 'Solvency UK', summary: 'Risk margin reduced.', regulator: 'PRA', effective_date: '2024-12-31', url: 'https://bankofengland.co.uk' }],
-  developments: [{ headline: 'Aviva completes Direct Line deal', summary: 'Programmes to merge.', url: 'https://example.com/dl', published_at: '2025-07-01' }],
-  opportunities: [{ title: 'Approach Direct Line on the merged motor XL', rationale: 'Programme consolidating at 1/1.' }],
-  from_the_desk: 'The desk\'s notes confirm the retention is moving up.',
-  citations: [{ title: 'PRA', url: 'https://bankofengland.co.uk' }],
+/** A complete answer, section by section, as the live model returns one per request. */
+const ANSWERS = {
+  sector: {
+    summary: 'The UK is Europe\'s largest reinsurance buyer.',
+    gross_premium: [{ segment: 'total', year: 2025, currency: 'GBP', amount: 250e9, growth_pct: 4.1, url: 'https://abi.org.uk/stats' }],
+    top_insurers: [{ rank: 1, name: 'Aviva', type: 'composite', overview: 'Composite insurer.', gwp: 22e9, currency: 'GBP', year: 2025, market_share_pct: 9, url: 'https://aviva.com' }],
+    local_brokers: [{ name: 'Howden', ownership: 'Local independent', overview: 'London-headquartered broker.', url: '' }],
+    mergers_acquisitions: [{ headline: 'Aviva completes Direct Line deal', acquirer: 'Aviva', target: 'Direct Line', value: 3.7e9, currency: 'GBP', status: 'completed', date: '2025-07-01', summary: 'Programmes to merge.', url: 'https://example.com/dl' }],
+    from_the_desk: 'The desk\'s notes confirm the retention is moving up.',
+    sources: [{ title: 'ABI', url: 'https://abi.org.uk/stats' }],
+  },
+  economy: {
+    summary: 'A large, slow-growing economy.',
+    indicators: [{ indicator: 'Real GDP growth', value: 1.1, unit: '%', period: '2025', as_published: '1.1%', url: 'https://ons.gov.uk' }],
+    projects: [{ name: 'Sizewell C', sector: 'energy', sponsor: 'public_private', value: 38e9, currency: 'GBP', status: 'under_construction', location: 'Suffolk', summary: 'Nuclear plant.', url: '' }],
+    from_the_desk: '', sources: [{ title: 'ONS', url: 'https://ons.gov.uk' }],
+  },
+  regulation: {
+    summary: 'The PRA and the FCA supervise.',
+    regulators: [{ name: 'PRA', role: 'Prudential supervision of insurers and reinsurers.', url: 'https://bankofengland.co.uk' }],
+    updates: [{ headline: 'Solvency UK', summary: 'Risk margin reduced.', regulator: 'PRA', status: 'in_force', effective_date: '2024-12-31', url: 'https://bankofengland.co.uk' }],
+    capital_regime: [], enforcement: [], other_news: [],
+    from_the_desk: '', sources: [{ title: 'PRA', url: 'https://bankofengland.co.uk' }],
+  },
+  statistics: {
+    summary: 'Motor and property lead.',
+    gwp_total: [{ year: 2025, currency: 'GBP', amount: 250e9, growth_pct: 4.1, url: '' }],
+    gwp_by_class: [{ class: 'Motor', year: 2025, currency: 'GBP', amount: 20e9, share_pct: 8, growth_pct: 6, url: '' }],
+    loss_ratios: [{ class: 'Motor', year: 2025, entity: 'Market', entity_type: 'market', loss_ratio_pct: 74.5, url: '' }],
+    top_insured_risks: [{ rank: 1, name: 'Hinkley Point C', type: 'power plant', owner: 'EDF', sum_insured: 30e9, currency: 'GBP', insurer: '', broker: '', summary: '', url: '' }],
+    largest_losses: [{ event: 'Storm Éowyn', date: '2025-01-24', type: 'storm', insured_loss: 4e8, uninsured_loss: 2e8, currency: 'GBP', summary: '', url: '' }],
+    from_the_desk: '', sources: [],
+  },
+  events: {
+    summary: 'Storms and floods.',
+    catastrophes: [{ event: 'Storm Éowyn', peril: 'windstorm', date: '2025-01-24', area: 'Northern Ireland, Scotland', insured_loss: 4e8, economic_loss: null, currency: 'GBP', summary: '', url: '' }],
+    large_fires: [{ event: 'Bicester Motion fire', date: '2025-05-15', location: 'Oxfordshire', occupancy: 'warehouse', insured_loss: null, currency: 'GBP', insurer: '', summary: '', url: '' }],
+    from_the_desk: '', sources: [],
+  },
+  players: {
+    summary: 'A concentrated broker market.',
+    competition: [{ among: 'brokers', headline: 'The big three hold most treaty placements', detail: 'Aon, Guy Carpenter and Gallagher Re.', url: '' }],
+    new_products: [], government_pools: [{ name: 'Flood Re', purpose: 'Flood', operator: 'Flood Re Ltd', status: 'operating', summary: 'A reinsurance pool for household flood.', url: 'https://floodre.co.uk' }],
+    from_the_desk: '', sources: [{ title: 'Flood Re', url: 'https://floodre.co.uk' }],
+  },
 };
 
-test('with no provider the gather fails and writes nothing; with one it stores the brief, folding in the desk\'s notes', async () => {
+test('with no provider the gather fails and writes nothing; with one it stores the six sections, folding in the desk\'s notes', async () => {
   await withServer(async (api) => {
     const led = await ledAccount(api);
     await trip(api, { ...TRIP, cedant_ids: [led.placement.cedant_id] });
@@ -329,25 +364,45 @@ test('with no provider the gather fails and writes nothing; with one it stores t
     assert.equal((await view(api, 'country', 'GB')).body.brief, null, 'nothing was written');
     assert.equal((await api('POST', `${BASE}/brief/gather`, { token: uw.token, body: { scope_type: 'country', scope_key: 'GB' } })).status, 403);
 
-    // A provider answering: the service stores what came back, unverified.
-    let request = null;
-    const clients = { openai: async (req) => { request = req; return { data: ANSWER, model: 'gpt-test' }; } };
+    // A provider answering, one request per section: the service stores the six, unverified.
+    const requests = [];
+    const clients = {
+      openai: async (req) => {
+        requests.push(req);
+        return { data: ANSWERS[req.schemaName.replace('market_brief_', '')], model: 'gpt-test' };
+      },
+    };
     const stored = await gather({ type: 'country', key: 'gb' }, broker.user, clients);
-    assert.equal(request.schemaName, 'market_brief');
-    assert.equal(request.webSearch, true, 'the market is researched on the internet');
-    assert.match(request.prompt, /Research the reinsurance market of United Kingdom \(Europe\)/);
-    assert.match(request.prompt, new RegExp(led.placement.reference), 'our book rides in the prompt');
-    assert.match(request.prompt, /Renewal roadshow/, 'the trips ride in the prompt');
-    assert.match(request.prompt, /Retention moving up to 15m\./, 'the cedant\'s note rides in the prompt');
-    assert.match(request.prompt, /Cat rates softening\./, 'the region\'s note rides in the country\'s prompt');
+    assert.deepEqual(requests.map((r) => r.schemaName).sort(), ['economy', 'events', 'players', 'regulation', 'sector', 'statistics'].map((k) => `market_brief_${k}`));
+    for (const request of requests) {
+      assert.equal(request.webSearch, true, 'each section is researched on the internet');
+      assert.match(request.prompt, /Research the insurance and reinsurance market of United Kingdom \(Europe\) for the "/);
+      assert.match(request.prompt, new RegExp(led.placement.reference), 'our book rides in every prompt');
+      assert.match(request.prompt, /Renewal roadshow/, 'the trips ride in every prompt');
+      assert.match(request.prompt, /Retention moving up to 15m\./, 'the cedant\'s note rides in every prompt');
+      assert.match(request.prompt, /Cat rates softening\./, 'the region\'s note rides in the country\'s prompt');
+    }
     assert.deepEqual(stored.gather, { provider: 'openai', model: 'gpt-test' });
     const b = stored.brief;
     assert.equal(b.scope_key, 'GB');
     assert.equal(b.scope_label, 'United Kingdom');
-    assert.equal(b.headline, ANSWER.headline);
-    assert.deepEqual(b.market_dynamics, ANSWER.market_dynamics);
-    assert.equal(b.regulatory[0].effective_date, '2024-12-31');
-    assert.equal(b.from_the_desk, ANSWER.from_the_desk);
+    assert.equal(b.sector.summary, ANSWERS.sector.summary);
+    assert.deepEqual(b.sector.gross_premium, ANSWERS.sector.gross_premium);
+    assert.equal(b.sector.top_insurers[0].name, 'Aviva');
+    assert.equal(b.sector.mergers_acquisitions[0].status, 'completed');
+    assert.equal(b.sector.from_the_desk, ANSWERS.sector.from_the_desk);
+    assert.equal(b.economy.projects[0].name, 'Sizewell C');
+    assert.equal(b.regulation.updates[0].effective_date, '2024-12-31');
+    assert.deepEqual(b.regulation.enforcement, []);
+    assert.equal(b.statistics.loss_ratios[0].loss_ratio_pct, 74.5);
+    assert.equal(b.statistics.top_insured_risks[0].name, 'Hinkley Point C');
+    assert.equal(b.statistics.largest_losses[0].uninsured_loss, 2e8);
+    assert.equal(b.events.catastrophes[0].peril, 'windstorm');
+    assert.equal(b.events.large_fires[0].occupancy, 'warehouse');
+    assert.equal(b.players.government_pools[0].name, 'Flood Re');
+    assert.deepEqual(b.citations.map((c) => c.url), [
+      'https://abi.org.uk/stats', 'https://ons.gov.uk', 'https://bankofengland.co.uk', 'https://floodre.co.uk',
+    ], 'the sections\' sources, once each, in section order');
     assert.equal(b.notes_used, 2);
     assert.equal(b.visits_used, 1);
     assert.equal(b.verified, false, 'gathered content lands unverified');

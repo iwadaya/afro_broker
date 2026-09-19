@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { api } from '../api.js';
 import {
-  useFetch, Blueprint, SectionLabel, Pill, StatusPill, ErrorBanner, fmtCompact, fmtDate, fmtStamp, providerLabel,
+  useFetch, Blueprint, SectionLabel, Pill, StatusPill, ErrorBanner, Tabs, fmtCompact, fmtDate, fmtStamp, providerLabel,
 } from '../components.jsx';
 import { useScreenHead } from '../shell.jsx';
 import { useAuth, useHasRole } from '../auth.jsx';
@@ -16,11 +16,12 @@ import { currencyNote, MoneyCell } from './PortfolioIntelligence.jsx';
  * intelligence: a market by country or by region of the reference list,
  * read from three sources at once.
  *
- *  - the brief     what the AI gathered from the internet for the market —
- *                  its dynamics, the cedants buying reinsurance there,
- *                  regulatory change, dated developments, what to do next —
- *                  with the desk's own notes and visits folded in. It lands
- *                  unverified and says so until someone signs it off.
+ *  - the brief     what the AI gathered from the internet for the market,
+ *                  in six sections — the insurance and reinsurance sector,
+ *                  the economy and its major projects, regulation, market
+ *                  statistics, events in the market, the market players —
+ *                  each with the desk's own notes and visits folded in. It
+ *                  lands unverified and says so until someone signs it off.
  *  - our book      the accounts whose cedant is domiciled in the market, as
  *                  Portfolio intelligence reads them; the treaty year in the
  *                  top bar narrows this table alone.
@@ -31,9 +32,11 @@ import { currencyNote, MoneyCell } from './PortfolioIntelligence.jsx';
  *                  or a region, typed or uploaded, which roll up into the
  *                  scopes above them and into the next gather.
  *
- * The scope lives in the URL (?region=Europe&country=GB) so a market can be
- * linked. With no scope the screen is the map: every region and country with
- * what the desk holds on it, the trips log and the latest notes.
+ * The scope lives in the URL (?region=Europe&country=GB), and so does the
+ * section of the brief being read (&section=statistics), so a market — and a
+ * page of its brief — can be linked. With no scope the screen is the map:
+ * every region and country with what the desk holds on it, the trips log and
+ * the latest notes.
  */
 
 const BASE = '/market-intelligence';
@@ -49,10 +52,6 @@ const LEVELS = [
   { value: 'country', label: 'Country' },
   { value: 'region', label: 'Region' },
 ];
-const TOPIC_LABEL = {
-  pricing: 'Pricing', capacity: 'Capacity', demand: 'Demand', catastrophe: 'Catastrophe', losses: 'Losses',
-  distribution: 'Distribution', competition: 'Competition', economy: 'Economy', other: 'Other',
-};
 const FALLBACK_CURRENCIES = ['USD', 'EUR', 'GBP', 'CHF', 'AED', 'SAR', 'ZAR', 'INR', 'SGD', 'JPY', 'AUD', 'CAD'];
 
 function Kpi({ label, value, sub, testid }) {
@@ -90,6 +89,7 @@ export default function MarketIntelligence() {
   const [params, setParams] = useSearchParams();
   const regionParam = params.get('region') || '';
   const countryParam = params.get('country') || '';
+  const sectionParam = params.get('section') || '';
   const scope = countryParam
     ? { type: 'country', key: countryParam }
     : regionParam ? { type: 'region', key: regionParam } : null;
@@ -122,7 +122,13 @@ export default function MarketIntelligence() {
     const next = new URLSearchParams();
     if (region) next.set('region', region);
     if (country) next.set('country', country);
+    if (sectionParam) next.set('section', sectionParam);   // the page of the brief being read carries over
     setParams(next);
+  };
+  const showSection = (key) => {
+    const next = new URLSearchParams(params);
+    next.set('section', key);
+    setParams(next, { replace: true });
   };
   const currentRegion = regionParam || (countryParam ? regionOfCountry(countryParam) : '');
   const countryChoices = currentRegion ? (regions.find((r) => r.region === currentRegion)?.countries || []) : [];
@@ -171,9 +177,9 @@ export default function MarketIntelligence() {
 
       <div className="sechead pi-scoperow">
         <span className="pi-scope">
-          A market by country or region: our book there, the brief the AI gathers from the internet — market
-          dynamics, cedants, regulatory change — and the desk&rsquo;s own market visits and notes, which the
-          next gather folds in. {allYears ? 'All treaty years' : `The ${yearLabel(year)} treaty year`} (top bar)
+          A market by country or region: our book there, the brief the AI gathers from the internet in six
+          sections — the sector, the economy and its projects, regulation, statistics, events, the players — and
+          the desk&rsquo;s own market visits and notes, which the next gather folds into each. {allYears ? 'All treaty years' : `The ${yearLabel(year)} treaty year`} (top bar)
           narrows the book table alone; a trip&rsquo;s return reads across years.
         </span>
         <div className="sechead-actions">
@@ -240,7 +246,17 @@ export default function MarketIntelligence() {
               sub={noteCounts.length ? noteCounts.map(([l, n]) => `${n} on a ${l.toLowerCase()}`).join(' · ') : 'none kept yet'} />
           </div>
 
-          <BriefPanel d={d} canWrite={canWrite} canVerify={canVerify} busy={gatherBusy} error={gatherError} onGather={gather} onVerify={verify} />
+          <BriefPanel
+            d={d}
+            section={sectionParam}
+            onSection={showSection}
+            canWrite={canWrite}
+            canVerify={canVerify}
+            busy={gatherBusy}
+            error={gatherError}
+            onGather={gather}
+            onVerify={verify}
+          />
 
           <BookPanel d={d} allYears={allYears} year={year} />
         </>
@@ -347,23 +363,365 @@ function MapTable({ regions, loading, onPick }) {
 
 /* ═══ The brief ═══ */
 
-function Section({ title, children }) {
-  return (
-    <div className="mi-section">
-      <h4>{title}</h4>
-      {children}
-    </div>
-  );
-}
+/** The six sections, in the order the brief shows them, named as marketBrief.js names them. */
+const SECTIONS = [
+  { key: 'sector', label: 'Sector', title: 'Insurance and reinsurance sector',
+    blurb: 'gross premium, the top insurance companies, the local brokers, mergers and acquisitions in the industry' },
+  { key: 'economy', label: 'Economy & projects', title: 'Economic indicators and major projects',
+    blurb: 'the headline indicators, and the government and private-sector projects above USD 50m, approved and in the pipeline' },
+  { key: 'regulation', label: 'Regulation', title: 'Insurance and reinsurance regulation',
+    blurb: 'the regulatory environment and its updates, the capital regime, fines and findings on industry players, other news' },
+  { key: 'statistics', label: 'Statistics', title: 'Market statistics',
+    blurb: 'gross written premium by class and in aggregate, loss ratios by class for the market and by insurer or reinsurer, the 50 biggest insured risks, the largest reported losses insured and uninsured' },
+  { key: 'events', label: 'Events', title: 'Events in the market',
+    blurb: 'catastrophes — flooding, hail, wildfire, earthquake — and big individual fires, a factory burning down and the like' },
+  { key: 'players', label: 'Players', title: 'Market players',
+    blurb: 'competition among the brokers, the insurers and the reinsurers, new products, government insurance pools' },
+];
+const LISTS = {
+  sector: ['gross_premium', 'top_insurers', 'local_brokers', 'mergers_acquisitions'],
+  economy: ['indicators', 'projects'],
+  regulation: ['regulators', 'updates', 'capital_regime', 'enforcement', 'other_news'],
+  statistics: ['gwp_total', 'gwp_by_class', 'loss_ratios', 'top_insured_risks', 'largest_losses'],
+  events: ['catastrophes', 'large_fires'],
+  players: ['competition', 'new_products', 'government_pools'],
+};
+const rowsOf = (section, list) => (Array.isArray(section?.[list]) ? section[list] : []);
+const itemCount = (key, section) => LISTS[key].reduce((n, l) => n + rowsOf(section, l).length, 0);
+
+const amount = (ccy, n) => (n == null ? null : `${ccy ? `${ccy} ` : ''}${fmtCompact(n)}`);
+const pct = (n, dp = 1) => (n == null ? null : `${Number(n).toLocaleString('en-US', { maximumFractionDigits: dp })}%`);
+const words = (v) => (v ? String(v).replace(/_/g, ' ') : null);
+const parts = (...xs) => xs.filter(Boolean).join(' · ') || null;
+const Dash = () => <span className="muted">—</span>;
+const cell = (v) => (v == null || v === '' ? <Dash /> : v);
 
 function ExtLink({ href, children }) {
   if (!href) return <>{children}</>;
   return <a href={href} target="_blank" rel="noreferrer">{children}</a>;
 }
 
-function BriefPanel({ d, canWrite, canVerify, busy, error, onGather, onVerify }) {
+/** A sub-section of a section: its heading, how many rows, and the rows or why there are none. */
+function Sub({ title, rows, what, hint, children }) {
+  return (
+    <div className="mi-sub-section">
+      <h5>
+        {title}
+        {rows?.length ? <span className="mi-count">{rows.length}</span> : null}
+        {hint && <span className="hint">{hint}</span>}
+      </h5>
+      {rows && !rows.length ? <p className="mi-empty">Nothing on {what || title.toLowerCase()} in this brief.</p> : children}
+    </div>
+  );
+}
+
+/** A compact table: `cols` are { key, label, r (numbers, right-aligned), render(row, i) }. */
+function Rows({ cols, rows }) {
+  return (
+    <div className="table-wrap mi-rows">
+      <table className="table mi-table">
+        <thead>
+          <tr>{cols.map((c) => <th key={c.key} className={c.r ? 'r' : ''}>{c.label}</th>)}</tr>
+        </thead>
+        <tbody>
+          {rows.map((row, i) => (
+            <tr key={i}>
+              {cols.map((c) => (
+                <td key={c.key} className={c.r ? 'r pi-nowrap' : ''}>{cell(c.render ? c.render(row, i) : row[c.key])}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+/** A named thing with its summary under it, for a table's first column. */
+const named = (name, sub, url) => (
+  <>
+    <ExtLink href={url}>{name}</ExtLink>
+    {sub && <span className="mi-sub">{sub}</span>}
+  </>
+);
+const source = { key: 'url', label: '', render: (r) => (r.url ? <ExtLink href={r.url}>source</ExtLink> : <span />) };
+
+/** Narrative items: a headline (linked to its source), a line of metadata, a body — and a tag before the headline. */
+function Items({ items, head, meta, body, tag }) {
+  return (
+    <ul className="mi-list">
+      {items.map((it, i) => (
+        <li key={i} className="mi-item">
+          {tag && tag(it) && <span className="mi-topic">{tag(it)}</span>}
+          <span className="mi-item-head"><ExtLink href={it.url}>{head(it)}</ExtLink></span>
+          {meta && meta(it) && <span className="mi-item-meta">{meta(it)}</span>}
+          {body && body(it) && <div>{body(it)}</div>}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function SectorSection({ s }) {
+  const premium = rowsOf(s, 'gross_premium');
+  const insurers = rowsOf(s, 'top_insurers');
+  const brokers = rowsOf(s, 'local_brokers');
+  const deals = rowsOf(s, 'mergers_acquisitions');
+  return (
+    <>
+      <Sub title="Gross written premium" rows={premium} what="the market's gross premium" hint="by segment and year">
+        <Rows rows={premium} cols={[
+          { key: 'segment', label: 'Segment', render: (r) => words(r.segment) },
+          { key: 'year', label: 'Year', r: true },
+          { key: 'amount', label: 'Premium', r: true, render: (r) => amount(r.currency, r.amount) },
+          { key: 'growth_pct', label: 'Growth', r: true, render: (r) => pct(r.growth_pct) },
+          source,
+        ]} />
+      </Sub>
+      <Sub title="Top insurance companies" rows={insurers} what="the top insurers" hint="by gross written premium">
+        <Rows rows={insurers} cols={[
+          { key: 'rank', label: '#', r: true, render: (r, i) => r.rank ?? i + 1 },
+          { key: 'name', label: 'Company', render: (r) => named(r.name, r.overview, r.url) },
+          { key: 'type', label: 'Type', render: (r) => words(r.type) },
+          { key: 'gwp', label: 'GWP', r: true, render: (r) => amount(r.currency, r.gwp) },
+          { key: 'year', label: 'Year', r: true },
+          { key: 'market_share_pct', label: 'Share', r: true, render: (r) => pct(r.market_share_pct) },
+        ]} />
+      </Sub>
+      <Sub title="Local brokers" rows={brokers} what="the local brokers">
+        <Items items={brokers} head={(b) => b.name} meta={(b) => b.ownership} body={(b) => b.overview} />
+      </Sub>
+      <Sub title="Mergers and acquisitions" rows={deals} what="mergers and acquisitions" hint="in the insurance and reinsurance industry">
+        <Items
+          items={deals}
+          head={(m) => m.headline}
+          meta={(m) => parts(m.acquirer && `by ${m.acquirer}`, m.target && `of ${m.target}`, amount(m.currency, m.value), words(m.status), m.date && fmtDate(m.date))}
+          body={(m) => m.summary}
+        />
+      </Sub>
+    </>
+  );
+}
+
+function EconomySection({ s }) {
+  const indicators = rowsOf(s, 'indicators');
+  const projects = rowsOf(s, 'projects');
+  return (
+    <>
+      <Sub title="Economic indicators" rows={indicators} what="the economy's indicators" hint="latest available">
+        <Rows rows={indicators} cols={[
+          { key: 'indicator', label: 'Indicator' },
+          { key: 'value', label: 'Value', r: true, render: (r) => r.as_published || (r.value != null ? `${r.value.toLocaleString('en-US', { maximumFractionDigits: 2 })}${r.unit ? ` ${r.unit}` : ''}` : null) },
+          { key: 'period', label: 'Period' },
+          source,
+        ]} />
+      </Sub>
+      <Sub title="Major projects" rows={projects} what="major projects" hint="government and private sector, above USD 50m, approved and in the pipeline">
+        <Rows rows={projects} cols={[
+          { key: 'name', label: 'Project', render: (r) => named(r.name, r.summary, r.url) },
+          { key: 'sector', label: 'Sector' },
+          { key: 'sponsor', label: 'Sponsor', render: (r) => words(r.sponsor) },
+          { key: 'value', label: 'Value', r: true, render: (r) => amount(r.currency, r.value) },
+          { key: 'status', label: 'Status', render: (r) => words(r.status) },
+          { key: 'location', label: 'Where' },
+        ]} />
+      </Sub>
+    </>
+  );
+}
+
+function RegulationSection({ s }) {
+  const regulators = rowsOf(s, 'regulators');
+  const updates = rowsOf(s, 'updates');
+  const capital = rowsOf(s, 'capital_regime');
+  const enforcement = rowsOf(s, 'enforcement');
+  const news = rowsOf(s, 'other_news');
+  return (
+    <>
+      <Sub title="Regulators" rows={regulators} what="the regulators">
+        <Items items={regulators} head={(r) => r.name} meta={(r) => r.role} />
+      </Sub>
+      <Sub title="Regulatory environment" rows={updates} what="the regulatory environment" hint="updates, recent and pending">
+        <Items
+          items={updates}
+          head={(u) => u.headline}
+          meta={(u) => parts(u.regulator, words(u.status), u.effective_date && `effective ${fmtDate(u.effective_date)}`)}
+          body={(u) => u.summary}
+        />
+      </Sub>
+      <Sub title="Capital regime" rows={capital} what="the capital regime">
+        <Items
+          items={capital}
+          head={(c) => c.headline}
+          meta={(c) => parts(c.regulator, c.effective_date && `effective ${fmtDate(c.effective_date)}`)}
+          body={(c) => c.summary}
+        />
+      </Sub>
+      <Sub title="Fines and findings" rows={enforcement} what="fines and findings" hint="on industry players">
+        <Rows rows={enforcement} cols={[
+          { key: 'date', label: 'Date', render: (r) => (r.date ? fmtDate(r.date, { shortYear: true }) : null) },
+          { key: 'subject', label: 'Against', render: (r) => named(r.subject, r.summary, r.url) },
+          { key: 'action', label: 'Action' },
+          { key: 'amount', label: 'Amount', r: true, render: (r) => amount(r.currency, r.amount) },
+          { key: 'regulator', label: 'By' },
+        ]} />
+      </Sub>
+      <Sub title="Other news" rows={news} what="other regulatory news">
+        <Items items={news} head={(n) => n.headline} meta={(n) => n.published_at && fmtDate(n.published_at)} body={(n) => n.summary} />
+      </Sub>
+    </>
+  );
+}
+
+function StatisticsSection({ s }) {
+  const total = rowsOf(s, 'gwp_total');
+  const byClass = rowsOf(s, 'gwp_by_class');
+  const ratios = rowsOf(s, 'loss_ratios');
+  const risks = rowsOf(s, 'top_insured_risks');
+  const losses = rowsOf(s, 'largest_losses');
+  return (
+    <>
+      <Sub title="Gross written premium — aggregate" rows={total} what="the aggregate premium" hint="by year">
+        <Rows rows={total} cols={[
+          { key: 'year', label: 'Year', r: true },
+          { key: 'amount', label: 'GWP', r: true, render: (r) => amount(r.currency, r.amount) },
+          { key: 'growth_pct', label: 'Growth', r: true, render: (r) => pct(r.growth_pct) },
+          source,
+        ]} />
+      </Sub>
+      <Sub title="Gross written premium — by class" rows={byClass} what="premium by class">
+        <Rows rows={byClass} cols={[
+          { key: 'class', label: 'Class of business' },
+          { key: 'year', label: 'Year', r: true },
+          { key: 'amount', label: 'GWP', r: true, render: (r) => amount(r.currency, r.amount) },
+          { key: 'share_pct', label: 'Share', r: true, render: (r) => pct(r.share_pct) },
+          { key: 'growth_pct', label: 'Growth', r: true, render: (r) => pct(r.growth_pct) },
+          source,
+        ]} />
+      </Sub>
+      <Sub title="Loss ratios" rows={ratios} what="loss ratios" hint="by class — the market, and by insurer or reinsurer where published">
+        <Rows rows={ratios} cols={[
+          { key: 'class', label: 'Class of business' },
+          { key: 'year', label: 'Year', r: true },
+          { key: 'entity', label: 'Whose', render: (r) => (
+            <>
+              {r.entity}
+              {r.entity_type && r.entity_type !== 'market' && <Pill tone={r.entity_type === 'reinsurer' ? 'gold' : 'blue'} className="mi-entity">{r.entity_type}</Pill>}
+            </>
+          ) },
+          { key: 'loss_ratio_pct', label: 'Loss ratio', r: true, render: (r) => pct(r.loss_ratio_pct) },
+          source,
+        ]} />
+      </Sub>
+      <Sub title="The biggest insured risks" rows={risks} what="the biggest insured risks" hint="up to 50, by sum insured">
+        <Rows rows={risks} cols={[
+          { key: 'rank', label: '#', r: true, render: (r, i) => r.rank ?? i + 1 },
+          { key: 'name', label: 'Risk or project', render: (r) => named(r.name, r.summary, r.url) },
+          { key: 'type', label: 'Type' },
+          { key: 'owner', label: 'Owner' },
+          { key: 'sum_insured', label: 'Sum insured', r: true, render: (r) => amount(r.currency, r.sum_insured) },
+          { key: 'insurer', label: 'Insurer' },
+          { key: 'broker', label: 'Broker' },
+        ]} />
+      </Sub>
+      <Sub title="Largest reported losses" rows={losses} what="the largest losses" hint="insured and uninsured">
+        <Rows rows={losses} cols={[
+          { key: 'date', label: 'Date', render: (r) => (r.date ? fmtDate(r.date, { shortYear: true }) : null) },
+          { key: 'event', label: 'Loss', render: (r) => named(r.event, r.summary, r.url) },
+          { key: 'type', label: 'Type' },
+          { key: 'insured_loss', label: 'Insured', r: true, render: (r) => amount(r.currency, r.insured_loss) },
+          { key: 'uninsured_loss', label: 'Uninsured', r: true, render: (r) => amount(r.currency, r.uninsured_loss) },
+        ]} />
+      </Sub>
+    </>
+  );
+}
+
+function EventsSection({ s }) {
+  const cats = rowsOf(s, 'catastrophes');
+  const fires = rowsOf(s, 'large_fires');
+  return (
+    <>
+      <Sub title="Catastrophe events" rows={cats} what="catastrophes" hint="flooding, hail, wildfire, earthquake, windstorm — the last five years">
+        <Rows rows={cats} cols={[
+          { key: 'date', label: 'Date', render: (r) => (r.date ? fmtDate(r.date, { shortYear: true }) : null) },
+          { key: 'event', label: 'Event', render: (r) => named(r.event, r.summary, r.url) },
+          { key: 'peril', label: 'Peril', render: (r) => words(r.peril) },
+          { key: 'area', label: 'Where' },
+          { key: 'insured_loss', label: 'Insured loss', r: true, render: (r) => amount(r.currency, r.insured_loss) },
+          { key: 'economic_loss', label: 'Economic loss', r: true, render: (r) => amount(r.currency, r.economic_loss) },
+        ]} />
+      </Sub>
+      <Sub title="Big individual fires" rows={fires} what="big individual fires" hint="a factory burning down, a warehouse, a refinery">
+        <Rows rows={fires} cols={[
+          { key: 'date', label: 'Date', render: (r) => (r.date ? fmtDate(r.date, { shortYear: true }) : null) },
+          { key: 'event', label: 'Fire', render: (r) => named(r.event, r.summary, r.url) },
+          { key: 'location', label: 'Where' },
+          { key: 'occupancy', label: 'Occupancy' },
+          { key: 'insured_loss', label: 'Insured loss', r: true, render: (r) => amount(r.currency, r.insured_loss) },
+          { key: 'insurer', label: 'Insurer' },
+        ]} />
+      </Sub>
+    </>
+  );
+}
+
+function PlayersSection({ s }) {
+  const competition = rowsOf(s, 'competition');
+  const products = rowsOf(s, 'new_products');
+  const pools = rowsOf(s, 'government_pools');
+  return (
+    <>
+      <Sub title="Competition" rows={competition} what="competition" hint="among the brokers, the insurers and the reinsurers">
+        <Items items={competition} tag={(c) => c.among} head={(c) => c.headline} body={(c) => c.detail} />
+      </Sub>
+      <Sub title="New products" rows={products} what="new products">
+        <Items
+          items={products}
+          head={(p) => p.product}
+          meta={(p) => parts(p.launched_by, p.line_of_business, p.launched_on && fmtDate(p.launched_on))}
+          body={(p) => p.summary}
+        />
+      </Sub>
+      <Sub title="Government insurance pools" rows={pools} what="government insurance pools">
+        <Items items={pools} head={(p) => p.name} meta={(p) => parts(p.purpose, p.operator, words(p.status))} body={(p) => p.summary} />
+      </Sub>
+    </>
+  );
+}
+
+const SECTION_VIEWS = {
+  sector: SectorSection, economy: EconomySection, regulation: RegulationSection,
+  statistics: StatisticsSection, events: EventsSection, players: PlayersSection,
+};
+
+/** One section: its summary, its lists, what the desk added to it, and its sources. */
+function BriefSection({ spec, s }) {
+  const View = SECTION_VIEWS[spec.key];
+  const sources = rowsOf(s, 'sources');
+  return (
+    <div className="mi-sec" data-testid={`mi-section-${spec.key}`}>
+      <p className="mi-headline">{s.summary || <span className="muted">The gather returned no summary for this section.</span>}</p>
+      <View s={s} />
+      <Sub title="From the desk">
+        {s.from_the_desk
+          ? <p className="mi-desk">{s.from_the_desk}</p>
+          : <p className="mi-empty">Nothing in the desk&rsquo;s notes or trips bore on this section when the brief was gathered.</p>}
+      </Sub>
+      {sources.length > 0 && (
+        <div className="mi-sources">
+          Sources: {sources.map((c, i) => (
+            <span key={i}>{i > 0 && ' · '}<ExtLink href={c.url}>{c.title || c.url}</ExtLink></span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function BriefPanel({ d, section, onSection, canWrite, canVerify, busy, error, onGather, onVerify }) {
   const b = d.brief;
-  const none = (what) => <p className="mi-empty">Nothing on {what} in this brief.</p>;
+  const current = SECTIONS.find((s) => s.key === section) || SECTIONS[0];
   return (
     <Blueprint className="viz-panel" data-testid="mi-brief">
       <div className="viz-head mi-brief-head">
@@ -378,7 +736,7 @@ function BriefPanel({ d, canWrite, canVerify, busy, error, onGather, onVerify })
         )}
         {canWrite && (
           <button type="button" className="btn btn-primary btn-sm" data-testid="mi-gather" disabled={busy} onClick={onGather}>
-            {busy ? 'Gathering…' : b ? 'Gather again' : 'Gather from internet'}
+            {busy ? 'Gathering six sections…' : b ? 'Gather again' : 'Gather from internet'}
           </button>
         )}
       </div>
@@ -390,96 +748,35 @@ function BriefPanel({ d, canWrite, canVerify, busy, error, onGather, onVerify })
         </p>
       )}
       {!b && (
-        <p className="mi-empty" data-testid="mi-brief-empty">
-          No brief yet. Gather one from the internet: market dynamics, the cedants buying reinsurance here, regulatory
-          changes, dated developments and what to do next — with the {plural(d.notes.length, 'note')} and
-          {' '}{plural(d.visits.length, 'trip')} the desk holds on this market folded in.
-        </p>
+        <div className="mi-empty" data-testid="mi-brief-empty">
+          <p>
+            No brief yet. Gather one from the internet — six sections, each researched on its own, with the
+            {' '}{plural(d.notes.length, 'note')} and {plural(d.visits.length, 'trip')} the desk holds on this market folded into each:
+          </p>
+          <ul className="mi-outline">
+            {SECTIONS.map((s) => <li key={s.key}><strong>{s.title}</strong> — {s.blurb}.</li>)}
+          </ul>
+        </div>
       )}
       {b && (
         <>
-          <p className="mi-headline">{b.headline || <span className="muted">The gather returned no summary.</span>}</p>
           <p className="viz-note">
             Gathered {fmtStamp(b.gathered_at)} by {b.gathered_by_name || 'the desk'} with {providerLabel(b.provider)}
-            {b.model ? ` (${b.model})` : ''}; {plural(b.notes_used, 'note')} and {plural(b.visits_used, 'trip')} folded in.
-            {' '}Check it against its sources before relying on it — a rule or a programme read here drives nothing until it is confirmed.
+            {b.model ? ` (${b.model})` : ''}; {plural(b.notes_used, 'note')} and {plural(b.visits_used, 'trip')} folded in, section by section.
+            {' '}Check it against its sources before relying on it — a figure, a rule or a programme read here drives nothing until it is confirmed.
           </p>
-          <div className="mi-brief-grid">
-            <Section title="Market dynamics">
-              {b.market_dynamics.length ? (
-                <ul className="mi-list">
-                  {b.market_dynamics.map((m, i) => (
-                    <li key={i} className="mi-item"><span className="mi-topic">{TOPIC_LABEL[m.topic] || m.topic}</span>{m.detail}</li>
-                  ))}
-                </ul>
-              ) : none('the market\'s dynamics')}
-            </Section>
-            <Section title="Regulatory changes">
-              {b.regulatory.length ? (
-                <ul className="mi-list">
-                  {b.regulatory.map((r, i) => (
-                    <li key={i} className="mi-item">
-                      <span className="mi-item-head"><ExtLink href={r.url}>{r.headline}</ExtLink></span>
-                      {(r.regulator || r.effective_date) && (
-                        <span className="mi-item-meta">{[r.regulator, r.effective_date && `effective ${fmtDate(r.effective_date)}`].filter(Boolean).join(' · ')}</span>
-                      )}
-                      {r.summary && <div>{r.summary}</div>}
-                    </li>
-                  ))}
-                </ul>
-              ) : none('regulation')}
-            </Section>
-            <Section title="Cedants in the market">
-              {b.cedants.length ? (
-                <ul className="mi-list">
-                  {b.cedants.map((c, i) => (
-                    <li key={i} className="mi-item">
-                      <span className="mi-item-head"><ExtLink href={c.url}>{c.name}</ExtLink></span>
-                      {c.overview && <div>{c.overview}</div>}
-                      {c.reinsurance && <div className="muted small">Reinsurance: {c.reinsurance}</div>}
-                    </li>
-                  ))}
-                </ul>
-              ) : none('the cedants')}
-            </Section>
-            <Section title="Developments">
-              {b.developments.length ? (
-                <ul className="mi-list">
-                  {b.developments.map((n, i) => (
-                    <li key={i} className="mi-item">
-                      <span className="mi-item-head"><ExtLink href={n.url}>{n.headline}</ExtLink></span>
-                      {n.published_at && <span className="mi-item-meta">{fmtDate(n.published_at)}</span>}
-                      {n.summary && <div>{n.summary}</div>}
-                    </li>
-                  ))}
-                </ul>
-              ) : none('recent developments')}
-            </Section>
-            <Section title="What to do next">
-              {b.opportunities.length ? (
-                <ul className="mi-list">
-                  {b.opportunities.map((o, i) => (
-                    <li key={i} className="mi-item">
-                      <span className="mi-item-head">{o.title}</span>
-                      {o.rationale && <div>{o.rationale}</div>}
-                    </li>
-                  ))}
-                </ul>
-              ) : none('what to do next')}
-            </Section>
-            <Section title="From the desk">
-              {b.from_the_desk
-                ? <p className="mi-desk">{b.from_the_desk}</p>
-                : <p className="mi-empty">No notes or trips were on file for this market when the brief was gathered.</p>}
-            </Section>
+          <Tabs
+            className="mi-tabs"
+            label="Sections of the brief"
+            value={current.key}
+            onChange={onSection}
+            tabs={SECTIONS.map((s) => ({ value: s.key, label: s.label, hint: itemCount(s.key, b[s.key]) || null }))}
+          />
+          <div className="mi-sec-head">
+            <strong>{current.title}</strong>
+            <span className="hint">{current.blurb}</span>
           </div>
-          {b.citations.length > 0 && (
-            <div className="mi-sources">
-              Sources: {b.citations.map((c, i) => (
-                <span key={i}>{i > 0 && ' · '}<ExtLink href={c.url}>{c.title || c.url}</ExtLink></span>
-              ))}
-            </div>
-          )}
+          <BriefSection key={current.key} spec={current} s={b[current.key] || {}} />
         </>
       )}
     </Blueprint>

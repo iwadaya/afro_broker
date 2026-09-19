@@ -5040,16 +5040,30 @@ button, .btn, .np-struct-btn, .np-green-pill, .action-pill, .segbtn, .tab, .role
 .mi-map tr.is-current td { background: rgba(var(--accent-rgb), .13); }
 .mi-map td.r, .mi-map th.r { text-align: right; }
 .mi-map-foot { display: flex; align-items: center; gap: 12px; padding: 10px 16px 12px; font-size: 12px; color: var(--color-neutral-600); }
-/* The brief: a paragraph, then its sections two abreast. */
+/* The brief: its provenance, then the six sections as tabs — each a summary
+   paragraph, its tables and lists, what the desk added to it, its sources. */
 .mi-brief-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .mi-brief-head .viz-title { margin-right: auto; }
 .mi-headline { font-size: 14.5px; line-height: 1.6; margin: 0; text-wrap: pretty; max-width: 96ch; }
-.mi-brief-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 28px; margin-top: 4px; }
-@media (max-width: 1100px) { .mi-brief-grid { grid-template-columns: minmax(0, 1fr); } }
-.mi-section h4 {
+.mi-tabs { flex-wrap: wrap; }
+.mi-sec-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; font-size: 13px; }
+.mi-sec-head .hint { font-size: 11px; color: var(--color-neutral-600); }
+.mi-sec { display: flex; flex-direction: column; gap: 16px; }
+.mi-sub-section h5 {
   margin: 0 0 8px; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; font-weight: 700;
-  color: var(--color-neutral-600);
+  color: var(--color-neutral-600); display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
 }
+.mi-sub-section h5 .mi-count { font-weight: 400; }
+.mi-sub-section h5 .hint { font-size: 11px; letter-spacing: 0; text-transform: none; font-weight: 400; }
+.mi-rows { padding: 0; }
+.mi-table { font-size: 12.5px; }
+.mi-table th { font-size: 10px; }
+.mi-table td { padding: 5px 8px; vertical-align: top; }
+.mi-table td .mi-sub { display: block; font-size: 11.5px; color: var(--color-neutral-600); margin-top: 2px; max-width: 64ch; white-space: normal; }
+.mi-table a { color: var(--color-accent-700); }
+.mi-table .mi-entity { margin-left: 8px; vertical-align: middle; }
+.mi-outline { margin: 6px 0 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
+.mi-empty p { margin: 0; }
 .mi-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
 .mi-item { font-size: 13px; line-height: 1.5; }
 .mi-item-head { font-weight: 600; }
