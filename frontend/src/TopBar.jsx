@@ -8,10 +8,10 @@ import ThemeSwitcher from './ThemeSwitcher.jsx';
 import BrandLockup from './BrandLockup.jsx';
 
 /**
- * The global bar above the screen header: the brand, Home, search, the two
- * book screens, treaty-year context, notifications, recents and the account
- * menu. There is no primary rail — the dashboard is the hub, its launcher
- * lists every destination, and Home brings it back from any page.
+ * The global bar above the screen header: the brand, Home, search,
+ * treaty-year context, notifications, recents and the account menu. There
+ * is no primary rail — the dashboard is the hub, its launcher lists every
+ * destination, and Home brings it back from any page.
  *
  * Search hands off to the contracts register, which owns the query in its
  * URL so a search result is linkable and survives a refresh.
@@ -70,33 +70,8 @@ export default function TopBar() {
       </form>
 
       <div className="topbar-tools">
-        <button
-          type="button"
-          className="topbar-renewals"
-          title="Renewal calendar — upcoming renewals in the next 3 months"
-          onClick={() => navigate('/renewals')}
-        >
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <rect x="3.5" y="5" width="17" height="15.5" rx="2" />
-            <path d="M3.5 9.5h17M8 2.8v4.4M16 2.8v4.4" />
-            <path d="M7.5 13.5h3M13.5 13.5h3M7.5 17h3" />
-          </svg>
-          <span className="topbar-renewals-label">Renewal calendar</span>
-        </button>
-        {/* Beside the calendar: the book read by who leads, places and writes it. */}
-        <button
-          type="button"
-          className="topbar-renewals topbar-portfolio"
-          title="Portfolio intelligence — who leads, who places and who writes the book"
-          onClick={() => navigate('/portfolio')}
-        >
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M4 20.5h16" />
-            <path d="M6.5 17V11M11 17V5.5M15.5 17v-4M20 17V8.5" />
-          </svg>
-          <span className="topbar-renewals-label">Portfolio intelligence</span>
-        </button>
-
+        {/* The renewal calendar and portfolio intelligence are reached from
+            the dashboard's launcher, so the bar carries no buttons for them. */}
         <label className="sr-only" htmlFor="biq-treaty-year">Treaty year</label>
         <select
           id="biq-treaty-year"

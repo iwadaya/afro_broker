@@ -6,7 +6,7 @@ import {
 } from '../components.jsx';
 import { useScreenHead } from '../shell.jsx';
 
-// The top bar's calendar button lands here on the 3-month view the diary is
+// The launcher's calendar pill lands here on the 3-month view the diary is
 // worked from; the longer windows exist because a January-heavy book is empty
 // three months out for most of the year.
 const WINDOWS = [3, 6, 12];

@@ -143,8 +143,7 @@ placement mapping in `contractModel.js`, the shared contract details pane and
 its state in `ContractDetailsPane.jsx`, and the two pages.
 
 The top bar, present on every page, carries a **Home** button that returns
-to the dashboard from anywhere. Two of the functions sit on it as well, side
-by side:
+to the dashboard from anywhere; the launcher's next two pills are
 the **Renewal calendar** (`/renewals`) — every placement renewing in the
 next 3, 6 or 12 months, with the treaty's shape and the desk's position on
 it — and **Portfolio intelligence** (`/portfolio`), the book read by who
